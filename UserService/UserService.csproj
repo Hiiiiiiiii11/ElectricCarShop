@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\AllocationRepository\AllocationRepository.csproj" />
+    <ProjectReference Include="..\Share\Share.csproj" />
   </ItemGroup>
 
 </Project>

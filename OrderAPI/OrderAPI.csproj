@@ -14,4 +14,9 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OrderService\OrderService.csproj" />
+    <ProjectReference Include="..\Share\Share.csproj" />
+  </ItemGroup>
+
 </Project>

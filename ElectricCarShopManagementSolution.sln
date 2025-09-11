@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserAPI", "UserAPI\UserAPI.csproj", "{E8D829DE-0B48-48EA-8554-CDE97AD51234}"
 EndProject
@@ -34,6 +34,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllocationRepository", "AllocationRepository\AllocationRepository.csproj", "{BD599A3E-30C5-45F7-9A44-7A9719887A41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllocationService", "AllocationService\AllocationService.csproj", "{E4A1933D-A522-4DD7-8668-0905E274AE89}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ShareService", "ShareService", "{01A16B83-2A56-459A-8115-565A766E7CE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Share", "Share\Share.csproj", "{147608E1-7A0C-4AF5-9FBF-D18549DF7338}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +93,10 @@ Global
 		{E4A1933D-A522-4DD7-8668-0905E274AE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4A1933D-A522-4DD7-8668-0905E274AE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4A1933D-A522-4DD7-8668-0905E274AE89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{147608E1-7A0C-4AF5-9FBF-D18549DF7338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{147608E1-7A0C-4AF5-9FBF-D18549DF7338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{147608E1-7A0C-4AF5-9FBF-D18549DF7338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{147608E1-7A0C-4AF5-9FBF-D18549DF7338}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,5 +114,6 @@ Global
 		{1B442CCF-9C66-4BAB-B2FA-1049F6FE6459} = {A88B3A83-828A-4D49-B2C5-37BAFE137272}
 		{BD599A3E-30C5-45F7-9A44-7A9719887A41} = {A88B3A83-828A-4D49-B2C5-37BAFE137272}
 		{E4A1933D-A522-4DD7-8668-0905E274AE89} = {A88B3A83-828A-4D49-B2C5-37BAFE137272}
+		{147608E1-7A0C-4AF5-9FBF-D18549DF7338} = {01A16B83-2A56-459A-8115-565A766E7CE3}
 	EndGlobalSection
 EndGlobal
