@@ -1,0 +1,6 @@
+@AllocationAPI_HostAddress = http://localhost:5104
+
+GET {{AllocationAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
