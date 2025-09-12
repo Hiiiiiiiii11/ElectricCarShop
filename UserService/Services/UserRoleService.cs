@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Share.Protos
+namespace UserService.Services
 {
-    class Class
+    public class UserRoleService : IUserRoleService
     {
     }
 }

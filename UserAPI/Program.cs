@@ -1,11 +1,15 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Setting;
 using System.Text;
 using UserRepository.Data;
+using UserRepository.Model;
+using UserRepository.Repositories;
+using UserService.Services;
 
 namespace UserAPI
 {
@@ -20,8 +24,27 @@ namespace UserAPI
             builder.Services.AddDbContext<UserDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection")));
 
+            builder.Services.AddSingleton(sp =>
+            sp.GetRequiredService<IOptions<AdminAccountSettings>>().Value);
+            builder.Services.Configure<AdminAccountSettings>(
+            builder.Configuration.GetSection("AdminAccountSettings"));
+            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+            builder.Services.AddSingleton(jwtSettings);
+
+            builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository.Repositories.UserRepository>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+
+
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -69,7 +92,6 @@ namespace UserAPI
             builder.Configuration.GetSection("Jwt")
             );
 
-            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
             builder.Services
@@ -117,6 +139,30 @@ namespace UserAPI
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+            app.UseCors("AllowAll");
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                var adminSettings = scope.ServiceProvider
+                                         .GetRequiredService<IOptions<AdminAccountSettings>>()
+                                         .Value;
+
+                // Kiểm tra nếu chưa có admin
+                if (!context.Users.Any(u => u.Email == adminSettings.Email))
+                {
+                    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(adminSettings.Password);
+                    var adminUser = new Users
+                    {
+                        Email = adminSettings.Email,
+                        PasswordHash = hashedPassword,
+                        UserName = adminSettings.UserName,
+                        Status = "Active"
+                    };
+
+                    context.Users.Add(adminUser);
+                    context.SaveChanges();
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

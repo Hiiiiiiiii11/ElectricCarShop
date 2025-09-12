@@ -2,11 +2,10 @@
 
 namespace UserAPI.Controllers
 {
-    public class RoleController : Controller
+    [Route("api/{controller}")]
+    [ApiController]
+    public class RoleController : ControllerBase
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+       
     }
 }

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace UserService.Services
 {
-    internal class Class1
+    public interface IUserRoleService
     {
+
     }
 }
