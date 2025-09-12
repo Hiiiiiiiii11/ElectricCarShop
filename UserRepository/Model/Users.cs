@@ -19,5 +19,7 @@ namespace UserRepository.Model
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
 
+        public ICollection<UserRoles> UserRoles { get; set; }
+
     }
 }

@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AllocationService\AllocationService.csproj" />
-    <ProjectReference Include="..\Share\Share.csproj" />
   </ItemGroup>
 
 </Project>

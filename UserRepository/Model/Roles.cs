@@ -10,5 +10,7 @@ namespace UserRepository.Model
     {
         public int Id { get; set; }
         public string RoleName { get; set; }
+
+        public ICollection<UserRoles> UserRoles { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserRepository.Model.Request
 {
-    internal class Request
+    internal class CreateUserRequest
     {
     }
 }

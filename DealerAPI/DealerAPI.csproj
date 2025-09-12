@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DealerService\DealerService.csproj" />
-    <ProjectReference Include="..\Share\Share.csproj" />
   </ItemGroup>
 
 </Project>
