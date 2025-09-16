@@ -12,6 +12,12 @@ namespace UserService.Services
         Task<RoleResponse> CreateRoleAsync(CreateRoleRequest request);
         Task<IEnumerable<RoleResponse>> GetAllRolesAsync();
         Task<RoleResponse> GetRoleByIdAsync(int id);
+        Task<RoleResponse> UpdateRoleAsync(int id, UpdateRoleRequest request);
         Task<bool> DeleteRoleAsync(int id);
+        Task<UserRoleResponse> AssignRoleForUser(AssignUserRoleRequest request);
+        Task<UserRoleResponse> UpdateUserRole(UpdateUserRoleRequest request);
+        Task<bool> RemoveUserRolesByUserId(int userId);
+        
+
     }
 }

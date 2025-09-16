@@ -15,7 +15,13 @@ namespace UserRepository.Repositories
         {
             _context = context;
         }
-
+        public async Task<IEnumerable<Users>> GetAllUsersWithRolesAsync()
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .ToListAsync();
+        }
         public async Task<Users?> GetUserWithRolesAsync(int userId)
         {
             return await _context.Users
@@ -29,5 +35,6 @@ namespace UserRepository.Repositories
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserName == userName);
         }
+
     }
 }

@@ -7,6 +7,7 @@ using UserRepository.Model;
 namespace UserRepository.Repositories
 {
     public interface IUserRepository : IGenericRepository<Users> {
+        Task<IEnumerable<Users>> GetAllUsersWithRolesAsync();
         Task<Users?> GetUserWithRolesAsync(int userId);
         Task<Users?> GetByUserNameAsync(string userName);
     }

@@ -4,7 +4,8 @@ using UserRepository.Model;
 
 namespace UserRepository.Repositories
 {
-    public interface IUserRoleRepository : IGenericRepository<UserRoles> { }
+    public interface IUserRoleRepository : IGenericRepository<UserRoles> {
+    }
 
 
 }

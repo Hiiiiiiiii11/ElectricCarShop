@@ -17,8 +17,12 @@ namespace UserAPI.Controllers
 
         // POST api/user
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
+        public async Task<IActionResult> CreateUser([FromForm] CreateUserRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var result = await _userService.CreateUserAsync(request);
@@ -32,7 +36,7 @@ namespace UserAPI.Controllers
 
         // PUT api/user/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserRequest request)
         {
             try
             {
@@ -90,7 +94,7 @@ namespace UserAPI.Controllers
             try
             {
                 var result = await _userService.DeleteUserAsync(id);
-                return Ok(new { success = result });
+                return Ok(new { messaga = $"Delete user success,{result}" });
             }
             catch (KeyNotFoundException ex)
             {

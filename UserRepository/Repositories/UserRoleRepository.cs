@@ -1,4 +1,5 @@
-﻿using Share.ShareRepo;
+﻿using Microsoft.EntityFrameworkCore;
+using Share.ShareRepo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace UserRepository.Repositories
 {
     public class UserRoleRepository : GenericRepository<UserRoles>, IUserRoleRepository
     {
+        private readonly UserDbContext _context;
         public UserRoleRepository(UserDbContext context) : base(context) { }
+
     }
 }

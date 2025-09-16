@@ -1,4 +1,5 @@
-﻿using Share.ShareRepo;
+﻿using Microsoft.EntityFrameworkCore;
+using Share.ShareRepo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,14 @@ namespace UserRepository.Repositories
 {
     public class RoleRepository : GenericRepository<Roles>, IRoleRepository
     {
-        public RoleRepository(UserDbContext context) : base(context) { }
+        private readonly UserDbContext _context;
+        public RoleRepository(UserDbContext context) : base(context) {
+            _context = context;
+        }
+
+        public async Task<bool> GetByRoleNameAsync(string roleName)
+        {
+            return await _context.Roles.AnyAsync(r => r.RoleName == roleName);
+        }
     }
 }

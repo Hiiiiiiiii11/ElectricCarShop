@@ -1,4 +1,5 @@
 ﻿
+using Share.ShareServices;
 using UserRepository.Model;
 using UserRepository.Model.DTO;
 using UserRepository.Repositories;
@@ -9,11 +10,13 @@ namespace UserService.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAuthenticationRepository _authRepository;
+        private readonly IUploadPhotoService _uploadPhotoService;
 
-        public UserService(IUserRepository userRepository, IAuthenticationRepository authRepository)
+        public UserService(IUserRepository userRepository, IAuthenticationRepository authRepository, IUploadPhotoService uploadPhotoService)
         {
             _userRepository = userRepository;
             _authRepository = authRepository;
+            _uploadPhotoService = uploadPhotoService;
         }
 
         public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
@@ -31,7 +34,7 @@ namespace UserService.Services
                 FullName = request.FullName,
                 Email = request.Email,
                 Phone = request.Phone,
-                AvartarUrl = request.AvartarUrl,
+                AvartarUrl = request.AvartarFile != null ? _uploadPhotoService.UploadPhoto(request.AvartarFile) : null,
                 Status = "Active",
                 Created_At = DateTime.UtcNow,
                 Updated_At = DateTime.UtcNow
@@ -51,11 +54,25 @@ namespace UserService.Services
                 throw new KeyNotFoundException($"User with ID {id} not found.");
             }
 
-            user.FullName = request.FullName;
-            user.Email = request.Email;
-            user.Phone = request.Phone;
-            user.AvartarUrl = request.AvartarUrl;
-            user.Status = request.Status;
+            // Nếu có giá trị mới thì update, còn nếu null/empty thì giữ nguyên cũ
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                user.FullName = request.FullName;
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+                user.Email = request.Email;
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+                user.Phone = request.Phone;
+
+            // Nếu có file mới thì update, còn nếu null thì giữ ảnh cũ
+            if (request.AvartarFile != null)
+            {
+                user.AvartarUrl = _uploadPhotoService.UploadPhoto(request.AvartarFile);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+                user.Status = request.Status;
+
             user.Updated_At = DateTime.UtcNow;
 
             _userRepository.Update(user);
@@ -66,7 +83,7 @@ namespace UserService.Services
 
         public async Task<UserResponse> GetUserByIdAsync(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetUserWithRolesAsync(id);
             if (user == null)
             {
                 throw new KeyNotFoundException($"User with ID {id} not found.");
@@ -76,7 +93,7 @@ namespace UserService.Services
 
         public async Task<IEnumerable<UserResponse>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllUsersWithRolesAsync();
             return users.Select(MapToResponse);
         }
 
@@ -106,7 +123,14 @@ namespace UserService.Services
                 AvartarUrl = user.AvartarUrl,
                 Status = user.Status,
                 Created_At = user.Created_At,
-                Updated_At = user.Updated_At
+                Updated_At = user.Updated_At,
+                Roles = user.UserRoles?
+               .Select(ur => new RoleSupport
+                {
+                RoleId = ur.Role.Id,
+                RoleName = ur.Role.RoleName
+                })
+               .ToList() ?? new List<RoleSupport>()
             };
         }
     }
