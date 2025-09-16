@@ -44,6 +44,10 @@ namespace UserAPI
                 return new Cloudinary(account);
             });
 
+            builder.Services.Configure<EmailSetting>(
+            builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddSingleton(resolver =>
+            resolver.GetRequiredService<IOptions<EmailSetting>>().Value);
 
 
             builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
@@ -54,6 +58,8 @@ namespace UserAPI
             builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUploadPhotoService,UpLoadPhotoService>();
+            builder.Services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
+            builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 
 
             builder.Services.AddHttpContextAccessor();

@@ -17,6 +17,7 @@ namespace UserRepository.Data
         public DbSet<Users> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
         public DbSet<UserRoles> UserRoles { get; set; }
+        public DbSet<EmailVerification> EmailVerifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -14,5 +14,8 @@ namespace DealerRepository.Model
         public decimal PaidAmount { get; set; }
         public decimal RemainingDebt{ get; set; }
         public DateTime LastUpdate { get; set; }
+
+        // Navigation
+        public Dealers Dealer { get; set; }
     }
 }

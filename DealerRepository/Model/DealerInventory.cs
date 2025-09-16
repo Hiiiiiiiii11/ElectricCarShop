@@ -12,5 +12,7 @@ namespace DealerRepository.Model
         public int DealerId { get; set; }
         public int VariantId { get; set; }
         public int Quantity { get; set; }
+        // Navigation
+        public Dealers Dealer { get; set; }
     }
 }

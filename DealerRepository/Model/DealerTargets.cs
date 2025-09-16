@@ -14,5 +14,6 @@ namespace DealerRepository.Model
         public decimal TargetMonth { get; set; }
         public int TargetSales { get; set; }
         public int AchievedSales{ get; set; }
+        public Dealers Dealer { get; set; }
     }
 }

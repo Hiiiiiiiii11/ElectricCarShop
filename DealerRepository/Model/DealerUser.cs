@@ -12,5 +12,6 @@ namespace DealerRepository.Model
         public int DealerId { get; set; }
         public int UserId { get; set; }
         public string Position { get; set; }
+        public Dealers Dealer { get; set; }
     }
 }

@@ -1,4 +1,8 @@
 
+using DealerRepository.Data;
+using DealerRepository.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 namespace DealerAPI
 {
     public class Program
@@ -6,6 +10,15 @@ namespace DealerAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<DealerDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DealerDbConnection")));
+
+            builder.Services.AddScoped<IDealerRepository,DealerRepository.Repositories.DealerRepository>();
+            builder.Services.AddScoped<IDealerContractRepository, DealerContractRepository>();
+            builder.Services.AddScoped<IDealerDebtRepository, DealerDebtRepository>();
+            builder.Services.AddScoped<IDealerTargetRepository, DealerTargetRepository>();
+            builder.Services.AddScoped<IDealerUserRepository, DealerUserRepository>();
+            builder.Services.AddScoped<IDealerInventoryRepository, DealerInventoryRepository>();
 
             // Add services to the container.
 

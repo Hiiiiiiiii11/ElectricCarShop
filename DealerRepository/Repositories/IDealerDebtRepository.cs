@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DealerRepository.Model;
+using Share.ShareRepo;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DealerRepository.Repositories
 {
-    internal class Repo
+    public interface IDealerDebtRepository : IGenericRepository<DealerDebts>
     {
     }
 }
