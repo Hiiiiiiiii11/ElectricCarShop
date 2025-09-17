@@ -51,3 +51,5 @@ namespace DealerRepository.Data
 
     }
 }
+//dotnet ef migrations add InitialCreate --project DealerRepository --startup-project DealerAPI --context DealerDbContext
+//dotnet ef database update --project DealerRepository --startup-project DealerAPI --context DealerDbContext
