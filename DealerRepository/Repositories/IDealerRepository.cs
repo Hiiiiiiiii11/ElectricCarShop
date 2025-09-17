@@ -10,5 +10,8 @@ namespace DealerRepository.Repositories
 {
     public interface IDealerRepository : IGenericRepository<Dealers>
     {
+        Task<Dealers> GetDealerByNameAsync(string dealerName);
+        Task<IEnumerable<Dealers>> SearchDealersAsync(string searchTerm);
+
     }
 }

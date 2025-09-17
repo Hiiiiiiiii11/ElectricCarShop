@@ -11,6 +11,7 @@ using System.Text;
 using UserRepository.Data;
 using UserRepository.Model;
 using UserRepository.Repositories;
+using UserService.Implement;
 using UserService.Services;
 
 namespace UserAPI
@@ -158,8 +159,12 @@ namespace UserAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            //add grpc
+            builder.Services.AddGrpc();
 
             var app = builder.Build();
+            app.MapGrpcService<UserGrpcServiceImpl>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
             app.UseCors("AllowAll");
             using (var scope = app.Services.CreateScope())
             {
@@ -179,7 +184,7 @@ namespace UserAPI
                 if (!context.Users.Any(u => u.Email == adminSettings.Email))
                 {
                     var hashedPassword = BCrypt.Net.BCrypt.HashPassword(adminSettings.Password);
-                     adminUser = new Users
+                    adminUser = new Users
                     {
                         Email = adminSettings.Email,
                         PasswordHash = hashedPassword,
@@ -202,6 +207,8 @@ namespace UserAPI
                     context.SaveChanges();
                 }
             }
+            //add userimplement để service khác sử dụng
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

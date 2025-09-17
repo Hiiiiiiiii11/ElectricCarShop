@@ -12,12 +12,12 @@ namespace DealerRepository.Data
     {
         public DealerDbContext(DbContextOptions<DealerDbContext> options) : base(options) { }
 
-        DbSet<Dealers> Dealers { get; set; }
-        DbSet<DealerDebts>DealerDebts { get; set; }
-        DbSet<DealerInventory> DealerInventories { get; set; }
-        DbSet<DealerTargets>DealerTargets { get; set; }
-        DbSet<DealerContracts>DealerContracts { get; set; }
-        DbSet<DealerUser> DealerUsers { get; set; }
+        public DbSet<Dealers> Dealers { get; set; }
+        public DbSet<DealerDebts>DealerDebts { get; set; }
+        public DbSet<DealerInventory> DealerInventories { get; set; }
+        public DbSet<DealerTargets>DealerTargets { get; set; }
+        public DbSet<DealerContracts>DealerContracts { get; set; }
+        public DbSet<DealerUser> DealerUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
