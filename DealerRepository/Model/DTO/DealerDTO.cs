@@ -70,4 +70,82 @@ namespace DealerRepository.Model.DTO
         public string AvartarUrl { get; set; }
         public string Phone { get; set; }
     }
+
+    //create model cho dealerContract
+    public class CreateDealerContractRequest
+    {
+        [Required(ErrorMessage = "DealerId is required")]
+        public int DealerId { get; set; }
+        [Required(ErrorMessage = "ContractNumber is required")]
+        public string ContractNumber { get; set; }
+        [Required(ErrorMessage = "ContractDate is required")]
+        public DateTime ContractDate { get; set; }
+        [Required(ErrorMessage = "ExpiredDate is required")]
+        public DateTime ExpiredDate { get; set; }
+        [Required(ErrorMessage = "Terms is required")]
+
+        public string Terms { get; set; }
+        public string Status { get; set; }
+    }
+    //response model cho dealerContract
+    public class DealerContractResponse {
+        public int Id { get; set; }
+        public int DealerId { get; set; }
+        public string ContractNumber { get; set; }
+        public DateTime ContractDate { get; set; }
+        public DateTime ExpiredDate { get; set; }
+        public string Terms { get; set; }
+        public string Status { get; set; }
+
+        // Navigation
+        public Dealers Dealer { get; set; }
+    }
+    //request gia hạn hợp đồng 
+    public class RenewContractRequest
+    {
+        [Required(ErrorMessage = "ContractId is required")]
+        public int ContractId { get; set; }
+        [Required(ErrorMessage = "NewContractDate is required")]
+        public DateTime NewContractDate { get; set; }
+        [Required(ErrorMessage = "NewTerms is required")]
+        public string NewTerms { get; set; }
+    }
+    //request hủy hợp đồng
+    public class TerminateContractRequest
+    {
+        [Required(ErrorMessage = "Reason is required")]
+        public string Reason { get; set; }
+    }
+    //request cập nhật trạng thái hợp đồng
+    public class UpdateStatusDealerContractRequest
+    {
+        [Required(ErrorMessage = "Status is required")]
+        public string Status { get; set; }
+    }
+
+    //thêm công nợ 
+    public class AddDealerDebtRequest
+    {
+        public decimal Amount { get; set; }
+    }
+
+    // Request khi thanh toán
+    public class MakePaymentRequest
+    {
+        public decimal Amount { get; set; }
+    }
+    //model response của dealer debt
+    // Response trả về cho FE
+    public class DealerDebtResponse
+    {
+        public int Id { get; set; }
+        public int DealerId { get; set; }
+        public decimal TotalDebt { get; set; }
+        public decimal PaidAmount { get; set; }
+        public decimal RemainingDebt { get; set; }
+        public DateTime LastUpdate { get; set; }
+
+        // Optionally trả về luôn Dealer info
+        public Dealers Dealer { get; set; }
+    }
 }

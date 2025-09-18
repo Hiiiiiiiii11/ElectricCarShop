@@ -12,6 +12,7 @@ namespace DealerRepository.Model
         public int DealerId { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
+        public DateTime ExpireDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
 

@@ -1,22 +1,23 @@
 ﻿using DealerRepository.Model;
-using Share.ShareRepo;
+using DealerRepository.Model.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DealerRepository.Repositories
+namespace DealerService.Services
 {
-    public interface IDealerContractRepository : IGenericRepository<DealerContracts>
+    public interface IDealerContractService
     {
-        Task<IEnumerable<DealerContracts>> GetByDealerIdAsync(int dealerId);
+        //tạo hợp đồng
+        Task<DealerContractResponse> CreateDealerContractAsync(CreateDealerContractRequest request);
+        Task<IEnumerable<DealerContractResponse>> GetByDealerIdAsync(int dealerId);
         // Lấy hợp đồng còn hiệu lực
-        Task<IEnumerable<DealerContracts>> GetActiveByDealerIdAsync(int dealerId);
+        Task<IEnumerable<DealerContractResponse>> GetActiveByDealerIdAsync(int dealerId);
 
         // Lấy hợp đồng đã hết hạn
-        Task<IEnumerable<DealerContracts>> GetExpiredByDealerIdAsync(int dealerId);
-        Task<DealerContracts?> GetByContractNumberAsync(string contractNumber);
+        Task<IEnumerable<DealerContractResponse>> GetExpiredByDealerIdAsync(int dealerId);
 
         // Cập nhật trạng thái hợp đồng
         Task UpdateStatusAsync(int contractId, string status);
@@ -27,7 +28,7 @@ namespace DealerRepository.Repositories
         // Chấm dứt hợp đồng
         Task TerminateContractAsync(int contractId, string reason);
         //search hợp đồng theo dk
-        Task<IEnumerable<DealerContracts>> SearchAsync(
+        Task<IEnumerable<DealerContractResponse>> SearchAsync(
             string? contractNumber = null,
             string? status = null,
             DateTime? startDate = null,
