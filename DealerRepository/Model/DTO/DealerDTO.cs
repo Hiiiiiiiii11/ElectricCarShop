@@ -74,15 +74,15 @@ namespace DealerRepository.Model.DTO
     //create model cho dealerContract
     public class CreateDealerContractRequest
     {
-        [Required(ErrorMessage = "DealerId is required")]
-        public int DealerId { get; set; }
-        [Required(ErrorMessage = "ContractNumber is required")]
+        //[Required(ErrorMessage = "DealerId is required")]
+        //public int DealerId { get; set; }
+        //[Required(ErrorMessage = "ContractNumber is required")]
         public string ContractNumber { get; set; }
         [Required(ErrorMessage = "ContractDate is required")]
-        public DateTime ContractDate { get; set; }
-        [Required(ErrorMessage = "ExpiredDate is required")]
-        public DateTime ExpiredDate { get; set; }
-        [Required(ErrorMessage = "Terms is required")]
+        //public DateTime ContractDate { get; set; }
+        //[Required(ErrorMessage = "ExpiredDate is required")]
+        //public DateTime ExpiredDate { get; set; }
+        //[Required(ErrorMessage = "Terms is required")]
 
         public string Terms { get; set; }
         public string Status { get; set; }
@@ -98,15 +98,12 @@ namespace DealerRepository.Model.DTO
         public string Status { get; set; }
 
         // Navigation
-        public Dealers Dealer { get; set; }
+        public DealerResponse? Dealer { get; set; }
     }
+  
     //request gia hạn hợp đồng 
     public class RenewContractRequest
     {
-        [Required(ErrorMessage = "ContractId is required")]
-        public int ContractId { get; set; }
-        [Required(ErrorMessage = "NewContractDate is required")]
-        public DateTime NewContractDate { get; set; }
         [Required(ErrorMessage = "NewTerms is required")]
         public string NewTerms { get; set; }
     }
@@ -146,6 +143,38 @@ namespace DealerRepository.Model.DTO
         public DateTime LastUpdate { get; set; }
 
         // Optionally trả về luôn Dealer info
-        public Dealers Dealer { get; set; }
+        public DealerResponse Dealer { get; set; }
+    }
+    //create dealer target request
+    public class CreateDealerTargetRequest
+    {
+        public int TargetYear { get; set; }
+        public int TargetMonth { get; set; }
+        public int TargetSales { get; set; }
+    }
+    //request lấy báo cáo doanh số theo đại lý
+    public class GetTargetReportRequest
+    {
+        public int? TargetYear { get; set; }
+        public int? TargetMonth { get; set; }
+    }
+    //response báo cáo doanh số theo đại lý
+    public class DealerTargetReportResponse
+    {
+        public int Id { get; set; }
+        public int DealerId { get; set; }
+        public int TargetYear { get; set; }
+        public int TargetMonth { get; set; }
+        public int TargetSales { get; set; }
+        public int AchievedSales { get; set; }
+        public DealerResponse? Dealer { get; set; }
+    }
+    //request update dealer target
+    public class UpdateDealerTargetRequest
+    {
+        public int? TargetYear { get; set; }
+        public int? TargetMonth { get; set; }
+        public int? TargetSales { get; set; }
+        public int? AchievedSales { get; set; }
     }
 }

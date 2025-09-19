@@ -10,8 +10,8 @@ namespace DealerRepository.Model
     {
         public int Id { get; set; }
         public int DealerId { get; set; }
-        public decimal TargetYear { get; set; }
-        public decimal TargetMonth { get; set; }
+        public int TargetYear { get; set; }
+        public int TargetMonth { get; set; }
         public int TargetSales { get; set; }
         public int AchievedSales{ get; set; }
         public Dealers Dealer { get; set; }
