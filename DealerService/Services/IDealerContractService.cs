@@ -11,7 +11,7 @@ namespace DealerService.Services
     public interface IDealerContractService
     {
         //tạo hợp đồng
-        Task<DealerContractResponse> CreateDealerContractAsync(CreateDealerContractRequest request);
+        Task<DealerContractResponse> CreateDealerContractAsync(int dealerId, CreateDealerContractRequest requestt);
         Task<IEnumerable<DealerContractResponse>> GetByDealerIdAsync(int dealerId);
         // Lấy hợp đồng còn hiệu lực
         Task<IEnumerable<DealerContractResponse>> GetActiveByDealerIdAsync(int dealerId);
@@ -20,13 +20,13 @@ namespace DealerService.Services
         Task<IEnumerable<DealerContractResponse>> GetExpiredByDealerIdAsync(int dealerId);
 
         // Cập nhật trạng thái hợp đồng
-        Task UpdateStatusAsync(int contractId, string status);
+        Task<DealerContractResponse> UpdateStatusAsync(int contractId, UpdateStatusDealerContractRequest request);
 
         // Gia hạn hợp đồng
-        Task RenewContractAsync(int contractId, DateTime newDate, string newTerms);
+        Task<DealerContractResponse> RenewContractAsync(int contractId,RenewContractRequest request);
 
         // Chấm dứt hợp đồng
-        Task TerminateContractAsync(int contractId, string reason);
+        Task<DealerContractResponse> TerminateContractAsync(int contractId, TerminateContractRequest request);
         //search hợp đồng theo dk
         Task<IEnumerable<DealerContractResponse>> SearchAsync(
             string? contractNumber = null,

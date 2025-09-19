@@ -14,7 +14,7 @@ namespace DealerAPI.Controllers
             _dealerContractService = dealerContractService;
         }
         [HttpPost]
-        public async Task<IActionResult> CreateDealerContract([FromBody] CreateDealerContractRequest request)
+        public async Task<IActionResult> CreateDealerContract(int dealerId ,[FromBody] CreateDealerContractRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -22,7 +22,7 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                var result = await _dealerContractService.CreateDealerContractAsync(request);
+                var result = await _dealerContractService.CreateDealerContractAsync(dealerId,request);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -95,8 +95,8 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                await _dealerContractService.RenewContractAsync(contractId, request.NewContractDate, request.NewTerms);
-                return NoContent();
+                var contract = await _dealerContractService.RenewContractAsync(contractId, request);
+                return Ok(contract);
             }
             catch (KeyNotFoundException ex)
             {
@@ -116,8 +116,8 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                await _dealerContractService.TerminateContractAsync(contractId, request.Reason);
-                return NoContent();
+                await _dealerContractService.TerminateContractAsync(contractId, request);
+                return Ok(new { message = "Terminate Contract successful" });
             }
             catch (KeyNotFoundException ex)
             {
@@ -136,7 +136,7 @@ namespace DealerAPI.Controllers
 
             try
             {
-                await _dealerContractService.UpdateStatusAsync(contractId, request.Status);
+                await _dealerContractService.UpdateStatusAsync(contractId, request);
                 return Ok(new { message = "Update status successful" });
             }
             catch (KeyNotFoundException ex)

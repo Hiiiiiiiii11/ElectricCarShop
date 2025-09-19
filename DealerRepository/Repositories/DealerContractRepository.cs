@@ -35,9 +35,12 @@ namespace DealerRepository.Repositories
                 .Include(c => c.Dealer).ToListAsync();
         }
 
-        public Task<IEnumerable<DealerContracts>> GetExpiredByDealerIdAsync(int dealerId)
+        public async Task<IEnumerable<DealerContracts>> GetExpiredByDealerIdAsync(int dealerId)
         {
-            throw new NotImplementedException();
+            return await _context.DealerContracts
+               .Where(c => c.DealerId == dealerId && c.Status == "Expired")
+               .Include(c => c.Dealer)
+               .ToListAsync();
         }
 
         public async Task RenewContractAsync(int contractId, DateTime newDate, string newTerms)
@@ -104,7 +107,7 @@ namespace DealerRepository.Repositories
 
         public Task<DealerContracts?> GetByContractNumberAsync(string contractNumber)
         {
-            return _context.DealerContracts
+            return _context.DealerContracts.Include(d => d.Dealer)
                 .FirstOrDefaultAsync(c => c.ContractNumber == contractNumber);
         }
     }

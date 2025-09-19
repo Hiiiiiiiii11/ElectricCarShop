@@ -31,7 +31,11 @@ namespace DealerAPI
             builder.Services.AddScoped<IDealerInventoryRepository, DealerInventoryRepository>();
             builder.Services.AddScoped<IDealerService,DealerService.Services.DealerService>();
             builder.Services.AddScoped<IDealerUserService, DealerUserService>();
+            builder.Services.AddScoped<IDealerContractService, DealerContractService>();
+            builder.Services.AddScoped<IDealerDebtService, DealerDebtService>();
+            builder.Services.AddScoped<IDealerTargetService, DealerTargetService>();
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
+            
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);

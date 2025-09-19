@@ -39,34 +39,55 @@ namespace DealerRepository.Repositories
             else
             {
                 debt.TotalDebt += newDebt;
-                debt.RemainingDebt
-
+                debt.RemainingDebt = debt.TotalDebt - debt.PaidAmount;
+                debt.LastUpdate = DateTime.UtcNow;
+                _context.DealerDebts.Update(debt);
             }
+            await _context.SaveChangesAsync();
         }
 
         public Task ClearDebtAsync(int dealerId)
         {
-            throw new NotImplementedException();
+            var debt = _context.DealerDebts.FirstOrDefault(d => d.DealerId == dealerId);
+            if (debt == null)
+                throw new KeyNotFoundException($"Debt record for DealerId {dealerId} not found.");
+            _context.DealerDebts.Remove(debt);
+            return _context.SaveChangesAsync();
         }
 
-        public Task<DealerDebts?> GetByDealerIdAsync(int dealerId)
+        public async Task<DealerDebts?> GetByDealerIdAsync(int dealerId)
         {
-            throw new NotImplementedException();
+            return await _context.DealerDebts.Include(d => d.Dealer).
+                FirstOrDefaultAsync(d => d.DealerId == dealerId);
         }
 
-        public Task<IEnumerable<DealerDebts>> GetDealersWithRemainingDebtAsync()
+        public async Task<IEnumerable<DealerDebts>> GetDealersWithRemainingDebtAsync()
         {
-            throw new NotImplementedException();
+                return await _context.DealerDebts.Include(d => d.Dealer).
+                Where(d => d.RemainingDebt > 0).ToListAsync();
         }
 
-        public Task<IEnumerable<DealerDebts>> SearchDebtsAsync(DateTime? fromDate, DateTime? toDate)
+        public async Task<IEnumerable<DealerDebts>> SearchDebtsAsync(DateTime? fromDate, DateTime? toDate)
         {
-            throw new NotImplementedException();
+            var query = _context.DealerDebts.AsQueryable();
+            if (fromDate.HasValue)
+                query = query.Where(d => d.LastUpdate >= fromDate.Value);
+            if (toDate.HasValue)
+                query = query.Where(d => d.LastUpdate <= toDate.Value);
+            return await query.Include(d => d.Dealer).ToListAsync();
+
         }
 
         public Task UpdatePaymentAsync(int dealerId, decimal paidAmount)
         {
-            throw new NotImplementedException();
+            var debt = _context.DealerDebts.FirstOrDefault(d => d.DealerId == dealerId);
+            if (debt == null)
+                throw new KeyNotFoundException($"Debt record for DealerId {dealerId} not found.");
+            debt.PaidAmount += paidAmount;
+            debt.RemainingDebt = debt.TotalDebt - debt.PaidAmount;
+            debt.LastUpdate = DateTime.UtcNow;
+            _context.DealerDebts.Update(debt);
+            return _context.SaveChangesAsync();
         }
     }
 }

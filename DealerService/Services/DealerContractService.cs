@@ -1,6 +1,8 @@
-﻿using DealerRepository.Model;
+﻿using CloudinaryDotNet.Actions;
+using DealerRepository.Model;
 using DealerRepository.Model.DTO;
 using DealerRepository.Repositories;
+using Grpc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +19,17 @@ namespace DealerService.Services
         {
             _dealerContractRepository = dealerContractRepository;
         }
-        public async Task<DealerContractResponse> CreateDealerContractAsync(CreateDealerContractRequest request)
+        public async Task<DealerContractResponse> CreateDealerContractAsync(int dealerId, CreateDealerContractRequest request)
         {
-            var existingContract =  _dealerContractRepository.GetByContractNumberAsync(request.ContractNumber);
+            var existingContract = await _dealerContractRepository.GetByContractNumberAsync(request.ContractNumber);
             if (existingContract != null)
                 throw new ArgumentException($"Contract with number {request.ContractNumber} already exists.");
             var dealerContract = new DealerContracts
             {
-                DealerId = request.DealerId,
+                DealerId = dealerId,
                 ContractNumber = request.ContractNumber,
                 ContractDate = DateTime.UtcNow,
+                ExpireDate = DateTime.UtcNow.AddYears(1),
                 Terms = request.Terms,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status,
             };
@@ -54,17 +57,18 @@ namespace DealerService.Services
             return contract.Select(MapToResponse);
         }
 
-        public async Task RenewContractAsync(int contractId, DateTime newDate, string newTerms)
+        public async Task<DealerContractResponse> RenewContractAsync(int contractId, RenewContractRequest request)
         {
             var contract = await _dealerContractRepository.GetByIdAsync(contractId);
             if (contract == null)
                 throw new KeyNotFoundException($"Contract with Id {contractId} not found.");
 
-            contract.ContractDate = newDate;
-            contract.Terms = newTerms;
+            contract.ContractDate = DateTime.UtcNow;
+            contract.Terms = request.NewTerms;
             contract.Status = "Active";
             _dealerContractRepository.Update(contract);
             await _dealerContractRepository.SaveChangesAsync();
+            return MapToResponse(contract);
         }
 
         public async Task<IEnumerable<DealerContractResponse>> SearchAsync(string? contractNumber = null, string? status = null, DateTime? startDate = null, DateTime? endDate = null)
@@ -73,7 +77,7 @@ namespace DealerService.Services
             return contracts.Select(MapToResponse);
         }
 
-        public async Task TerminateContractAsync(int contractId, string reason)
+        public async Task<DealerContractResponse> TerminateContractAsync(int contractId, TerminateContractRequest request)
         {
             var contract = await _dealerContractRepository.GetByIdAsync(contractId);
             if (contract == null)
@@ -81,16 +85,18 @@ namespace DealerService.Services
             contract.Status = "Terminated";
             _dealerContractRepository.Update(contract);
             await _dealerContractRepository.SaveChangesAsync();
+            return MapToResponse(contract);
         }
 
-        public async Task UpdateStatusAsync(int contractId, string status)
+        public async Task<DealerContractResponse> UpdateStatusAsync(int contractId, UpdateStatusDealerContractRequest request)
         {
             var contract = await _dealerContractRepository.GetByIdAsync(contractId);
             if (contract == null)
                 throw new KeyNotFoundException($"Contract with Id {contractId} not found.");
-            contract.Status = status;
+            contract.Status = request.Status;
             _dealerContractRepository.Update(contract);
             await _dealerContractRepository.SaveChangesAsync();
+            return MapToResponse(contract);
         }
 
         //mapping
@@ -104,6 +110,17 @@ namespace DealerService.Services
                 ContractDate = contract.ContractDate,
                 Terms = contract.Terms,
                 Status = contract.Status,
+                Dealer = contract.Dealer == null ? null : new DealerResponse
+                {
+                    Id = contract.Dealer.Id,
+                    DealerName = contract.Dealer.DealerName,
+                    Address = contract.Dealer.Address,
+                    Phone = contract.Dealer.Phone,
+                    Email = contract.Dealer.Email,
+                    Status = contract.Dealer.Status,
+                    Created_At = contract.Dealer.Created_At,
+                    Updated_At = contract.Dealer.Updated_At,
+                }
             };
         }
     }
