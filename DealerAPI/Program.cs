@@ -34,6 +34,8 @@ namespace DealerAPI
             builder.Services.AddScoped<IDealerContractService, DealerContractService>();
             builder.Services.AddScoped<IDealerDebtService, DealerDebtService>();
             builder.Services.AddScoped<IDealerTargetService, DealerTargetService>();
+            builder.Services.AddScoped<IDealerInventoryService, DealerInventoryService>();
+
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             
 

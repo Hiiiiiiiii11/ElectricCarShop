@@ -22,6 +22,7 @@ namespace DealerRepository.Model
         public ICollection<DealerTargets> Targets { get; set; } = new List<DealerTargets>();
         public ICollection<DealerInventory> Inventories { get; set; } = new List<DealerInventory>();
         public ICollection<DealerUser> DealerUsers { get; set; } = new List<DealerUser>();
+        public ICollection<TestDrive> TestDrives { get; set; }= new List<TestDrive>();
 
     }
 }

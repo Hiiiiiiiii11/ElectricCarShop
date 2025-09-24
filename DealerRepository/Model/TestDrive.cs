@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace DealerRepository.Model
 {
-    public class DealerInventory
+    public class TestDrive
     {
         public int Id { get; set; }
         public int DealerId { get; set; }
         public int VehicleId { get; set; }
-        public int Quantity { get; set; }
-        // Navigation
+        public DateTime AppointmentDate { get; set; }
+        public string Status { get; set; } // e.g., Scheduled, Completed, Canceled
+        public string Notes { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+
         public Dealers Dealer { get; set; }
     }
 }

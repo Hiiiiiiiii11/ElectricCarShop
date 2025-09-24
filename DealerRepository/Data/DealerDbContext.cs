@@ -18,6 +18,7 @@ namespace DealerRepository.Data
         public DbSet<DealerTargets>DealerTargets { get; set; }
         public DbSet<DealerContracts>DealerContracts { get; set; }
         public DbSet<DealerUser> DealerUsers { get; set; }
+        public DbSet<TestDrive> TestDrives { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +48,11 @@ namespace DealerRepository.Data
                 .HasOne(u => u.Dealer)
                 .WithMany(d => d.DealerUsers)
                 .HasForeignKey(u => u.DealerId);
+
+            modelBuilder.Entity<TestDrive>()
+                 .HasOne(t => t.Dealer)
+                 .WithMany(d => d.TestDrives)
+                 .HasForeignKey(t => t.DealerId);
         }
 
     }

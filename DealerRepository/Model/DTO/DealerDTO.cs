@@ -177,4 +177,26 @@ namespace DealerRepository.Model.DTO
         public int? TargetSales { get; set; }
         public int? AchievedSales { get; set; }
     }
+
+    //request create dealer inventory
+    public class CreateDealerInventoryRequest
+    {
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+    }
+    //request update dealer inventory
+    public class UpdateDealerInventoryRequest
+    {
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+    }
+    //response dealer inventory
+    public class DealerInventoryResponse
+    {
+        public int Id { get; set; }
+        public int DealerId { get; set; }
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+        public DealerResponse? Dealer { get; set; }
+    }
 }
