@@ -10,7 +10,8 @@ namespace AllocationRepository.Model
 
     {
         public int Id { get; set; }
-        public int VehicleId { get; set; }
+        public int VehicleOptionId { get; set; }
+        public VehicleOptions VehicleOption { get; set; }
         public string VariantName { get; set; }
         public string Color { get; set; }
         public string BatteryCapacity { get; set; }
@@ -25,7 +26,6 @@ namespace AllocationRepository.Model
         public ICollection<Allocations> Allocations { get; set; } = new List<Allocations>();
         public ICollection<Quotations> Quotations { get; set; } = new List<Quotations>();
 
-        public ICollection<VehicleOptions> VehicleOptions { get; set; } = new List<VehicleOptions>();
 
     }
 }

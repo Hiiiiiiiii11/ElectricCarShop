@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AllocationService.Services
 {
-    internal class Class1
+    internal class AllocationService
     {
     }
 }

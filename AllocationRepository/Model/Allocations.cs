@@ -14,7 +14,6 @@ namespace AllocationRepository.Model
         public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
-
         public EVInventory EVInventory { get; set; }
         public Vehicles Vehicle { get; set; }
     }

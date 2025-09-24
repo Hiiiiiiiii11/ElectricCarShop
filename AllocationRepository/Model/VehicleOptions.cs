@@ -9,7 +9,7 @@ namespace AllocationRepository.Model
     public class VehicleOptions
     {
         public int Id { get; set; }
-        public int ModelName { get; set; }
+        public string ModelName { get; set; }
         public string Description { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }

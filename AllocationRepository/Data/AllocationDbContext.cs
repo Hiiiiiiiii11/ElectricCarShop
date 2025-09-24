@@ -1,14 +1,9 @@
 ﻿using AllocationRepository.Model;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AllocationRepository.Data
 {
-    public class AllocationDbContext :DbContext
+    public class AllocationDbContext : DbContext
     {
         public AllocationDbContext(DbContextOptions<AllocationDbContext> options) : base(options) { }
 
@@ -16,9 +11,10 @@ namespace AllocationRepository.Data
         public DbSet<EVInventory> EVInventories { get; set; }
         public DbSet<Quotations> Quotations { get; set; }
         public DbSet<VehicleOptions> VehicleOptions { get; set; }
-        public DbSet<Vehicles> Vehicles { get; set; }   
+        public DbSet<Vehicles> Vehicles { get; set; }
         public DbSet<VehiclePrices> VehiclePrices { get; set; }
         public DbSet<VehiclePromotions> VehiclePromotions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Vehicle -> EVInventory
@@ -27,18 +23,12 @@ namespace AllocationRepository.Data
                 .WithMany(v => v.EVInventories)
                 .HasForeignKey(e => e.VehicleId);
 
+            // VehicleOption -> Vehicle
             modelBuilder.Entity<Vehicles>()
-         .HasMany(v => v.VehicleOptions)
-         .WithMany(o => o.Vehicles)
-         .UsingEntity<Dictionary<string, object>>(
-             "VehicleVehicleOption", // tên bảng trung gian
-             j => j.HasOne<VehicleOptions>().WithMany().HasForeignKey("VehicleOptionId"),
-             j => j.HasOne<Vehicles>().WithMany().HasForeignKey("VehicleId"),
-             j =>
-             {
-                 j.HasKey("VehicleId", "VehicleOptionId");
-                 j.ToTable("VehicleVehicleOptions");
-             });
+                .HasOne(v => v.VehicleOption)
+                .WithMany(o => o.Vehicles)
+                .HasForeignKey(v => v.VehicleOptionId)
+                .OnDelete(DeleteBehavior.Restrict); // tránh multiple cascade paths
 
             // Vehicle -> VehiclePrices
             modelBuilder.Entity<VehiclePrices>()
@@ -56,13 +46,15 @@ namespace AllocationRepository.Data
             modelBuilder.Entity<Allocations>()
                 .HasOne(a => a.Vehicle)
                 .WithMany(v => v.Allocations)
-                .HasForeignKey(a => a.VehicleId);
+                .HasForeignKey(a => a.VehicleId)
+                .OnDelete(DeleteBehavior.Restrict); // tránh cycle
 
             // EVInventory -> Allocations
             modelBuilder.Entity<Allocations>()
                 .HasOne(a => a.EVInventory)
                 .WithMany(e => e.Allocations)
-                .HasForeignKey(a => a.EvInventoryId);
+                .HasForeignKey(a => a.EvInventoryId)
+                .OnDelete(DeleteBehavior.Cascade); // cho phép cascade
 
             // Vehicle -> Quotations
             modelBuilder.Entity<Quotations>()
@@ -70,6 +62,8 @@ namespace AllocationRepository.Data
                 .WithMany(v => v.Quotations)
                 .HasForeignKey(q => q.VehicleId);
         }
-
     }
 }
+
+//dotnet ef migrations add InitialCreate --project AllocationRepository --startup-project AllocationAPI --context AllocationDbContext
+//dotnet ef database update --project AllocationRepository --startup-project AllocationAPI --context AllocationDbContext
