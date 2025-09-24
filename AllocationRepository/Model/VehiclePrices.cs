@@ -9,10 +9,11 @@ namespace AllocationRepository.Model
     public class VehiclePrices
     {
         public int Id { get; set; }
-        public int VariantId { get; set; }
+        public int VehicleId { get; set; }
         public decimal PriceType { get; set; }
         public decimal PriceAmount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public Vehicles Vehicle { get; set; }
     }
 }

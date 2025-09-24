@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AllocationRepository.Model.Request
+namespace AllocationRepository.Model.DTO
 {
-    internal class Request
+    public class AllocationDTO
     {
     }
 }

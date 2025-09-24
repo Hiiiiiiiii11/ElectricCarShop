@@ -9,10 +9,11 @@ namespace AllocationRepository.Model
     public class VehiclePromotions
     {
         public int Id { get; set; }
-        public int VariantId { get; set; }
+        public int VehicleId { get; set; }
         public string PromoName { get; set; }
         public decimal DiscountAmount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public Vehicles Vehicle { get; set; }
     }
 }
