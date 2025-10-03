@@ -1,0 +1,20 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+message GetAgencyByIdRequest {
+  int32 id = 1;
+}
+
+message AgencyReply {
+  int32 id = 1;
+  string agencyName = 2;
+  string address = 3;
+  string phone = 4;
+  string email = 5;
+  string status = 6;
+}
+
+service AgencyGrpcService {
+  rpc GetAgencyById (GetAgencyByIdRequest) returns (AgencyReply);
+}

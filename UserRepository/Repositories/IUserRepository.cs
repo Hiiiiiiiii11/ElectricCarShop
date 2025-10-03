@@ -10,5 +10,6 @@ namespace UserRepository.Repositories
         Task<IEnumerable<Users>> GetAllUsersWithRolesAsync();
         Task<Users?> GetUserWithRolesAsync(int userId);
         Task<Users?> GetByUserNameAsync(string userName);
+        Task<bool> AssignUserToAgencyAsync(int userId, int agencyId);
     }
 }

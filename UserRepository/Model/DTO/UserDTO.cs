@@ -70,6 +70,11 @@ namespace UserRepository.Model.DTO
         public string Token { get; set; }
         public DateTime Expiration { get; set; }
     }
+
+    public class AssignUserAgencyRequest
+    {
+        public int AgencyId { get; set; }
+    }
 }    
 
 

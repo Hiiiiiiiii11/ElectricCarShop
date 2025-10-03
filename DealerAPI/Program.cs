@@ -1,7 +1,8 @@
 ﻿
-using DealerRepository.Data;
-using DealerRepository.Repositories;
-using DealerService.Services;
+
+using AgencyRepository.Data;
+using AgencyRepository.Repositories;
+using AgencyService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using Share.Setting;
 using Share.ShareServices;
 using System.Text;
 
-namespace DealerAPI
+namespace AgencyAPI
 {
     public class Program
     {
@@ -20,21 +21,20 @@ namespace DealerAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<DealerDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DealerDbConnection")));
+            builder.Services.AddDbContext<AgencyDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection")));
 
-            builder.Services.AddScoped<IDealerRepository,DealerRepository.Repositories.DealerRepository>();
-            builder.Services.AddScoped<IDealerContractRepository, DealerContractRepository>();
-            builder.Services.AddScoped<IDealerDebtRepository, DealerDebtRepository>();
-            builder.Services.AddScoped<IDealerTargetRepository, DealerTargetRepository>();
-            builder.Services.AddScoped<IDealerUserRepository, DealerUserRepository>();
-            builder.Services.AddScoped<IDealerInventoryRepository, DealerInventoryRepository>();
-            builder.Services.AddScoped<IDealerService,DealerService.Services.DealerService>();
-            builder.Services.AddScoped<IDealerUserService, DealerUserService>();
-            builder.Services.AddScoped<IDealerContractService, DealerContractService>();
-            builder.Services.AddScoped<IDealerDebtService, DealerDebtService>();
-            builder.Services.AddScoped<IDealerTargetService, DealerTargetService>();
-            builder.Services.AddScoped<IDealerInventoryService, DealerInventoryService>();
+            builder.Services.AddScoped<IAgencyRepository,AgencyRepository.Repositories.AgencyRepository>();
+            builder.Services.AddScoped<IAgencyContractRepository, AgencyContractRepository>();
+            builder.Services.AddScoped<IAgencyDebtRepository, AgencyDebtRepository>();
+            builder.Services.AddScoped<IAgencyTargetRepository, AgencyTargetRepository>();
+
+            builder.Services.AddScoped<IAgencyInventoryRepository, AgencyInventoryRepository>();
+            builder.Services.AddScoped<IAgencyService,AgencyService.Services.AgencyService>();
+            builder.Services.AddScoped<IAgencyContractService, AgencyContractService>();
+            builder.Services.AddScoped<IAgencyDebtService, AgencyDebtService>();
+            builder.Services.AddScoped<IAgencyTargetService, AgencyTargetService>();
+            builder.Services.AddScoped<IAgencyInventoryService, AgencyInventoryService>();
 
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             

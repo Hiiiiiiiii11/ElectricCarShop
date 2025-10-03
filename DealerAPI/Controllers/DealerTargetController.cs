@@ -1,24 +1,24 @@
-﻿using DealerRepository.Model.DTO;
-using DealerService.Services;
+﻿using AgencyRepository.Model.DTO;
+using AgencyService.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DealerAPI.Controllers
+namespace AgencyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DealerTargetController : Controller
+    public class AgencyTargetController : Controller
     {
-        private readonly IDealerTargetService _dealerTargetService;
-        public DealerTargetController(IDealerTargetService dealerTargetService)
+        private readonly IAgencyTargetService _AgencyTargetService;
+        public AgencyTargetController(IAgencyTargetService AgencyTargetService)
         {
-            _dealerTargetService = dealerTargetService;
+            _AgencyTargetService = AgencyTargetService;
         }
-        [HttpPost("dealer/{dealerId}/targets")]
-        public async Task<IActionResult> CreateTarget(int dealerId, [FromBody] CreateDealerTargetRequest request)
+        [HttpPost("Agency/{AgencyId}/targets")]
+        public async Task<IActionResult> CreateTarget(int AgencyId, [FromBody] CreateAgencyTargetRequest request)
         {
             try
             {
-                var result = await _dealerTargetService.CreateTargetAsync(dealerId, request);
+                var result = await _AgencyTargetService.CreateTargetAsync(AgencyId, request);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -32,7 +32,7 @@ namespace DealerAPI.Controllers
         {
             try
             {
-                var results = await _dealerTargetService.GetAllTargetsAsync(request);
+                var results = await _AgencyTargetService.GetAllTargetsAsync(request);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -40,12 +40,12 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("dealer/{dealerId}/current-target")]
-        public async Task<IActionResult> GetCurrentTargetByDealerId(int dealerId)
+        [HttpGet("Agency/{AgencyId}/current-target")]
+        public async Task<IActionResult> GetCurrentTargetByAgencyId(int AgencyId)
         {
             try
             {
-                var result = await _dealerTargetService.GetCurrentTargetByDealerIdAsync(dealerId);
+                var result = await _AgencyTargetService.GetCurrentTargetByAgencyIdAsync(AgencyId);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -57,12 +57,12 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("dealer/{dealerId}/target")]
-        public async Task<IActionResult> GetDealerTarget(int dealerId, [FromQuery] GetTargetReportRequest request)
+        [HttpGet("Agency/{AgencyId}/target")]
+        public async Task<IActionResult> GetAgencyTarget(int AgencyId, [FromQuery] GetTargetReportRequest request)
         {
             try
             {
-                var result = await _dealerTargetService.GetDealerTargetAsync(dealerId, request);
+                var result = await _AgencyTargetService.GetAgencyTargetAsync(AgencyId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -74,12 +74,12 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPut("dealer/{dealerId}/target")]
-        public async Task<IActionResult> UpdateDealerTarget(int dealerId,int targetId, [FromBody] UpdateDealerTargetRequest request)
+        [HttpPut("Agency/{AgencyId}/target")]
+        public async Task<IActionResult> UpdateAgencyTarget(int AgencyId,int targetId, [FromBody] UpdateAgencyTargetRequest request)
         {
             try
             {
-                var result = await _dealerTargetService.UpdateAchievedSalesAsync(dealerId, targetId, request);
+                var result = await _AgencyTargetService.UpdateAchievedSalesAsync(AgencyId, targetId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -100,7 +100,7 @@ namespace DealerAPI.Controllers
         {
             try
             {
-                var results = await _dealerTargetService.GetTargetsReportAsync(request);
+                var results = await _AgencyTargetService.GetTargetsReportAsync(request);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -108,13 +108,13 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpDelete("dealer/{dealerId}")]
-        public async Task<IActionResult> DeleteTarget(int dealerId ,int targetId)
+        [HttpDelete("Agency/{AgencyId}")]
+        public async Task<IActionResult> DeleteTarget(int AgencyId ,int targetId)
         {
             try
             {
-                await _dealerTargetService.RemoveDealerTarget(dealerId, targetId);
-                return Ok(new {mesage = "Remove Dealer Target successfull"});
+                await _AgencyTargetService.RemoveAgencyTarget(AgencyId, targetId);
+                return Ok(new {mesage = "Remove Agency Target successfull"});
             }
             catch (KeyNotFoundException ex)
             {

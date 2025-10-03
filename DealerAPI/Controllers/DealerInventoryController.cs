@@ -1,24 +1,24 @@
-﻿using DealerRepository.Model.DTO;
-using DealerService.Services;
+﻿using AgencyRepository.Model.DTO;
+using AgencyService.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DealerAPI.Controllers
+namespace AgencyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DealerInventoryController : Controller
+    public class AgencyInventoryController : Controller
     {
-       private readonly IDealerInventoryService _dealerInventoryService;
-        public DealerInventoryController(IDealerInventoryService dealerInventoryService)
+       private readonly IAgencyInventoryService _AgencyInventoryService;
+        public AgencyInventoryController(IAgencyInventoryService AgencyInventoryService)
         {
-            _dealerInventoryService = dealerInventoryService;
+            _AgencyInventoryService = AgencyInventoryService;
         }
-        [HttpGet("dealer/{dealerId}/inventories")]
-        public async Task<IActionResult> GetInventoriesByDealerId(int dealerId)
+        [HttpGet("Agency/{AgencyId}/inventories")]
+        public async Task<IActionResult> GetInventoriesByAgencyId(int AgencyId)
         {
             try
             {
-                var inventories = await _dealerInventoryService.GetInventoriesByDealerIdAsync(dealerId);
+                var inventories = await _AgencyInventoryService.GetInventoriesByAgencyIdAsync(AgencyId);
                 return Ok(inventories);
             }
             catch (Exception ex)
@@ -28,15 +28,15 @@ namespace DealerAPI.Controllers
 
         }
 
-        [HttpGet("dealer/{dealerId}/inventory/{vehicleId}")]
-        public async Task<IActionResult> GetInventory(int dealerId, int vehicleId)
+        [HttpGet("Agency/{AgencyId}/inventory/{vehicleId}")]
+        public async Task<IActionResult> GetInventory(int AgencyId, int vehicleId)
         {
             try
             {
-                var inventory = await _dealerInventoryService.GetInventoryAsync(dealerId, vehicleId);
+                var inventory = await _AgencyInventoryService.GetInventoryAsync(AgencyId, vehicleId);
                 if (inventory == null)
                 {
-                    return NotFound($"Inventory item not found for Dealer ID {dealerId} and Variant ID {vehicleId}.");
+                    return NotFound($"Inventory item not found for Agency ID {AgencyId} and Variant ID {vehicleId}.");
                 }
                 return Ok(inventory);
             }
@@ -46,12 +46,12 @@ namespace DealerAPI.Controllers
             }
         }
 
-        [HttpPost("dealer/{dealerId}/inventory")]
-        public async Task<IActionResult> CreateDealerInventory(int dealerId, [FromBody] CreateDealerInventoryRequest request)
+        [HttpPost("Agency/{AgencyId}/inventory")]
+        public async Task<IActionResult> CreateAgencyInventory(int AgencyId, [FromBody] CreateAgencyInventoryRequest request)
         {
             try
             {
-                var inventory = await _dealerInventoryService.CreateDealerInventoryAsync(dealerId, request);
+                var inventory = await _AgencyInventoryService.CreateAgencyInventoryAsync(AgencyId, request);
                 return Ok(inventory);
             }
             catch (Exception ex)
@@ -60,12 +60,12 @@ namespace DealerAPI.Controllers
             }
         }
 
-        [HttpDelete("dealer/{dealerId}/inventory/{variantId}")]
-        public async Task<IActionResult> RemoveInventoryItem(int dealerId, int variantId)
+        [HttpDelete("Agency/{AgencyId}/inventory/{variantId}")]
+        public async Task<IActionResult> RemoveInventoryItem(int AgencyId, int variantId)
         {
             try
             {
-                await _dealerInventoryService.RemoveInventoryItemAsync(dealerId, variantId);
+                await _AgencyInventoryService.RemoveInventoryItemAsync(AgencyId, variantId);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -77,12 +77,12 @@ namespace DealerAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
-        [HttpPut("dealer/{dealerId}/inventory/{variantId}/quantity")]
-        public async Task<IActionResult> UpdateInventoryQuantity(int dealerId, int vehicleId, [FromBody] int newQuantity)
+        [HttpPut("Agency/{AgencyId}/inventory/{variantId}/quantity")]
+        public async Task<IActionResult> UpdateInventoryQuantity(int AgencyId, int vehicleId, [FromBody] int newQuantity)
         {
             try
             {
-                await _dealerInventoryService.SetQuantityAsync(dealerId, vehicleId, newQuantity);
+                await _AgencyInventoryService.SetQuantityAsync(AgencyId, vehicleId, newQuantity);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -95,12 +95,12 @@ namespace DealerAPI.Controllers
             }
         }
 
-        [HttpGet("dealer/{dealerId}/inventory/{variantId}/sufficient-stock")]
-        public async Task<IActionResult> HasSufficientStock(int dealerId, int vehicleId, [FromQuery] int requiredQuantity)
+        [HttpGet("Agency/{AgencyId}/inventory/{variantId}/sufficient-stock")]
+        public async Task<IActionResult> HasSufficientStock(int AgencyId, int vehicleId, [FromQuery] int requiredQuantity)
         {
             try
             {
-                var hasStock = await _dealerInventoryService.HasSufficientStockAsync(dealerId, vehicleId, requiredQuantity);
+                var hasStock = await _AgencyInventoryService.HasSufficientStockAsync(AgencyId, vehicleId, requiredQuantity);
                 return Ok(new { hasSufficientStock = hasStock });
             }
             catch (Exception ex)
@@ -108,12 +108,12 @@ namespace DealerAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpPut("dealer/{dealerId}/inventory/{variantId}/adjust-quantity")]
-        public async Task<IActionResult> AdjustInventoryQuantity(int dealerId, int vehicleId, [FromBody] int quantityChange)
+        [HttpPut("Agency/{AgencyId}/inventory/{variantId}/adjust-quantity")]
+        public async Task<IActionResult> AdjustInventoryQuantity(int AgencyId, int vehicleId, [FromBody] int quantityChange)
         {
             try
             {
-                await _dealerInventoryService.SetQuantityAsync(dealerId, vehicleId, quantityChange);
+                await _AgencyInventoryService.SetQuantityAsync(AgencyId, vehicleId, quantityChange);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

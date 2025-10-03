@@ -1,23 +1,43 @@
-﻿
-syntax = "proto3";
+﻿syntax = "proto3";
 
 option csharp_namespace = "GrpcService";
 
-// Request lấy user theo id
 message GetUserByIdRequest {
-  string id = 1;
+  int32 userId = 1;
 }
 
-// Response chứa thông tin user
+// Request lấy user theo agencyId
+message GetUsersByAgencyIdRequest {
+  int32 agencyId = 1;
+}
+
+// User item
 message UserReply {
-  string id = 1;
+  int32 id = 1;
   string userName = 2;
-  string avartarUrl = 3;
-  string email = 4;
-  string Phone = 5;
+  string fullName = 3;
+  string avartarUrl = 4;
+  string email = 5;
+  string phone = 6;
+  string role = 7;
 }
 
-// Service định nghĩa các API gRPC
+// Response chứa danh sách user
+message UsersReply {
+  repeated UserReply users = 1;
+}
+
+message AssignUserToAgencyRequest {
+  int32 userId = 1;
+  int32 agencyId = 2;
+}
+
+message AssignUserToAgencyReply {
+  bool success = 1;
+}
+
 service UserGrpcService {
   rpc GetUserById (GetUserByIdRequest) returns (UserReply);
+  rpc GetUsersByAgencyId (GetUsersByAgencyIdRequest) returns (UsersReply);
+  rpc AssignUserToAgency(AssignUserToAgencyRequest) returns (AssignUserToAgencyReply);
 }

@@ -18,7 +18,27 @@ namespace Share.ShareServices
 
         public async Task<UserReply> GetUserByIdAsync(int userId)
         {
-            return await _client.GetUserByIdAsync(new GetUserByIdRequest { Id = userId.ToString() });
+            return await _client.GetUserByIdAsync(new GetUserByIdRequest { UserId = userId });
+        }
+        public async Task<IEnumerable<UserReply>> GetUsersByAgencyIdAsync(int agencyId)
+        {
+            var response = await _client.GetUsersByAgencyIdAsync(new GetUsersByAgencyIdRequest
+            {
+                AgencyId = agencyId
+            });
+
+            return response.Users;
+        }
+        public async Task<bool> AssignUserToAgencyAsync(int userId, int agencyId)
+        {
+            var request = new AssignUserToAgencyRequest
+            {
+                UserId = userId,
+                AgencyId = agencyId
+            };
+
+            var response = await _client.AssignUserToAgencyAsync(request);
+            return response.Success;
         }
     }
 }

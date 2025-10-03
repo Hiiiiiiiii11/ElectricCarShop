@@ -1,17 +1,17 @@
-﻿using DealerRepository.Model.DTO;
-using DealerService.Services;
+﻿using AgencyRepository.Model.DTO;
+using AgencyService.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DealerAPI.Controllers
+namespace AgencyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DealerDebtController : ControllerBase
+    public class AgencyDebtController : ControllerBase
     {
-        private readonly IDealerDebtService _dealerDebtService;
-        public DealerDebtController(IDealerDebtService dealerDebtService)
+        private readonly IAgencyDebtService _AgencyDebtService;
+        public AgencyDebtController(IAgencyDebtService AgencyDebtService)
         {
-            _dealerDebtService = dealerDebtService;
+            _AgencyDebtService = AgencyDebtService;
         }
 
         [HttpGet("GetAll")]
@@ -19,7 +19,7 @@ namespace DealerAPI.Controllers
         {
             try
             {
-                var debts = await _dealerDebtService.GetAllDebtsAsync();
+                var debts = await _AgencyDebtService.GetAllDebtsAsync();
                 return Ok(debts);
             }
             catch (Exception ex)
@@ -32,7 +32,7 @@ namespace DealerAPI.Controllers
         {
             try
             {
-                var debts = await _dealerDebtService.GetDealersWithRemainingDebtAsync();
+                var debts = await _AgencyDebtService.GetAgencysWithRemainingDebtAsync();
                 return Ok(debts);
             }
             catch (Exception ex)
@@ -40,12 +40,12 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("{dealerId}")]
-        public async Task<IActionResult> GetByDealerId(int dealerId)
+        [HttpGet("{AgencyId}")]
+        public async Task<IActionResult> GetByAgencyId(int AgencyId)
         {
             try
             {
-                var debt = await _dealerDebtService.GetDebtByDealerIdAsync(dealerId);
+                var debt = await _AgencyDebtService.GetDebtByAgencyIdAsync(AgencyId);
                 return Ok(debt);
             }
             catch (KeyNotFoundException ex)
@@ -57,8 +57,8 @@ namespace DealerAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPost("Add/{dealerId}")]
-        public async Task<IActionResult> AddDebt(int dealerId, [FromBody] AddDealerDebtRequest request)
+        [HttpPost("Add/{AgencyId}")]
+        public async Task<IActionResult> AddDebt(int AgencyId, [FromBody] AddAgencyDebtRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                var result = await _dealerDebtService.AddDebtAsync(dealerId, request);
+                var result = await _AgencyDebtService.AddDebtAsync(AgencyId, request);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -78,8 +78,8 @@ namespace DealerAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
-        [HttpPost("Payment/{dealerId}")]
-        public async Task<IActionResult> MakePayment(int dealerId, [FromBody] MakePaymentRequest request)
+        [HttpPost("Payment/{AgencyId}")]
+        public async Task<IActionResult> MakePayment(int AgencyId, [FromBody] MakePaymentRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +87,7 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                var result = await _dealerDebtService.MakePaymentAsync(dealerId, request);
+                var result = await _AgencyDebtService.MakePaymentAsync(AgencyId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -104,12 +104,12 @@ namespace DealerAPI.Controllers
             }
         }
 
-        [HttpPost("Clear/{dealerId}")]
-        public async Task<IActionResult> ClearDebt(int dealerId)
+        [HttpPost("Clear/{AgencyId}")]
+        public async Task<IActionResult> ClearDebt(int AgencyId)
         {
             try
             {
-                var result = await _dealerDebtService.ClearDebtAsync(dealerId);
+                var result = await _AgencyDebtService.ClearDebtAsync(AgencyId);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -127,7 +127,7 @@ namespace DealerAPI.Controllers
         {
             try
             {
-                var debts = await _dealerDebtService.SearchDebtsAsync(fromDate, toDate);
+                var debts = await _AgencyDebtService.SearchDebtsAsync(fromDate, toDate);
                 return Ok(debts);
             }
             catch (Exception ex)
