@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using Share.ShareServices;
 using UserRepository.Model;
 using UserRepository.Model.DTO;
@@ -35,6 +36,7 @@ namespace UserService.Services
                 Email = request.Email,
                 Phone = request.Phone,
                 AvartarUrl = request.AvartarFile != null ? _uploadPhotoService.UploadPhoto(request.AvartarFile) : null,
+                RoleId = request.RoleId,
                 Status = "Active",
                 Created_At = DateTime.UtcNow,
                 Updated_At = DateTime.UtcNow
@@ -43,7 +45,10 @@ namespace UserService.Services
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
-            return MapToResponse(user);
+            var createdUser = await _userRepository.GetUserWithRolesAsync(user.Id);
+
+
+            return MapToResponse(createdUser);
         }
 
         public async Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest request)
@@ -77,8 +82,9 @@ namespace UserService.Services
 
             _userRepository.Update(user);
             await _userRepository.SaveChangesAsync();
+            var updateUser = await _userRepository.GetUserWithRolesAsync(user.Id);
 
-            return MapToResponse(user);
+            return MapToResponse(updateUser);
         }
 
         public async Task<UserResponse> GetUserByIdAsync(int id)
@@ -124,13 +130,11 @@ namespace UserService.Services
                 Status = user.Status,
                 Created_At = user.Created_At,
                 Updated_At = user.Updated_At,
-                Roles = user.UserRoles?
-               .Select(ur => new RoleSupport
+                Role = new RoleResponse   
                 {
-                RoleId = ur.Role.Id,
-                RoleName = ur.Role.RoleName
-                })
-               .ToList() ?? new List<RoleSupport>()
+                    Id = user.Role.Id,
+                    RoleName = user.Role.RoleName
+                }
             };
         }
     }

@@ -18,15 +18,13 @@ namespace UserRepository.Repositories
         public async Task<IEnumerable<Users>> GetAllUsersWithRolesAsync()
         {
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.Role)
                 .ToListAsync();
         }
         public async Task<Users?> GetUserWithRolesAsync(int userId)
         {
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
