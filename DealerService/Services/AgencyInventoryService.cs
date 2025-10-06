@@ -89,7 +89,7 @@ namespace AgencyService.Services
                 AgencyId = inventory.AgencyId,
                 VehicleId = inventory.VehicleId,
                 Quantity = inventory.Quantity,
-                Agency = inventory.Agency == null ? null : new AgencyResponse
+                Agency = inventory.Agency == null ? null : new AgencyResponseForTarget
                 {
                     Id = inventory.Agency.Id,
                     AgencyName = inventory.Agency.AgencyName,
@@ -97,8 +97,6 @@ namespace AgencyService.Services
                     Phone = inventory.Agency.Phone,
                     Address = inventory.Agency.Address,
                     Status = inventory.Agency.Status,
-                    Created_At = inventory.Agency.Created_At,
-                    Updated_At = inventory.Agency.Updated_At
                 }
             };
         }

@@ -18,6 +18,13 @@ namespace AgencyRepository.Repositories
         {
             _context = context;
         }
+        public async Task<IEnumerable<AgencyContracts>> GetAllContractAgencyIdAsync(int AgencyId)
+        {
+            return await _context.AgencyContracts
+                .Where(c => c.AgencyId == AgencyId)
+                .Include(c => c.Agency)
+                .ToListAsync();
+        }
 
         public async Task<IEnumerable<AgencyContracts>> GetActiveByAgencyIdAsync(int AgencyId)
         {

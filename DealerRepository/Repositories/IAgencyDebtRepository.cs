@@ -11,13 +11,15 @@ namespace AgencyRepository.Repositories
     public interface IAgencyDebtRepository : IGenericRepository<AgencyDebts>
     {
         // Lấy công nợ theo AgencyId
+        Task<IEnumerable<AgencyDebts>> GetAllDebtAgencyIdAsync(int AgencyId);
+        Task<IEnumerable<AgencyDebts>> GetAgencysWithRemainingDebtByAgencyIdAsync(int AgencyId);
         Task<AgencyDebts?> GetByAgencyIdAsync(int AgencyId);
 
         // Cập nhật số tiền đã trả
-        Task UpdatePaymentAsync(int AgencyId, decimal paidAmount);
+        Task UpdatePaymentAsync(int agencyId, int contractId, decimal paidAmount);
 
         // Cập nhật nợ phát sinh thêm
-        Task AddDebtAsync(int AgencyId, decimal newDebt);
+        Task AddOrUpdateDebtAsync(int agencyId, int contractId, decimal newDebt, string note);
 
         // Xoá công nợ (nếu tất toán hoặc reset)
         Task ClearDebtAsync(int AgencyId);
@@ -27,5 +29,7 @@ namespace AgencyRepository.Repositories
 
         // Tìm kiếm công nợ theo khoảng thời gian
         Task<IEnumerable<AgencyDebts>> SearchDebtsAsync(DateTime? fromDate, DateTime? toDate);
+
+        Task<IEnumerable<AgencyDebts>> GetDebtsByContractAsync(int contractId);
     }
 }

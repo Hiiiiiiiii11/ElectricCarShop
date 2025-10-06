@@ -35,9 +35,18 @@ message AssignUserToAgencyRequest {
 message AssignUserToAgencyReply {
   bool success = 1;
 }
+message RemoveUserFromAgencyRequest {
+  int32 userId = 1;
+  int32 agencyId = 2;
+}
+
+message RemoveUserFromAgencyReply {
+  bool success = 1;
+}
 
 service UserGrpcService {
   rpc GetUserById (GetUserByIdRequest) returns (UserReply);
   rpc GetUsersByAgencyId (GetUsersByAgencyIdRequest) returns (UsersReply);
   rpc AssignUserToAgency(AssignUserToAgencyRequest) returns (AssignUserToAgencyReply);
+  rpc RemoveUserFromAgency(RemoveUserFromAgencyRequest) returns (RemoveUserFromAgencyReply);
 }

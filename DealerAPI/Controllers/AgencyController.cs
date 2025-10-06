@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using GrpcService;
 using Microsoft.AspNetCore.Mvc;
 using Share.ShareServices;
 
@@ -74,6 +75,23 @@ namespace AgencyAPI.Controllers
                     return BadRequest(new { message = "Failed to assign user to agency" });
 
                 return Ok(new { message = "User assigned successfully" });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+        [HttpPost("{agencyId}/remove-user")]
+        public async Task<IActionResult> RemoveUserFromAgency(int agencyId, [FromBody] RemoveUserAgencyRequest request)
+        {
+            try
+            {
+                var result = await _agencyService.RemoveUserAsync(request, agencyId);
+
+                if (!result)
+                    return BadRequest(new { message = "Failed to remove user from agency" });
+
+                return Ok(new { message = "User removed successfully" });
             }
             catch (Exception ex)
             {

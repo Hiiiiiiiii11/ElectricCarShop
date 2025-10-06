@@ -40,5 +40,16 @@ namespace Share.ShareServices
             var response = await _client.AssignUserToAgencyAsync(request);
             return response.Success;
         }
+        public async Task<bool> RemoveUserFromAgencyAsync(int userId, int agencyId)
+        {
+            var request = new RemoveUserFromAgencyRequest
+            {
+                UserId = userId,
+                AgencyId = agencyId
+            };
+
+            var reply = await _client.RemoveUserFromAgencyAsync(request);
+            return reply.Success;
+        }
     }
 }

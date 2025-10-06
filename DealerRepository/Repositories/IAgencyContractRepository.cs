@@ -10,6 +10,7 @@ namespace AgencyRepository.Repositories
 {
     public interface IAgencyContractRepository : IGenericRepository<AgencyContracts>
     {
+        Task<IEnumerable<AgencyContracts>> GetAllContractAgencyIdAsync(int AgencyId);
         Task<IEnumerable<AgencyContracts>> GetByAgencyIdAsync(int AgencyId);
         // Lấy hợp đồng còn hiệu lực
         Task<IEnumerable<AgencyContracts>> GetActiveByAgencyIdAsync(int AgencyId);

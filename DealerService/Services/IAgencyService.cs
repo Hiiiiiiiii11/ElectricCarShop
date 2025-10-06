@@ -1,4 +1,5 @@
 ﻿using AgencyRepository.Model.DTO;
+using GrpcService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,6 @@ namespace AgencyService.Services
         Task<bool> DeleteAgencyAsync(int id);
         Task<IEnumerable<AgencyResponse>> SearchAgencysAsync(string searchTerm);
         Task<bool> AssignUserAsync( AssignUserAgencyRequest request, int agencyId);
+        Task<bool> RemoveUserAsync( RemoveUserAgencyRequest request, int agencyId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AgencyRepository.Model;
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
+using GrpcService;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
@@ -140,6 +141,13 @@ namespace AgencyService.Services
 
             // Chỉ truyền int cho wrapper thôi, wrapper sẽ tạo request gRPC
             return await _userGrpcServiceClient.AssignUserToAgencyAsync(request.UserId, agencyId);
+        }
+        public async Task<bool> RemoveUserAsync(RemoveUserAgencyRequest request,int agencyId)
+        {
+            var agency = await _AgencyRepository.GetByIdAsync(agencyId);
+            if (agency == null)
+                throw new Exception("Agency not found");
+            return await _userGrpcServiceClient.RemoveUserFromAgencyAsync(request.UserId, agencyId);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace AgencyService.Services
                 AgencyId = AgencyId,
                 ContractNumber = request.ContractNumber,
                 ContractDate = DateTime.UtcNow,
-                ContracrEndDate = DateTime.UtcNow.AddYears(1),
+                ContractEndDate = DateTime.UtcNow.AddYears(1),
                 Terms = request.Terms,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status,
             };
@@ -105,8 +105,10 @@ namespace AgencyService.Services
             return new AgencyContractResponse
             {
                 Id = contract.Id,
+                AgencyId = contract.AgencyId,
                 ContractNumber = contract.ContractNumber,
                 ContractDate = contract.ContractDate,
+                ContractEndDate = contract.ContractEndDate,
                 Terms = contract.Terms,
                 Status = contract.Status,
                 Agency = contract.Agency == null ? null : new AgencyResponse
@@ -117,8 +119,6 @@ namespace AgencyService.Services
                     Phone = contract.Agency.Phone,
                     Email = contract.Agency.Email,
                     Status = contract.Agency.Status,
-                    //Created_At = contract.Agency.Created_At,
-                    //Updated_At = contract.Agency.Updated_At,
                 }
             };
         }

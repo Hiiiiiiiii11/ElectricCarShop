@@ -12,7 +12,7 @@ namespace AgencyRepository.Model
         public int AgencyId { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public DateTime ContracrEndDate { get; set; }
+        public DateTime ContractEndDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
 

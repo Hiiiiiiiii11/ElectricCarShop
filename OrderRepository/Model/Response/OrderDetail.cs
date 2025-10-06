@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AllocationService.Services
+namespace OrderRepository.Model.Response
 {
-    public class IAllocationService
+    public class OrderDetail
     {
-        Task <IEnumerable<>>
     }
 }

@@ -37,10 +37,14 @@ namespace AgencyRepository.Model.DTO
     {
         public int UserId { get; set; }
     }
+    public class RemoveUserAgencyRequest
+    {
+        public int UserId { get; set; }
+    }
     //response model
     public class AgencyResponse
     {
-        public int Id { get; set; }   
+        public int Id { get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
@@ -49,6 +53,34 @@ namespace AgencyRepository.Model.DTO
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
         public IEnumerable<UserReply> Users { get; set; }
+
+    }
+    public class AgencyResponseForContract
+    {
+        public int Id { get; set; }
+        public string AgencyName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Status { get; set; }
+    }
+    public class AgencyResponseForTarget
+    {
+        public int Id { get; set; }
+        public string AgencyName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Status { get; set; }
+    }
+    public class AgencyResponseforDebt
+    {
+        public int Id { get; set; }
+        public string AgencyName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Status { get; set; }
 
     }
 
@@ -78,16 +110,9 @@ namespace AgencyRepository.Model.DTO
     //create model cho AgencyContract
     public class CreateAgencyContractRequest
     {
-        //[Required(ErrorMessage = "AgencyId is required")]
-        //public int AgencyId { get; set; }
-        //[Required(ErrorMessage = "ContractNumber is required")]
+        [Required(ErrorMessage = "ContractNumber is required")]
         public string ContractNumber { get; set; }
         [Required(ErrorMessage = "ContractDate is required")]
-        //public DateTime ContractDate { get; set; }
-        //[Required(ErrorMessage = "ExpiredDate is required")]
-        //public DateTime ExpiredDate { get; set; }
-        //[Required(ErrorMessage = "Terms is required")]
-
         public string Terms { get; set; }
         public string Status { get; set; }
     }
@@ -97,14 +122,26 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public DateTime ExpiredDate { get; set; }
+        public DateTime ContractEndDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
 
         // Navigation
         public AgencyResponse? Agency { get; set; }
     }
-  
+    public class AgencyContractResponseForDebt
+    {
+        public int Id { get; set; }
+        public int AgencyId { get; set; }
+        public string ContractNumber { get; set; }
+        public DateTime ContractDate { get; set; }
+        public DateTime ContractEndDate { get; set; }
+        public string Terms { get; set; }
+        public string Status { get; set; }
+
+    }
+
+
     //request gia hạn hợp đồng 
     public class RenewContractRequest
     {
@@ -127,13 +164,22 @@ namespace AgencyRepository.Model.DTO
     //thêm công nợ 
     public class AddAgencyDebtRequest
     {
-        public decimal Amount { get; set; }
+        public decimal Amount { get; set; }                  // Số tiền công nợ
+/*        public int AgencyContractId { get; set; }  */          // Mã hợp đồng (liên kết)
+/*        public DateTime? DueDate { get; set; }         */      // Hạn thanh toán
+/*        public string PaymentMethod { get; set; }    */        // Hình thức thanh toán
+        public string Notes { get; set; }                    // Ghi chú
+        //public string CreatedBy { get; set; }
     }
 
     // Request khi thanh toán
     public class MakePaymentRequest
     {
-        public decimal Amount { get; set; }
+/*        public int AgencyContractId { get; set; }      */      // Mã hợp đồng liên quan
+        public decimal Amount { get; set; }                  // Số tiền thanh toán
+/*        public string PaymentMethod { get; set; }   */         // Hình thức thanh toán
+        public string Notes { get; set; }                    // Ghi chú khi thanh toán
+        //public string UpdatedBy { get; set; }
     }
     //model response của Agency debt
     // Response trả về cho FE
@@ -141,14 +187,20 @@ namespace AgencyRepository.Model.DTO
     {
         public int Id { get; set; }
         public int AgencyId { get; set; }
+        public int AgencyContractId { get; set; }
         public decimal DebtAmount { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal RemainingAmount { get; set; }
+        public DateTime DueDate { get; set; }
+        public string Status { get; set; }
+        public string Notes { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
 
+
         // Optionally trả về luôn Agency info
-        public AgencyResponse Agency { get; set; }
+        public AgencyResponseforDebt Agency { get; set; }
+        public AgencyContractResponseForDebt Contract { get; set; }
     }
     //create Agency target request
     public class CreateAgencyTargetRequest
@@ -202,7 +254,7 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
         public int VehicleId { get; set; }
         public int Quantity { get; set; }
-        public AgencyResponse? Agency { get; set; }
+        public AgencyResponseForTarget? Agency { get; set; }
     }
     //response model cho test drive
     public class TestDriveResponse

@@ -1,4 +1,5 @@
-﻿using AgencyRepository.Model.DTO;
+﻿using AgencyRepository.Model;
+using AgencyRepository.Model.DTO;
 using AgencyService.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,32 @@ namespace AgencyAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpGet("GetAll/{AgencyId}")]
+        public async Task<IActionResult> GetAllByAgencyId(int AgencyId)
+        {
+            try
+            {
+                var debts = await _AgencyDebtService.GetAllDebtsByAgencyIdAsync(AgencyId);
+                return Ok(debts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpGet("Remaining/{AgencyId}")]
+        public async Task<IActionResult> GetRemainingDebtsAgencyId(int AgencyId)
+        {
+            try
+            {
+                var debts = await _AgencyDebtService.GetAgencysWithRemainingDebtByAgencyIdAsync(AgencyId);
+                return Ok(debts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
         [HttpGet("{AgencyId}")]
         public async Task<IActionResult> GetByAgencyId(int AgencyId)
         {
@@ -58,15 +85,14 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPost("Add/{AgencyId}")]
-        public async Task<IActionResult> AddDebt(int AgencyId, [FromBody] AddAgencyDebtRequest request)
+        public async Task<IActionResult> AddDebt(int AgencyId, int contractId ,[FromBody] AddAgencyDebtRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
-                var result = await _AgencyDebtService.AddDebtAsync(AgencyId, request);
+                var result = await _AgencyDebtService.AddDebtAsync(AgencyId, contractId, request);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -75,11 +101,11 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while adding debt.", detail = ex.Message });
             }
         }
         [HttpPost("Payment/{AgencyId}")]
-        public async Task<IActionResult> MakePayment(int AgencyId, [FromBody] MakePaymentRequest request)
+        public async Task<IActionResult> MakePayment(int AgencyId, int contractId, [FromBody] MakePaymentRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +113,7 @@ namespace AgencyAPI.Controllers
             }
             try
             {
-                var result = await _AgencyDebtService.MakePaymentAsync(AgencyId, request);
+                var result = await _AgencyDebtService.MakePaymentAsync(AgencyId, contractId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)

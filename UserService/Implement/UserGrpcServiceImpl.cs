@@ -17,7 +17,7 @@ namespace UserService.Implement
 
         public override async Task<UserReply> GetUserById(GetUserByIdRequest request, ServerCallContext context)
         {
-            var user = await _userRepository.GetByIdAsync(request.UserId);
+            var user = await _userRepository.GetUserWithRolesAsync(request.UserId);
             if (user == null)
                 throw new RpcException(new Status(StatusCode.NotFound, $"User {request.UserId} not found"));
 
@@ -35,7 +35,7 @@ namespace UserService.Implement
 
         public override async Task<UsersReply> GetUsersByAgencyId(GetUsersByAgencyIdRequest request, ServerCallContext context)
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetUsersByAgencyIdWithRolesAsync(request.AgencyId);
             var filtered = users.Where(u => u.AgencyId == request.AgencyId).ToList();
 
             var reply = new UsersReply();
@@ -65,6 +65,22 @@ namespace UserService.Implement
             await _userRepository.SaveChangesAsync();
 
             return new AssignUserToAgencyReply { Success = true};
+        }
+        public override async Task<RemoveUserFromAgencyReply> RemoveUserFromAgency(RemoveUserFromAgencyRequest request, ServerCallContext context)
+        {
+            var user = await _userRepository.GetByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return new RemoveUserFromAgencyReply { Success = false };
+            }
+
+            user.AgencyId = 0; // gỡ ra khỏi agency
+            _userRepository.Update(user);
+
+
+            await _userRepository.SaveChangesAsync();
+
+            return new RemoveUserFromAgencyReply { Success = true };
         }
 
     }

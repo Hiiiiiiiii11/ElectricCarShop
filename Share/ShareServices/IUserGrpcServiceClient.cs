@@ -12,5 +12,6 @@ namespace Share.ShareServices
         Task<UserReply> GetUserByIdAsync(int userId);
         Task<IEnumerable<UserReply>> GetUsersByAgencyIdAsync(int agencyId);
         Task<bool> AssignUserToAgencyAsync(int userId, int agencyId);
+        Task<bool> RemoveUserFromAgencyAsync(int userId, int agencyId);
     }
 }

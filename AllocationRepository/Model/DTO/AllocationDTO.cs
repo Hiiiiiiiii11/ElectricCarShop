@@ -68,10 +68,21 @@ namespace AllocationRepository.Model.DTO
         public string ModelName { get; set; }
         public string Description { get; set; } = string.Empty;
     }
+    // request model for allocation
+    public class AllocationRequest
+    {
+        public int EvInventoryId { get; set; }
+        public int DealerId { get; set; }
+        public int VehicleId { get; set; }
+        public int AllocationQuantity { get; set; }
+    }
+    //response model for allocation
     public class AllocationResponse
     {
         public int Id { get; set; }
+        public int EvInventoryId { get; set; }
         public int DealerId { get; set; }
+        public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
     }
