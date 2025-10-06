@@ -72,7 +72,7 @@ namespace AllocationRepository.Model.DTO
     public class AllocationRequest
     {
         public int EvInventoryId { get; set; }
-        public int DealerId { get; set; }
+        public int AgencyId { get; set; }
         public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
     }
@@ -81,7 +81,7 @@ namespace AllocationRepository.Model.DTO
     {
         public int Id { get; set; }
         public int EvInventoryId { get; set; }
-        public int DealerId { get; set; }
+        public int AgencyId { get; set; }
         public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }

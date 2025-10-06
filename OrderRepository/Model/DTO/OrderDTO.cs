@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderRepository.Model.Response
+namespace OrderRepository.Model.Request
 {
-    internal class Response
+    public class OrderDTO
     {
     }
 }

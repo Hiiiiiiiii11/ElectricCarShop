@@ -18,18 +18,18 @@ namespace AllocationRepository.Repositories
             _context = context;
         }
 
-        public async Task<Allocations?> GetByDealerAndVehicleAsync(int dealerId, int vehicleId)
+        public async Task<Allocations?> GetByDealerAndVehicleAsync(int agencyId, int vehicleId)
         {
             return await _context.Allocations
-                .Include(a => a.DealerId)
+                .Include(a => a.AgencyId)
                 .Include(a => a.VehicleId)
-                .FirstOrDefaultAsync(a => a.DealerId == dealerId && a.VehicleId == vehicleId);
+                .FirstOrDefaultAsync(a => a.AgencyId == agencyId && a.VehicleId == vehicleId);
         }
 
-        public async Task<IEnumerable<Allocations>> GetByDealerIdAsync(int dealerId)
+        public async Task<IEnumerable<Allocations>> GetByDealerIdAsync(int agencyId)
         {
             return await _context.Allocations
-                .Where(a => a.DealerId == dealerId)
+                .Where(a => a.AgencyId == agencyId)
                 .Include(a => a.VehicleId)
                 .Include(a => a.EvInventoryId)
                 .ToListAsync();

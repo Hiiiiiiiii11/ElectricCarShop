@@ -8,6 +8,5 @@ namespace AllocationService.Services
 {
     public class IAllocationService
     {
-        Task <IEnumerable<>>
     }
 }

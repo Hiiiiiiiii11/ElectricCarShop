@@ -128,7 +128,7 @@ namespace AllocationService.Services
                 Allocations = v.Allocations.Select(a => new AllocationResponse
                 {
                     Id = a.Id,
-                    DealerId = a.DealerId,
+                    AgencyId = a.AgencyId,
                     AllocationQuantity = a.AllocationQuantity,
                     AllocationDate = a.AllocationDate
                 }).ToList()
