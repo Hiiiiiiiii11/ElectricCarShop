@@ -9,7 +9,6 @@ namespace AllocationRepository.Data
 
         public DbSet<Allocations> Allocations { get; set; }
         public DbSet<EVInventory> EVInventories { get; set; }
-        public DbSet<Quotations> Quotations { get; set; }
         public DbSet<VehicleOptions> VehicleOptions { get; set; }
         public DbSet<Vehicles> Vehicles { get; set; }
         public DbSet<VehiclePrices> VehiclePrices { get; set; }
@@ -56,11 +55,14 @@ namespace AllocationRepository.Data
                 .HasForeignKey(a => a.EvInventoryId)
                 .OnDelete(DeleteBehavior.Cascade); // cho phép cascade
 
-            // Vehicle -> Quotations
-            modelBuilder.Entity<Quotations>()
-                .HasOne(q => q.Vehicle)
-                .WithMany(v => v.Quotations)
-                .HasForeignKey(q => q.VehicleId);
+            modelBuilder.Entity<Vehicles>()
+            .Navigation(v => v.VehicleOption)
+            .AutoInclude();
+
+            modelBuilder.Entity<Vehicles>()
+                .Navigation(v => v.EVInventories)
+                .AutoInclude();
+
         }
     }
 }

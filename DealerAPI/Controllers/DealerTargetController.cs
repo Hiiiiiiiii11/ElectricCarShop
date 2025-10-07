@@ -96,7 +96,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> GetTargetsReport([FromBody] GetTargetReportRequest request)
+        public async Task<IActionResult> GetTargetsReport([FromForm] GetTargetReportRequest request)
         {
             try
             {

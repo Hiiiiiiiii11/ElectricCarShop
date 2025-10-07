@@ -50,9 +50,9 @@ namespace AgencyAPI
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
                 {
-                    Title = "User API",
+                    Title = "Agency API",
                     Version = "v1",
-                    Description = "API for User Application"
+                    Description = "API for Agency Application"
                 });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -136,7 +136,9 @@ namespace AgencyAPI
 
                 });
 
+
             //add grpc
+            builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
                 // URL của UserService (port gRPC)
@@ -144,6 +146,8 @@ namespace AgencyAPI
             });
 
             var app = builder.Build();
+            app.MapGrpcService<AgencyGrpcServiceImpl>(); // ✅ Bắt buộc
+            app.MapGet("/", () => "Use a gRPC client to communicate.");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

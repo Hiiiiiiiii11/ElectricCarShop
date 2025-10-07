@@ -32,6 +32,7 @@ namespace AllocationRepository.Repositories
         public async Task<IEnumerable<Vehicles>> GetVehiclesByStatusAsync(string status)
         {
             return await _context.Vehicles
+                .Include(v => v.VehicleOption)
                 .Where(v => v.Status == status)
                 .ToListAsync();
                 
@@ -40,6 +41,7 @@ namespace AllocationRepository.Repositories
         public async Task<IEnumerable<Vehicles>> GetVehiclesWithAvailableStockAsync()
         {
            return await _context.Vehicles
+                .Include(v => v.VehicleOption)
                 .Include(v => v.EVInventories)
                 .Where(v => v.EVInventories.Any(inv => inv.Quantity > 0))
                 .ToListAsync();
@@ -49,6 +51,7 @@ namespace AllocationRepository.Repositories
         {
             var today = DateTime.UtcNow;
             return await _context.Vehicles
+                .Include(v => v.VehicleOption)
                 .Include(v => v.VehiclePromotions)
                 .Where(v => v.VehiclePromotions.Any(p => p.StartDate <= today && p.EndDate >= today))
                 .ToListAsync();
@@ -57,11 +60,11 @@ namespace AllocationRepository.Repositories
         public async Task<Vehicles?> GetVehicleWithDetailsAsync(int vehicleId)
         {
             return await _context.Vehicles
+                .Include(v => v.VehicleOption)
                 .Include(v => v.EVInventories)
                 .Include(v => v.Allocations)
                 .Include(v => v.VehiclePrices)
                 .Include(v => v.VehiclePromotions)
-                .Include(v => v.Quotations)
                 .FirstOrDefaultAsync(v => v.Id == vehicleId);
         }
 

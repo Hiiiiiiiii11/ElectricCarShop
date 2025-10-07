@@ -123,15 +123,16 @@ namespace AllocationService.Services
                 Option = v.VehicleOption == null ? null : new VehicleOptionResponse
                 {
                     Id = v.VehicleOption.Id,
+                    ModelName = v.VehicleOption.ModelName,
                     Description = v.VehicleOption.Description
                 },
-                Allocations = v.Allocations.Select(a => new AllocationResponse
-                {
-                    Id = a.Id,
-                    AgencyId = a.AgencyId,
-                    AllocationQuantity = a.AllocationQuantity,
-                    AllocationDate = a.AllocationDate
-                }).ToList()
+                //Allocations = v.Allocations.Select(a => new AllocationResponse
+                //{
+                //    Id = a.Id,
+                //    AgencyId = a.AgencyId,
+                //    AllocationQuantity = a.AllocationQuantity,
+                //    AllocationDate = a.AllocationDate
+                //}).ToList()
             };
         }
 

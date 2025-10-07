@@ -1,48 +1,35 @@
-﻿using AgencyRepository.Model.DTO;
-using Share.ShareServices;
-using static GrpcService.UserGrpcService;
+﻿using AgencyRepository.Repositories;
+using Grpc.Core;
+using GrpcService;
 
 namespace AgencyService.Services
 {
-    public class AgencyServiceImpl
+    public class AgencyGrpcServiceImpl : AgencyGrpcService.AgencyGrpcServiceBase
     {
-        private readonly IAgencyGrpcServiceClient _agencyGrpcClient;
-        private readonly IUserGrpcServiceClient _userGrpcClient;
+        private readonly IAgencyRepository _agencyRepository;
 
-        public AgencyServiceImpl(IAgencyGrpcServiceClient agencyGrpcClient, IUserGrpcServiceClient userGrpcClient)
+        public AgencyGrpcServiceImpl(IAgencyRepository agencyRepository)
         {
-            _agencyGrpcClient = agencyGrpcClient;
-            _userGrpcClient = userGrpcClient;
+            _agencyRepository = agencyRepository;
         }
 
-        public async Task<AgencyWithUsersResponse> GetAgencyWithUsersAsync(int agencyId)
+        // Đây là method gRPC thực sự implement từ file .proto
+        public override async Task<AgencyReply> GetAgencyById(GetAgencyByIdRequest request, ServerCallContext context)
         {
-            // 1. Gọi gRPC lấy thông tin agency
-            var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
-
-            // 2. Gọi gRPC lấy list user theo agency
-            var userReplies = await _userGrpcClient.GetUsersByAgencyIdAsync(agencyId);
-
-            // Map UserReply -> UserResponse
-            var userResponses = userReplies.Select(u => new UserResponse
+            var agency = await _agencyRepository.GetByIdAsync(request.Id);
+            if (agency == null)
             {
-                Id = u.Id, // ép kiểu an toàn
-                UserName = u.UserName,
-                FullName = u.FullName,
-                Email = u.Email,
-                AvatarUrl = u.AvartarUrl,
-                Phone = u.Phone,
-                Role = u.Role
-            }).ToList();
+                throw new RpcException(new Status(StatusCode.NotFound, $"Không tìm thấy đại lý với ID {request.Id}"));
+            }
 
-           // Kết hợp trả về
-             return new AgencyWithUsersResponse
+            return new AgencyReply
             {
-                AgencyId = agency.Id,
-                AgencyName = agency.AgencyName,
-                Address = agency.Address,
-                Status = agency.Status,
-                Users = userResponses
+                Id = agency.Id,
+                AgencyName = agency.AgencyName ?? "",
+                Address = agency.Address ?? "",
+                Phone = agency.Phone ?? "",
+                Email = agency.Email ?? "",
+                Status = agency.Status ?? ""
             };
         }
     }

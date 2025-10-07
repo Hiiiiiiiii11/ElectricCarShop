@@ -45,7 +45,7 @@ namespace AllocationRepository.Model.DTO
         public string Status { get; set; }
 
         public VehicleOptionResponse? Option { get; set; }
-        public List<AllocationResponse> Allocations { get; set; } = new();
+        //public List<AllocationResponse> Allocations { get; set; } = new();
     }
 
     //model for vehicle option response
@@ -68,22 +68,44 @@ namespace AllocationRepository.Model.DTO
         public string ModelName { get; set; }
         public string Description { get; set; } = string.Empty;
     }
-    // request model for allocation
-    public class AllocationRequest
+    public class AllocationRequestModel
     {
-        public int EvInventoryId { get; set; }
         public int AgencyId { get; set; }
+        public int EvInventoryId { get; set; }
         public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
     }
-    //response model for allocation
+
     public class AllocationResponse
     {
         public int Id { get; set; }
-        public int EvInventoryId { get; set; }
         public int AgencyId { get; set; }
+        public int EvInventoryId { get; set; }
         public int VehicleId { get; set; }
         public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
+
+        // Thông tin bổ sung từ Agency gRPC
+        public string? AgencyName { get; set; }
+        public string? AgencyEmail { get; set; }
+    }
+
+    //request create evinventory
+    public class EVInventoryRequest
+    {
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class EVInventoryResponse
+    {
+        public int Id { get; set; }
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+
+        //// Thông tin chi tiết xe (nếu cần)
+        //public string? VehicleName { get; set; }
+        //public string? Color { get; set; }
+        //public string? BatteryCapacity { get; set; }
     }
 }

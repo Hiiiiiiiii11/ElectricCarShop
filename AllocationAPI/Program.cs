@@ -2,11 +2,13 @@
 using AllocationRepository.Data;
 using AllocationRepository.Repositories;
 using AllocationService.Services;
+using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Setting;
+using Share.ShareServices;
 using System.Text;
 
 namespace AllocationAPI
@@ -21,11 +23,13 @@ namespace AllocationAPI
 
             builder.Services.AddScoped<IAllocationRepository, AllocationRepository.Repositories.AllocationRepository>();
             builder.Services.AddScoped<IEVInventoryRepository,EVInventoryRepository>();
-            builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
             builder.Services.AddScoped<IVehicleOptionRepository, VehicleOptionRepository>();
             builder.Services.AddScoped<IVehiclePriceRepository, VehiclePriceRepository>();
             builder.Services.AddScoped<IVehiclePromotionRepository,VehiclePromotionRepository>();
             builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+            builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
+            builder.Services.AddScoped<IAllocationService, AllocationService.Services.AllocationService>();
+            builder.Services.AddScoped<IEVInventoryService, EVInventoryService>();
 
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IVehicleOptionService, VehicleOptionService>();
@@ -123,8 +127,15 @@ namespace AllocationAPI
                     };
 
                 });
+            builder.Services.AddGrpc();
+            builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+            {
+                o.Address = new Uri("https://localhost:7198"); // URL của AgencyService
+            });
+
 
             var app = builder.Build();
+            app.MapGet("/", () => "Allocation Service is running");
 
 
             // Configure the HTTP request pipeline.

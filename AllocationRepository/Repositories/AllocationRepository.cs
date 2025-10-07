@@ -18,20 +18,19 @@ namespace AllocationRepository.Repositories
             _context = context;
         }
 
-        public async Task<Allocations?> GetByDealerAndVehicleAsync(int agencyId, int vehicleId)
+        public async Task<Allocations?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId)
         {
             return await _context.Allocations
-                .Include(a => a.AgencyId)
-                .Include(a => a.VehicleId)
+                .Include(a => a.Vehicle)
                 .FirstOrDefaultAsync(a => a.AgencyId == agencyId && a.VehicleId == vehicleId);
         }
 
-        public async Task<IEnumerable<Allocations>> GetByDealerIdAsync(int agencyId)
+        public async Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencyId)
         {
             return await _context.Allocations
                 .Where(a => a.AgencyId == agencyId)
-                .Include(a => a.VehicleId)
-                .Include(a => a.EvInventoryId)
+                .Include(a => a.Vehicle)
+                .Include(a => a.EVInventory)
                 .ToListAsync();
         }
 
@@ -47,7 +46,7 @@ namespace AllocationRepository.Repositories
         {
             return await _context.Allocations
                .Where(a => a.VehicleId == vehicleId)
-               .Include(a => a.VehicleId)
+               .Include(a => a.Vehicle)
                .Include(a => a.EvInventoryId)
                .ToListAsync();
         }
