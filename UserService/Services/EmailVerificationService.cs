@@ -24,20 +24,52 @@ namespace UserService.Services
 
         public async Task SendVerificationCodeAsync(string email)
         {
-           var codeOTP = new Random().Next(100000, 999999).ToString();
-            var verificationEmail = new EmailVerification
+            var existing = await _emailVerificationRepository.GetByEmailAsync(email);
+
+            if (existing != null && existing.IsVerified)
             {
-                Email = email,
-                Code = codeOTP,
-                ExpiredAt = DateTime.UtcNow.AddMinutes(10),
-                IsVerified = false
-            };
-            await _emailVerificationRepository.AddAsync(verificationEmail);
+                throw new InvalidOperationException("Email already verified");
+            }
+            if (existing != null)
+            {
+                // Check 1 phút kể từ lần gửi gần nhất
+                var timeSinceLastSend = DateTime.UtcNow - (existing.ExpiredAt.AddMinutes(-10));
+                if (timeSinceLastSend < TimeSpan.FromMinutes(1))
+                {
+                    throw new InvalidOperationException("You can request a new code only after 1 minute.");
+                }
+            }
+            var codeOTP = new Random().Next(100000, 999999).ToString();
+            var expiredAt = DateTime.UtcNow.AddMinutes(10);
+
+            if (existing != null)
+            {
+                // Cập nhật record cũ
+                existing.Code = codeOTP;
+                existing.ExpiredAt = expiredAt;
+                existing.IsVerified = false;
+
+                _emailVerificationRepository.Update(existing);
+            }
+            else
+            {
+                // Tạo record mới
+                var verificationEmail = new EmailVerification
+                {
+                    Email = email,
+                    Code = codeOTP,
+                    ExpiredAt = expiredAt,
+                    IsVerified = false
+                };
+                await _emailVerificationRepository.AddAsync(verificationEmail);
+            }
+
             await _emailVerificationRepository.SaveChangesAsync();
-            // Gửi email chứa mã OTP (giả sử bạn có một dịch vụ gửi email)
+
             await SendEmailAsync(email, "Email Verification Code",
-               $"Your verification code is: <b>{codeOTP}</b>. It will expire in 5 minutes.");
+                $"Your verification code is: <b>{codeOTP}</b>. It will expire in 10 minutes.");
         }
+
 
         public async Task<bool> VerifyCodeAsync(VerifyOTPRequest request)
         {

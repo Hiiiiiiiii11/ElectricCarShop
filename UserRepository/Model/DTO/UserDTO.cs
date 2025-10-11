@@ -24,6 +24,9 @@ namespace UserRepository.Model.DTO
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; }
 
+        [Required(ErrorMessage = "RoleId is required")]
+        public int RoleId { get; set; }
+
         [Required(ErrorMessage = "Phone is required")]
         public string Phone { get; set; }
         public IFormFile? AvartarFile { get; set; }
@@ -37,6 +40,7 @@ namespace UserRepository.Model.DTO
         public string? Phone { get; set; }
         public IFormFile? AvartarFile { get; set; }
         public string? Status { get; set; }
+        public int? RoleId { get; set; }
     }
 
     // Response model
@@ -51,10 +55,10 @@ namespace UserRepository.Model.DTO
         public string Status { get; set; }
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
-        public List<RoleSupport> Roles { get; set; } = new();
+        public RoleResponse Role { get; set; }
     }
 
-    //request model khi login
+    //request model khi login 
     public class UserLoginRequest
     {
         public string Email { get; set; }
@@ -65,6 +69,11 @@ namespace UserRepository.Model.DTO
     {
         public string Token { get; set; }
         public DateTime Expiration { get; set; }
+    }
+
+    public class AssignUserAgencyRequest
+    {
+        public int AgencyId { get; set; }
     }
 }    
 

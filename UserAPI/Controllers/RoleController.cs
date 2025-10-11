@@ -94,65 +94,65 @@ namespace UserAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPost("assign")]
-        public async Task<IActionResult> AssignRoleToUser([FromForm] AssignUserRoleRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var result = await _roleService.AssignRoleForUser(request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-        [HttpPut("assign/update")]
-        public async Task<IActionResult> UpdateUserRole([FromForm] UpdateUserRoleRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var result = await _roleService.UpdateUserRole(request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-        [HttpDelete("assign/{userRoleId}")]
-        public async Task<IActionResult> RemoveUserRole(int userRoleId)
-        {
-            try
-            {
-                var result = await _roleService.RemoveUserRolesByUserId(userRoleId);
-                if (!result)
-                {
-                    return NotFound(new { message = $"UserRole with ID {userRoleId} not found." });
-                }
-                return Ok(new { message = "Remove role for user success" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPost("assign")]
+        //public async Task<IActionResult> AssignRoleToUser([FromForm] AssignUserRoleRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    try
+        //    {
+        //        var result = await _roleService.AssignRoleForUser(request);
+        //        return Ok(result);
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
+        //[HttpPut("assign/update")]
+        //public async Task<IActionResult> UpdateUserRole([FromForm] UpdateUserRoleRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    try
+        //    {
+        //        var result = await _roleService.UpdateUserRole(request);
+        //        return Ok(result);
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
+        //[HttpDelete("assign/{userRoleId}")]
+        //public async Task<IActionResult> RemoveUserRole(int userRoleId)
+        //{
+        //    try
+        //    {
+        //        var result = await _roleService.RemoveUserRolesByUserId(userRoleId);
+        //        if (!result)
+        //        {
+        //            return NotFound(new { message = $"UserRole with ID {userRoleId} not found." });
+        //        }
+        //        return Ok(new { message = "Remove role for user success" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
 
     }

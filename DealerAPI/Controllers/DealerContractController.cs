@@ -1,20 +1,21 @@
-﻿using DealerRepository.Model.DTO;
-using DealerService.Services;
+﻿
+using AgencyRepository.Model.DTO;
+using AgencyService.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DealerAPI.Controllers
+namespace AgencyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DealerContractController : ControllerBase
+    public class AgencyContractController : ControllerBase
     {
-        private readonly IDealerContractService _dealerContractService;
-        public DealerContractController(IDealerContractService dealerContractService)
+        private readonly IAgencyContractService _AgencyContractService;
+        public AgencyContractController(IAgencyContractService AgencyContractService)
         {
-            _dealerContractService = dealerContractService;
+            _AgencyContractService = AgencyContractService;
         }
         [HttpPost]
-        public async Task<IActionResult> CreateDealerContract([FromBody] CreateDealerContractRequest request)
+        public async Task<IActionResult> CreateAgencyContract(int AgencyId ,[FromBody] CreateAgencyContractRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -22,7 +23,7 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                var result = await _dealerContractService.CreateDealerContractAsync(request);
+                var result = await _AgencyContractService.CreateAgencyContractAsync(AgencyId,request);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -34,12 +35,12 @@ namespace DealerAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
-        [HttpGet("active/{dealerId}")]
-        public async Task<IActionResult> GetActiveContractsByDealerId(int dealerId)
+        [HttpGet("active/{AgencyId}")]
+        public async Task<IActionResult> GetActiveContractsByAgencyId(int AgencyId)
         {
             try
             {
-                var contracts = await _dealerContractService.GetActiveByDealerIdAsync(dealerId);
+                var contracts = await _AgencyContractService.GetActiveByAgencyIdAsync(AgencyId);
                 return Ok(contracts);
             }
             catch (KeyNotFoundException ex)
@@ -52,12 +53,12 @@ namespace DealerAPI.Controllers
             }
         }
 
-        [HttpGet("{dealerId}")]
-        public async Task<IActionResult> GetContractsByDealerId(int dealerId)
+        [HttpGet("{AgencyId}")]
+        public async Task<IActionResult> GetContractsByAgencyId(int AgencyId)
         {
             try
             {
-                var contracts = await _dealerContractService.GetByDealerIdAsync(dealerId);
+                var contracts = await _AgencyContractService.GetByAgencyIdAsync(AgencyId);
                 return Ok(contracts);
             }
             catch (KeyNotFoundException ex)
@@ -69,12 +70,12 @@ namespace DealerAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
-        [HttpGet("expired/{dealerId}")]
-        public async Task<IActionResult> GetExpiredContractsByDealerId(int dealerId)
+        [HttpGet("expired/{AgencyId}")]
+        public async Task<IActionResult> GetExpiredContractsByAgencyId(int AgencyId)
         {
             try
             {
-                var contracts = await _dealerContractService.GetExpiredByDealerIdAsync(dealerId);
+                var contracts = await _AgencyContractService.GetExpiredByAgencyIdAsync(AgencyId);
                 return Ok(contracts);
             }
             catch (KeyNotFoundException ex)
@@ -95,8 +96,8 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                await _dealerContractService.RenewContractAsync(contractId, request.NewContractDate, request.NewTerms);
-                return NoContent();
+                var contract = await _AgencyContractService.RenewContractAsync(contractId, request);
+                return Ok(contract);
             }
             catch (KeyNotFoundException ex)
             {
@@ -116,8 +117,8 @@ namespace DealerAPI.Controllers
             }
             try
             {
-                await _dealerContractService.TerminateContractAsync(contractId, request.Reason);
-                return NoContent();
+                await _AgencyContractService.TerminateContractAsync(contractId, request);
+                return Ok(new { message = "Terminate Contract successful" });
             }
             catch (KeyNotFoundException ex)
             {
@@ -129,14 +130,14 @@ namespace DealerAPI.Controllers
             }
         }
         [HttpPut("update/{contractId}")]
-        public async Task<IActionResult> UpdateContract(int contractId, [FromBody] UpdateStatusDealerContractRequest request)
+        public async Task<IActionResult> UpdateContract(int contractId, [FromBody] UpdateStatusAgencyContractRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                await _dealerContractService.UpdateStatusAsync(contractId, request.Status);
+                await _AgencyContractService.UpdateStatusAsync(contractId, request);
                 return Ok(new { message = "Update status successful" });
             }
             catch (KeyNotFoundException ex)

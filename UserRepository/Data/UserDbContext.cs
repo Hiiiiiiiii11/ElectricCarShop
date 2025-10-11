@@ -16,29 +16,13 @@ namespace UserRepository.Data
 
         public DbSet<Users> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
-        public DbSet<UserRoles> UserRoles { get; set; }
         public DbSet<EmailVerification> EmailVerifications { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<UserRoles>()
-                .HasOne(ur => ur.User)
-                .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
-
-            // Quan hệ Roles - UserRoles
-            modelBuilder.Entity<UserRoles>()
-                .HasOne(ur => ur.Role)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId);
-
-            // Unique constraint để tránh User có trùng Role
-            modelBuilder.Entity<UserRoles>()
-                .HasIndex(ur => new { ur.UserId, ur.RoleId })
-                .IsUnique();
-        }
+        //}
     }
 }
 //dotnet ef migrations add InitialCreate --project UserRepository --startup-project UserAPI --context UserDbContext

@@ -13,11 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DealerAPIService", "DealerAPIService", "{76A67FEF-E92C-474E-9EB2-EAEEECB587B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealerAPI", "DealerAPI\DealerAPI.csproj", "{8C358D30-B4C0-4500-9C63-397A9902186E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgencyAPI", "DealerAPI\AgencyAPI.csproj", "{8C358D30-B4C0-4500-9C63-397A9902186E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealerRepository", "DealerRepository\DealerRepository.csproj", "{AD7DD7E6-49FF-40FC-9884-F025BB6A4CC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgencyRepository", "DealerRepository\AgencyRepository.csproj", "{AD7DD7E6-49FF-40FC-9884-F025BB6A4CC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealerService", "DealerService\DealerService.csproj", "{527C6A60-A720-4AC0-9C76-43BBF9ABB0F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgencyService", "DealerService\AgencyService.csproj", "{527C6A60-A720-4AC0-9C76-43BBF9ABB0F8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OrderAPIService", "OrderAPIService", "{D241CB55-092C-4D48-BBEF-FFF7B782EFDB}"
 EndProject

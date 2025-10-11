@@ -18,15 +18,13 @@ namespace UserRepository.Repositories
         public async Task<IEnumerable<Users>> GetAllUsersWithRolesAsync()
         {
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.Role)
                 .ToListAsync();
         }
         public async Task<Users?> GetUserWithRolesAsync(int userId)
         {
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
@@ -35,6 +33,21 @@ namespace UserRepository.Repositories
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserName == userName);
         }
+        public async Task<IEnumerable<Users>> GetUsersByAgencyIdWithRolesAsync(int agencyId)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.AgencyId == agencyId)
+                .ToListAsync();
+        }
+        //public async Task<bool> AssignUserToAgencyAsync(int userId, int agencyId)
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        //    user.AgencyId = agencyId;
+        //    _context.Users.Update(user);
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
 
     }
 }

@@ -1,7 +1,8 @@
 ﻿
-using DealerRepository.Data;
-using DealerRepository.Repositories;
-using DealerService.Services;
+
+using AgencyRepository.Data;
+using AgencyRepository.Repositories;
+using AgencyService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using Share.Setting;
 using Share.ShareServices;
 using System.Text;
 
-namespace DealerAPI
+namespace AgencyAPI
 {
     public class Program
     {
@@ -20,18 +21,23 @@ namespace DealerAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<DealerDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DealerDbConnection")));
+            builder.Services.AddDbContext<AgencyDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection")));
 
-            builder.Services.AddScoped<IDealerRepository,DealerRepository.Repositories.DealerRepository>();
-            builder.Services.AddScoped<IDealerContractRepository, DealerContractRepository>();
-            builder.Services.AddScoped<IDealerDebtRepository, DealerDebtRepository>();
-            builder.Services.AddScoped<IDealerTargetRepository, DealerTargetRepository>();
-            builder.Services.AddScoped<IDealerUserRepository, DealerUserRepository>();
-            builder.Services.AddScoped<IDealerInventoryRepository, DealerInventoryRepository>();
-            builder.Services.AddScoped<IDealerService,DealerService.Services.DealerService>();
-            builder.Services.AddScoped<IDealerUserService, DealerUserService>();
+            builder.Services.AddScoped<IAgencyRepository,AgencyRepository.Repositories.AgencyRepository>();
+            builder.Services.AddScoped<IAgencyContractRepository, AgencyContractRepository>();
+            builder.Services.AddScoped<IAgencyDebtRepository, AgencyDebtRepository>();
+            builder.Services.AddScoped<IAgencyTargetRepository, AgencyTargetRepository>();
+
+            builder.Services.AddScoped<IAgencyInventoryRepository, AgencyInventoryRepository>();
+            builder.Services.AddScoped<IAgencyService,AgencyService.Services.AgencyService>();
+            builder.Services.AddScoped<IAgencyContractService, AgencyContractService>();
+            builder.Services.AddScoped<IAgencyDebtService, AgencyDebtService>();
+            builder.Services.AddScoped<IAgencyTargetService, AgencyTargetService>();
+            builder.Services.AddScoped<IAgencyInventoryService, AgencyInventoryService>();
+
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
+            
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
@@ -44,9 +50,9 @@ namespace DealerAPI
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
                 {
-                    Title = "User API",
+                    Title = "Agency API",
                     Version = "v1",
-                    Description = "API for User Application"
+                    Description = "API for Agency Application"
                 });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -130,7 +136,9 @@ namespace DealerAPI
 
                 });
 
+
             //add grpc
+            builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
                 // URL của UserService (port gRPC)
@@ -138,6 +146,8 @@ namespace DealerAPI
             });
 
             var app = builder.Build();
+            app.MapGrpcService<AgencyGrpcServiceImpl>(); // ✅ Bắt buộc
+            app.MapGet("/", () => "Use a gRPC client to communicate.");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

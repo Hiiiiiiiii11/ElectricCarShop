@@ -56,7 +56,6 @@ namespace UserAPI
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUploadPhotoService,UpLoadPhotoService>();
             builder.Services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
@@ -172,6 +171,8 @@ namespace UserAPI
                 var adminSettings = scope.ServiceProvider
                                          .GetRequiredService<IOptions<AdminAccountSettings>>()
                                          .Value;
+
+                // Tạo role Admin nếu chưa có
                 var adminRole = context.Roles.FirstOrDefault(r => r.RoleName == "Admin");
                 if (adminRole == null)
                 {
@@ -179,9 +180,10 @@ namespace UserAPI
                     context.Roles.Add(adminRole);
                     context.SaveChanges();
                 }
-                // Kiểm tra nếu chưa có admin
+
+                // Tạo user admin nếu chưa có
                 var adminUser = context.Users.FirstOrDefault(u => u.Email == adminSettings.Email);
-                if (!context.Users.Any(u => u.Email == adminSettings.Email))
+                if (adminUser == null)
                 {
                     var hashedPassword = BCrypt.Net.BCrypt.HashPassword(adminSettings.Password);
                     adminUser = new Users
@@ -189,24 +191,24 @@ namespace UserAPI
                         Email = adminSettings.Email,
                         PasswordHash = hashedPassword,
                         UserName = adminSettings.UserName,
-                        Status = "Active"
+                        Status = "Active",
+                        RoleId = adminRole.Id
                     };
 
                     context.Users.Add(adminUser);
                     context.SaveChanges();
                 }
-                var hasAdminRole = context.UserRoles
-                              .Any(ur => ur.UserId == adminUser.Id && ur.RoleId == adminRole.Id);
-                if (!hasAdminRole)
+                else
                 {
-                    context.UserRoles.Add(new UserRoles
+                    // Nếu có user nhưng chưa có role thì update role
+                    if (adminUser.RoleId != adminRole.Id)
                     {
-                        UserId = adminUser.Id,
-                        RoleId = adminRole.Id
-                    });
-                    context.SaveChanges();
+                        adminUser.RoleId = adminRole.Id;
+                        context.SaveChanges();
+                    }
                 }
             }
+
             //add userimplement để service khác sử dụng
 
 
