@@ -40,6 +40,14 @@ namespace UserRepository.Repositories
                 .Where(u => u.AgencyId == agencyId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Users>> GetUserCreateByUserId(int userId)
+        {
+            return await _context.Users
+                .Where(u => u.Created_By == userId)
+                .Include(u => u.Role)
+                .ToListAsync();
+        }
         //public async Task<bool> AssignUserToAgencyAsync(int userId, int agencyId)
         //{
         //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);

@@ -15,5 +15,7 @@ namespace UserService.Services
         Task<UserResponse> GetUserByIdAsync(int id);
         Task<IEnumerable<UserResponse>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(int id);
+        Task<IEnumerable<UserResponse>>GetUserCreateByUserId(int userId);
+
     }
 }

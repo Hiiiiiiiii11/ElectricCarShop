@@ -15,7 +15,6 @@ namespace UserAPI.Controllers
             _userService = userService;
         }
 
-        // POST api/user
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm] CreateUserRequest request)
         {
@@ -23,8 +22,18 @@ namespace UserAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             try
             {
+                // ✅ Lấy userId từ token
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new { message = "Invalid token. No user id found." });
+                }
+
+                request.Created_By = int.Parse(userIdClaim);
+
                 var result = await _userService.CreateUserAsync(request);
                 return Ok(result);
             }
@@ -34,8 +43,9 @@ namespace UserAPI.Controllers
             }
         }
 
-        // PUT api/user/{id}
-        [HttpPut("{id}")]
+
+            // PUT api/user/{id}
+            [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserRequest request)
         {
             try
@@ -99,6 +109,19 @@ namespace UserAPI.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpGet("created-by-id")]
+        public async Task<IActionResult> GetUserCreateByUserId([FromQuery] int userId)
+        {
+            try
+            {
+                var result = await _userService.GetUserCreateByUserId(userId);
+                return Ok(result);
             }
             catch (Exception ex)
             {
