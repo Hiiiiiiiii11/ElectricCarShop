@@ -16,6 +16,8 @@ namespace AgencyRepository.Model
         public string Status { get; set; }
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
+        public string Avatar { get; set; }
+        public string Location { get; set; }
 
         public ICollection<AgencyContracts> Contracts { get; set; } = new List<AgencyContracts>();
         public ICollection<AgencyDebts> Debts { get; set; } = new List<AgencyDebts>();

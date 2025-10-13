@@ -21,8 +21,9 @@ namespace UserRepository.Model
         public string Status { get; set; }
         public DateTime Created_At { get; set; } = DateTime.Now;
         public DateTime Updated_At { get; set; } = DateTime.Now;
-        
-     
+        public int Created_By { get; set; }
+
+
 
     }
 }
