@@ -11,6 +11,7 @@ namespace UserRepository.Repositories
         Task<Users?> GetUserWithRolesAsync(int userId);
         Task<Users?> GetByUserNameAsync(string userName);
         Task<IEnumerable<Users>> GetUsersByAgencyIdWithRolesAsync(int agencyId);
+        Task<IEnumerable<Users>>GetUserCreateByUserId(int userId);
         //Task<bool> AssignUserToAgencyAsync(int userId, int agencyId);
     }
 }

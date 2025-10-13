@@ -24,12 +24,12 @@ namespace UserRepository.Model.DTO
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "RoleId is required")]
-        public int RoleId { get; set; }
+        public int? RoleId { get; set; }
 
         [Required(ErrorMessage = "Phone is required")]
         public string Phone { get; set; }
         public IFormFile? AvartarFile { get; set; }
+        public int? Created_By { get; set; }
     }
 
     // Request model khi update user
@@ -55,6 +55,7 @@ namespace UserRepository.Model.DTO
         public string Status { get; set; }
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
+        public int Created_By { get; set; } 
         public RoleResponse Role { get; set; }
     }
 

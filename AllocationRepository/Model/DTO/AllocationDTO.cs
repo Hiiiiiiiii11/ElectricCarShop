@@ -108,4 +108,68 @@ namespace AllocationRepository.Model.DTO
         //public string? Color { get; set; }
         //public string? BatteryCapacity { get; set; }
     }
+
+    //request create vehicle price
+    public class VehiclePriceRequest
+    {
+        public int VehicleId { get; set; }
+        public int? AgencyId { get; set; }
+        public decimal PriceType { get; set; }
+        public decimal PriceAmount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+    //request update vehicle price
+    public class VehiclePriceUpdateRequest
+    {
+        public int? VehicleId { get; set; }
+        public int? AgencyId { get; set; }
+        public decimal? PriceType { get; set; }
+        public decimal? PriceAmount { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
+
+    //response model for vehicleprice
+    public class VehiclePriceResponse
+    {
+        public int Id { get; set; }
+        public int VehicleId { get; set; }
+        public string VehicleName { get; set; }
+        public int? AgencyId { get; set; }
+        public decimal PriceType { get; set; }
+        public decimal PriceAmount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+
+    //request create model for vehicle promotion
+    public class VehiclePromotionRequest
+    {
+        public int VehicleId { get; set; }
+        public string PromoName { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+
+    //request update model for vehicle promotion
+    public class VehiclePromotionUpdateRequest
+    {
+        public int? VehicleId { get; set; }
+        public string? PromoName { get; set; }
+        public decimal? DiscountAmount { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
+    //response model for vehicle promotion
+    public class VehiclePromotionResponse
+    {
+        public int Id { get; set; }
+        public int VehicleId { get; set; }
+        public string PromoName { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
 }

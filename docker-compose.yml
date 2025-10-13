@@ -1,0 +1,123 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/letsencrypt:ro
+      - ./www:/var/www/certbot:ro
+    depends_on:
+      orderapi:
+        condition: service_started
+      allocationapi:
+        condition: service_started
+      agencyapi:
+        condition: service_started
+      userapi:
+        condition: service_started
+    networks:
+      - backend
+
+  orderapi:
+    build:
+      context: .
+      dockerfile: OrderAPI/Dockerfile
+    container_name: orderapi
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "ConnectionStrings__OrderDbConnection=Server=db;Database=ChatDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
+      - GRPC_CHATAPI_URL=http://allocationapi:80
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  allocationapi:
+    build:
+      context: .
+      dockerfile: AllocationAPI/Dockerfile
+    container_name: allocationapi
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "ConnectionStrings__AllocationDbConnection=Server=db;Database=ChatDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
+      - GRPC_USERAPI_URL=http://agencyapi:80
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  agencyapi:
+    build:
+      context: .
+      dockerfile: DealerAPI/Dockerfile
+    container_name: agencyapi
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "ConnectionStrings__AgencyDbConnection=Server=db;Database=NotificationDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
+      - GRPC_USERAPI_URL=http://userapi:80
+      - GRPC_CHATAPI_URL=http://allocationapi:80
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  userapi:
+    build:
+      context: .
+      dockerfile: UserAPI/Dockerfile
+    container_name: userapi
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "ConnectionStrings__UserDbConnection=Server=db;Database=UserDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: always
+    environment:
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'Your_strong_password123'
+      MSSQL_PID: 'Developer'
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Your_strong_password123' -Q 'SELECT 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks:
+      - backend
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./www:/var/www/certbot
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  sql_data:
+

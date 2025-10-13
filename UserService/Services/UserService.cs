@@ -39,7 +39,8 @@ namespace UserService.Services
                 RoleId = request.RoleId,
                 Status = "Active",
                 Created_At = DateTime.UtcNow,
-                Updated_At = DateTime.UtcNow
+                Updated_At = DateTime.UtcNow,
+                Created_By = request.Created_By ?? 0
             };
 
             await _userRepository.AddAsync(user);
@@ -115,6 +116,11 @@ namespace UserService.Services
             await _userRepository.SaveChangesAsync();
             return true;
         }
+        public async Task<IEnumerable<UserResponse>> GetUserCreateByUserId(int userId)
+        {
+           var users = await _userRepository.GetUserCreateByUserId(userId);
+            return users.Select(MapToResponse);
+        }
 
         //mapping user to user response
         private UserResponse MapToResponse(Users user)
@@ -130,12 +136,17 @@ namespace UserService.Services
                 Status = user.Status,
                 Created_At = user.Created_At,
                 Updated_At = user.Updated_At,
-                Role = new RoleResponse   
-                {
-                    Id = user.Role.Id,
-                    RoleName = user.Role.RoleName
-                }
+                Created_By = user.Created_By,
+                Role = user.Role != null
+                    ? new RoleResponse
+                    {
+                        Id = user.Role.Id,
+                        RoleName = user.Role.RoleName
+                    }
+                    : null // 👈 Nếu không có role thì để null
             };
         }
+
+
     }
 }
