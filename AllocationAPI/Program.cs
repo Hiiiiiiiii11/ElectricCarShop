@@ -27,12 +27,15 @@ namespace AllocationAPI
             builder.Services.AddScoped<IVehiclePriceRepository, VehiclePriceRepository>();
             builder.Services.AddScoped<IVehiclePromotionRepository,VehiclePromotionRepository>();
             builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
+
             builder.Services.AddScoped<IAllocationService, AllocationService.Services.AllocationService>();
             builder.Services.AddScoped<IEVInventoryService, EVInventoryService>();
-
+            builder.Services.AddScoped<IVehiclePriceService, VehiclePriceService>();
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IVehicleOptionService, VehicleOptionService>();
+            builder.Services.AddScoped<IVehiclePromotionService, VehiclePromotionService>();
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
             // Add services to the container.
