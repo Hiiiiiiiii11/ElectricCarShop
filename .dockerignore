@@ -1,4 +1,4 @@
-**/.classpath
+﻿**/.classpath
 **/.dockerignore
 **/.env
 **/.git
@@ -8,14 +8,14 @@
 **/.toolstarget
 **/.vs
 **/.vscode
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
+**/.proj.user
+**/.dbmdl
+**/.jfm
 **/azds.yaml
 **/bin
 **/charts
-**/docker-compose*
-**/Dockerfile*
+*/docker-compose
+*/Dockerfile
 **/node_modules
 **/npm-debug.log
 **/obj
@@ -23,8 +23,7 @@
 **/values.dev.yaml
 LICENSE
 README.md
-!**/.gitignore
-!.git/HEAD
-!.git/config
-!.git/packed-refs
-!.git/refs/heads/**
+
+Bỏ qua các thư mục được tạo bởi certbot và nginx
+certs/
+www/
