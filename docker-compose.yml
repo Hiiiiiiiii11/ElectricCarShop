@@ -76,8 +76,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices:AllocationApi=http://allocationapi"
-      - "GrpcServices:UserApi=http://userapi"
     depends_on:
       - sqlserver
     networks:
@@ -110,8 +108,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices:AgencyApi=http://agencyapi"
-      - "GrpcServices:AllocationApi=http://allocationapi"
     depends_on:
       - sqlserver
     networks:

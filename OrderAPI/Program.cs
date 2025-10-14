@@ -95,11 +95,11 @@ namespace OrderAPI
             builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
-                o.Address = new Uri(builder.Configuration["GrpcServices:AgencyApi"]);
+                o.Address = new Uri("https://agency.agencymanagement.online");
             });
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
-                o.Address = new Uri(builder.Configuration["GrpcServices:AllocationApi"]);
+                o.Address = new Uri("https://allocation.agencymanagement.online");
             });
 
             var app = builder.Build();

@@ -91,11 +91,11 @@ namespace AgencyAPI
             builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
-                o.Address = new Uri(builder.Configuration["GrpcServices:UserApi"]);
+                o.Address = new Uri("https://user.agencymanagement.online");
             });
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
-                o.Address = new Uri(builder.Configuration["GrpcServices:AllocationApi"]);
+                o.Address = new Uri("https://allocation.agencymanagement.online");
             });
 
             var app = builder.Build();
