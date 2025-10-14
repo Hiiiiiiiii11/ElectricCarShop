@@ -53,7 +53,7 @@ services:
   userapi:
     build:
       context: .
-      dockerfile: UserAPIService/Dockerfile
+      dockerfile: UserAPI/Dockerfile
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
@@ -70,7 +70,7 @@ services:
   agencyapi:
     build:
       context: .
-      dockerfile: AgencyAPIService/Dockerfile
+      dockerfile: DealerAPI/Dockerfile
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
@@ -89,7 +89,7 @@ services:
   allocationapi:
     build:
       context: .
-      dockerfile: AllocationAPIService/Dockerfile
+      dockerfile: AllocationAPI/Dockerfile
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
@@ -106,7 +106,7 @@ services:
   orderapi:
     build:
       context: .
-      dockerfile: OrderAPIService/Dockerfile
+      dockerfile: OrderAPI/Dockerfile
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
