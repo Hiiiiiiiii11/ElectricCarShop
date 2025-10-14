@@ -4,6 +4,7 @@ using AllocationRepository.Repositories;
 using AllocationService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,12 +21,15 @@ namespace AllocationAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ✅ BẬT TÍNH NĂNG TỰ ĐỘNG THỬ LẠI KHI KẾT NỐI DB
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
             builder.Services.AddDbContext<AllocationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    // Kích hoạt tính năng tự động thử lại khi có lỗi tạm thời
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -48,31 +52,13 @@ namespace AllocationAPI
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
-
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Allocation API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter JWT."
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... Cấu hình JWT ... */ });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... Cấu hình JWT ... */ });
             });
             builder.Services.AddCors(options =>
             {
@@ -81,6 +67,7 @@ namespace AllocationAPI
                     policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -100,18 +87,16 @@ namespace AllocationAPI
             builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://agency.agencymanagement.online");
+                o.Address = new Uri(builder.Configuration["GrpcServices:AgencyApi"]);
             });
 
             var app = builder.Build();
 
-            // =================================================================
-            // === LOGIC TỰ ĐỘNG TẠO DATABASE KHI DEPLOY ===
-            // =================================================================
-            if (app.Environment.IsEnvironment("Docker"))
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(10));
+            app.UseForwardedHeaders();
 
+            if (app.Environment.IsProduction())
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(15));
                 using (var scope = app.Services.CreateScope())
                 {
                     var services = scope.ServiceProvider;
@@ -144,13 +129,16 @@ namespace AllocationAPI
                 }
             }
 
-            // Bật Swagger cho cả Development và Production
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Allocation API V1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
-            //app.UseHttpsRedirection();
+
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();

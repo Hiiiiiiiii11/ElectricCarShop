@@ -22,12 +22,19 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            // ✅ BẬT TÍNH NĂNG TỰ ĐỘNG THỬ LẠI KHI KẾT NỐI DB
+
+            // =================== CẤU HÌNH REVERSE PROXY ===================
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            // =============================================================
+
+            // --- Đăng ký các services ---
             builder.Services.AddDbContext<UserDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    // Kích hoạt tính năng tự động thử lại khi có lỗi tạm thời
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -71,8 +78,25 @@ namespace UserAPI
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "User API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... Cấu hình JWT ... */ });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... Cấu hình JWT ... */ });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT."
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
             builder.Services.AddCors(options =>
             {
@@ -102,12 +126,14 @@ namespace UserAPI
 
             var app = builder.Build();
 
+            // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
             app.UseForwardedHeaders();
+            // =======================================================================
 
             // Logic tạo DB chỉ chạy trong môi trường Production
             if (app.Environment.IsProduction())
             {
-                Thread.Sleep(TimeSpan.FromSeconds(15));
+                Thread.Sleep(TimeSpan.FromSeconds(15)); // Thêm độ trễ để SQL Server khởi động
 
                 using (var scope = app.Services.CreateScope())
                 {
@@ -167,13 +193,19 @@ namespace UserAPI
             }
 
             // Bật Swagger cho cả Development và Production
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
+                    c.RoutePrefix = string.Empty; // Hiển thị Swagger UI ở trang chủ
+                });
             }
 
-            //app.UseHttpsRedirection();
+            // Bỏ UseHttpsRedirection() vì NGINX đã xử lý HTTPS
+            // app.UseHttpsRedirection(); 
+
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();

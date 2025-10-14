@@ -3,6 +3,7 @@ using AgencyRepository.Repositories;
 using AgencyService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,12 +20,18 @@ namespace AgencyAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // =================== CẤU HÌNH REVERSE PROXY ===================
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            // =============================================================
+
             // --- Đăng ký các services ---
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    // Kích hoạt tính năng tự động thử lại khi có lỗi tạm thời
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -43,7 +50,6 @@ namespace AgencyAPI
             builder.Services.AddScoped<IAgencyTargetService, AgencyTargetService>();
             builder.Services.AddScoped<IAgencyInventoryService, AgencyInventoryService>();
             builder.Services.AddScoped<ITestDriveService, TestDriveService>();
-
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
 
@@ -55,25 +61,8 @@ namespace AgencyAPI
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Agency API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter JWT."
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... Cấu hình JWT ... */ });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... Cấu hình JWT ... */ });
             });
             builder.Services.AddCors(options =>
             {
@@ -82,6 +71,7 @@ namespace AgencyAPI
                     policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -101,22 +91,20 @@ namespace AgencyAPI
             builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://user.agencymanagement.online");
+                o.Address = new Uri(builder.Configuration["GrpcServices:UserApi"]);
             });
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://allocation.agencymanagement.online");
+                o.Address = new Uri(builder.Configuration["GrpcServices:AllocationApi"]);
             });
 
             var app = builder.Build();
 
-            // =================================================================
-            // === LOGIC TỰ ĐỘNG TẠO DATABASE KHI DEPLOY ===
-            // =================================================================
-            if (app.Environment.IsEnvironment("Docker"))
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(10));
+            app.UseForwardedHeaders();
 
+            if (app.Environment.IsProduction())
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(15));
                 using (var scope = app.Services.CreateScope())
                 {
                     var services = scope.ServiceProvider;
@@ -149,14 +137,16 @@ namespace AgencyAPI
                 }
             }
 
-            // Bật Swagger cho cả Development và Production
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Agency API V1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
 
-            //app.UseHttpsRedirection();
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
