@@ -12,8 +12,8 @@ namespace OrderRepository.Repositories
 {
     public class FeedbackRepository : GenericRepository<Feedback>, IFeedbackRepository
     {
-        private readonly OrderDBContext _context;
-        public FeedbackRepository(OrderDBContext context) : base(context)
+        private readonly OrderDbContext _context;
+        public FeedbackRepository(OrderDbContext context) : base(context)
         {
             _context = context;
         }

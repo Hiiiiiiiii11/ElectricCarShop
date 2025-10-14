@@ -5,6 +5,7 @@ using AgencyRepository.Repositories;
 using AgencyService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -156,6 +157,59 @@ namespace AgencyAPI
             var app = builder.Build();
             app.MapGrpcService<AgencyGrpcServiceImpl>(); // ✅ Bắt buộc
             app.MapGet("/", () => "Use a gRPC client to communicate.");
+
+            if (app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            {
+                int maxRetries = 10;
+                int delayInSeconds = 5;
+
+                for (int i = 0; i < maxRetries; i++)
+                {
+                    try
+                    {
+                        using (var scope = app.Services.CreateScope())
+                        {
+                            var services = scope.ServiceProvider;
+                            var dbContext = services.GetRequiredService<AgencyDbContext>();
+                            var logger = services.GetRequiredService<ILogger<Program>>();
+
+                            // Bước 1: Tự tạo DB nếu chưa có
+                            var defaultConnStr = builder.Configuration.GetConnectionString("AgencyDbConnection");
+                            var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                            var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
+
+                            using (var connection = new SqlConnection(masterConnStr))
+                            {
+                                connection.Open();
+                                using (var command = connection.CreateCommand())
+                                {
+                                    command.CommandText = $"IF DB_ID('{dbName}') IS NULL CREATE DATABASE [{dbName}]";
+                                    command.ExecuteNonQuery();
+                                }
+                                logger.LogInformation("✅ Step 1/2: Database '{DbName}' created or already exists.", dbName);
+                            }
+
+                            // Bước 2: Tạo schema (các bảng)
+                            dbContext.Database.EnsureCreated();
+                            logger.LogInformation("✅ Step 2/2: Schema has been created successfully.");
+
+                            break; // Thoát vòng lặp nếu tất cả thành công
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                        logger.LogWarning(ex, "❌ Attempt {Attempt} of {MaxRetries}: Database is not ready yet. Retrying in {Delay} seconds...", i + 1, maxRetries, delayInSeconds);
+                        Thread.Sleep(TimeSpan.FromSeconds(delayInSeconds));
+                    }
+                    catch (Exception ex)
+                    {
+                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                        logger.LogError(ex, "❌ An unexpected error occurred during database setup.");
+                        break;
+                    }
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

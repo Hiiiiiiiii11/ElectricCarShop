@@ -10,9 +10,9 @@ namespace OrderRepository.Repositories
 {
     public class TransactionRepository : GenericRepository<Transaction>, ITransactionRepository
     {
-        private readonly OrderDBContext _context;
+        private readonly OrderDbContext _context;
 
-        public TransactionRepository(OrderDBContext context) : base(context)
+        public TransactionRepository(OrderDbContext context) : base(context)
         {
             _context = context;
         }

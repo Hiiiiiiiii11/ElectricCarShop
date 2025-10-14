@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace OrderRepository.Data
 {
-    public class OrderDBContext :DbContext
+    public class OrderDbContext :DbContext
     {
-        public OrderDBContext(DbContextOptions<OrderDBContext> options) : base(options)
+        public OrderDbContext(DbContextOptions<OrderDbContext> options) : base(options)
         {
         }
         public DbSet<Orders> Orders { get; set; }

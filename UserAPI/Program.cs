@@ -1,6 +1,7 @@
 ﻿
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -165,51 +166,87 @@ namespace UserAPI
             app.MapGrpcService<UserGrpcServiceImpl>();
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
             app.UseCors("AllowAll");
-            using (var scope = app.Services.CreateScope())
+
+
+            if (app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
             {
-                var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-                var adminSettings = scope.ServiceProvider
-                                         .GetRequiredService<IOptions<AdminAccountSettings>>()
-                                         .Value;
+                int maxRetries = 10;
+                int delayInSeconds = 5;
 
-                // Tạo role Admin nếu chưa có
-                var adminRole = context.Roles.FirstOrDefault(r => r.RoleName == "Admin");
-                if (adminRole == null)
+                for (int i = 0; i < maxRetries; i++)
                 {
-                    adminRole = new Roles { RoleName = "Admin" };
-                    context.Roles.Add(adminRole);
-                    context.SaveChanges();
-                }
-
-                // Tạo user admin nếu chưa có
-                var adminUser = context.Users.FirstOrDefault(u => u.Email == adminSettings.Email);
-                if (adminUser == null)
-                {
-                    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(adminSettings.Password);
-                    adminUser = new Users
+                    try
                     {
-                        Email = adminSettings.Email,
-                        PasswordHash = hashedPassword,
-                        UserName = adminSettings.UserName,
-                        Status = "Active",
-                        RoleId = adminRole.Id
-                    };
+                        using (var scope = app.Services.CreateScope())
+                        {
+                            var services = scope.ServiceProvider;
+                            var dbContext = services.GetRequiredService<UserDbContext>();
+                            var logger = services.GetRequiredService<ILogger<Program>>();
 
-                    context.Users.Add(adminUser);
-                    context.SaveChanges();
-                }
-                else
-                {
-                    // Nếu có user nhưng chưa có role thì update role
-                    if (adminUser.RoleId != adminRole.Id)
+                            // Bước 1: Tự tạo DB nếu chưa có
+                            var defaultConnStr = builder.Configuration.GetConnectionString("UserDbConnection");
+                            var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                            var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
+
+                            using (var connection = new SqlConnection(masterConnStr))
+                            {
+                                connection.Open();
+                                using (var command = connection.CreateCommand())
+                                {
+                                    command.CommandText = $"IF DB_ID('{dbName}') IS NULL CREATE DATABASE [{dbName}]";
+                                    command.ExecuteNonQuery();
+                                }
+                                logger.LogInformation("✅ Step 1/3: Database '{DbName}' created or already exists.", dbName);
+                            }
+
+                            // Bước 2: Tạo schema (các bảng)
+                            dbContext.Database.EnsureCreated();
+                            logger.LogInformation("✅ Step 2/3: Schema has been created successfully.");
+
+                            // Bước 3: Seed admin account (và role)
+                            var adminSettings = services.GetRequiredService<IOptions<AdminAccountSettings>>().Value;
+
+                            var adminRole = dbContext.Roles.FirstOrDefault(r => r.RoleName == "Admin");
+                            if (adminRole == null)
+                            {
+                                adminRole = new UserRepository.Model.Roles { RoleName = "Admin" };
+                                dbContext.Roles.Add(adminRole);
+                                dbContext.SaveChanges();
+                            }
+
+                            if (!dbContext.Users.Any(u => u.Email == adminSettings.Email))
+                            {
+                                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(adminSettings.Password);
+                                var adminUser = new UserRepository.Model.Users
+                                {
+                                    Email = adminSettings.Email,
+                                    PasswordHash = hashedPassword,
+                                    UserName = adminSettings.UserName,
+                                    Status = "Active",
+                                    RoleId = adminRole.Id
+                                };
+                                dbContext.Users.Add(adminUser);
+                                dbContext.SaveChanges();
+                                logger.LogInformation("✅ Step 3/3: Admin account has been seeded successfully.");
+                            }
+
+                            break; // Thoát vòng lặp nếu tất cả thành công
+                        }
+                    }
+                    catch (SqlException ex)
                     {
-                        adminUser.RoleId = adminRole.Id;
-                        context.SaveChanges();
+                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                        logger.LogWarning(ex, "❌ Attempt {Attempt} of {MaxRetries}: Database is not ready yet. Retrying in {Delay} seconds...", i + 1, maxRetries, delayInSeconds);
+                        Thread.Sleep(TimeSpan.FromSeconds(delayInSeconds));
+                    }
+                    catch (Exception ex)
+                    {
+                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                        logger.LogError(ex, "❌ An unexpected error occurred during database setup.");
+                        break;
                     }
                 }
             }
-
-            //add userimplement để service khác sử dụng
 
 
             // Configure the HTTP request pipeline.
