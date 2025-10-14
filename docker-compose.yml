@@ -43,7 +43,7 @@ services:
       - electric-car-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Admin@2025!", "-Q", "SELECT 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Admin@2025!' -Q 'SELECT 1' || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 10
