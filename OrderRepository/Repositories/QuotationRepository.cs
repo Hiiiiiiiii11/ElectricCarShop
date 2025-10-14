@@ -12,7 +12,7 @@ namespace AllocationRepository.Repositories
 {
     public class QuotationRepository : GenericRepository<Quotations>, IQuotationRepository
     {
-        public QuotationRepository(OrderDBContext context) : base(context)
+        public QuotationRepository(OrderDbContext context) : base(context)
         {
         }
     }

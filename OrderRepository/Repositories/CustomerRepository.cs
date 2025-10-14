@@ -11,9 +11,9 @@ namespace OrderRepository.Repositories
 {
     public class CustomerRepository : GenericRepository<Customers>, ICustomerRepository
     {
-        private readonly OrderDBContext _context;
+        private readonly OrderDbContext _context;
 
-        public CustomerRepository(OrderDBContext context) : base(context)
+        public CustomerRepository(OrderDbContext context) : base(context)
         {
             _context = context;
         }

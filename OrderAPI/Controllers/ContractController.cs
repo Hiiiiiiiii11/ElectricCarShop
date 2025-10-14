@@ -6,50 +6,54 @@ namespace OrderAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
     public class ContractController : Controller
     {
         private readonly IContractService _contractService;
+
         public ContractController(IContractService contractService)
         {
             _contractService = contractService;
         }
-        [HttpGet("GetContractById/{id}")]
-        public IActionResult GetContractById(int id)
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetContractByIdAsync(int id)
         {
-            var contract =  _contractService.GetContractByIdAsync(id);
+            var contract = await _contractService.GetContractByIdAsync(id);
             if (contract == null)
-            {
-                return NotFound();
-            }
+                return NotFound(new { message = $"Contract with id {id} not found." });
+
             return Ok(contract);
         }
+
         [HttpGet("GetContractsByQuotationId/{quotationId}")]
-        public IActionResult GetContractsByQuotationId(int quotationId)
+        public async Task<IActionResult> GetContractsByQuotationId(int quotationId)
         {
-            var contracts = _contractService.GetContractsByQuotationIdAsync(quotationId);
+            var contracts = await _contractService.GetContractsByQuotationIdAsync(quotationId);
             return Ok(contracts);
         }
+
         [HttpGet("GetByContractNumber/{contractNumber}")]
-        public IActionResult GetByContractNumber(string contractNumber)
+        public async Task<IActionResult> GetByContractNumber(string contractNumber)
         {
-            var contract = _contractService.GetByContractNumberAsync(contractNumber);
+            var contract = await _contractService.GetByContractNumberAsync(contractNumber);
             if (contract == null)
             {
-                return NotFound();
+                return NotFound(new {message= $"Contract with number {contractNumber} not found." });
             }
             return Ok(contract);
         }
+
         [HttpPost("CreateContract")]
-        public IActionResult CreateContract([FromBody] CreateContractRequest request)
+        public async Task<IActionResult> CreateContract([FromBody] CreateContractRequest request)
         {
             if (request == null)
             {
                 return BadRequest("Request body is null.");
             }
+
             try
             {
-                var createdContract = _contractService.CreateContractAsync(request);
+                var createdContract = await _contractService.CreateContractAsync(request);
                 return Ok(createdContract);
             }
             catch (Exception ex)
@@ -57,16 +61,18 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         [HttpPut("UpdateContract/{id}")]
-        public IActionResult UpdateContract(int id, [FromBody] UpdateContractRequest request)
+        public async Task<IActionResult> UpdateContract(int id, [FromBody] UpdateContractRequest request)
         {
             if (request == null)
             {
                 return BadRequest("Request body is null.");
             }
+
             try
             {
-                var updatedContract = _contractService.UpdateContractAsync(id, request);
+                var updatedContract = await _contractService.UpdateContractAsync(id, request);
                 return Ok(updatedContract);
             }
             catch (KeyNotFoundException knfEx)
@@ -78,13 +84,14 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         [HttpDelete("DeleteContract/{id}")]
-        public IActionResult DeleteContract(int id)
+        public async Task<IActionResult> DeleteContract(int id)
         {
             try
             {
-                var result =  _contractService.DeleteContractAsync(id);
-                if (result == null)
+                var result = await _contractService.DeleteContractAsync(id);
+                if (!result)
                 {
                     return NotFound($"Contract with ID {id} not found.");
                 }
@@ -95,6 +102,5 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
     }
 }

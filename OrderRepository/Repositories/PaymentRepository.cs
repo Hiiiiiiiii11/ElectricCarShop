@@ -10,9 +10,9 @@ namespace OrderRepository.Repositories
 {
     public class PaymentRepository : GenericRepository<Payments>, IPaymentRepository
     {
-        private readonly OrderDBContext _context;
+        private readonly OrderDbContext _context;
 
-        public PaymentRepository(OrderDBContext context) : base(context)
+        public PaymentRepository(OrderDbContext context) : base(context)
         {
             _context = context;
         }

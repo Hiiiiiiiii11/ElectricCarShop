@@ -1,7 +1,8 @@
 services:
+  # NGINX Reverse Proxy
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: electric_car_nginx
     restart: always
     ports:
       - "80:80"
@@ -11,113 +12,119 @@ services:
       - ./certs:/etc/letsencrypt:ro
       - ./www:/var/www/certbot:ro
     depends_on:
-      orderapi:
-        condition: service_started
-      allocationapi:
-        condition: service_started
-      agencyapi:
-        condition: service_started
-      userapi:
-        condition: service_started
+      - userapi
+      - agencyapi
+      - allocationapi
+      - orderapi
     networks:
-      - backend
+      - electric-car-network
 
-  orderapi:
-    build:
-      context: .
-      dockerfile: OrderAPI/Dockerfile
-    container_name: orderapi
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - "ConnectionStrings__OrderDbConnection=Server=db;Database=ChatDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
-      - GRPC_CHATAPI_URL=http://allocationapi:80
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - backend
-
-  allocationapi:
-    build:
-      context: .
-      dockerfile: AllocationAPI/Dockerfile
-    container_name: allocationapi
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - "ConnectionStrings__AllocationDbConnection=Server=db;Database=ChatDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
-      - GRPC_USERAPI_URL=http://agencyapi:80
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - backend
-
-  agencyapi:
-    build:
-      context: .
-      dockerfile: DealerAPI/Dockerfile
-    container_name: agencyapi
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - "ConnectionStrings__AgencyDbConnection=Server=db;Database=NotificationDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
-      - GRPC_USERAPI_URL=http://userapi:80
-      - GRPC_CHATAPI_URL=http://allocationapi:80
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - backend
-
-  userapi:
-    build:
-      context: .
-      dockerfile: UserAPI/Dockerfile
-    container_name: userapi
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - "ConnectionStrings__UserDbConnection=Server=db;Database=UserDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True;Encrypt=False;"
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - backend
-
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
-    restart: always
-    environment:
-      ACCEPT_EULA: 'Y'
-      SA_PASSWORD: 'Your_strong_password123'
-      MSSQL_PID: 'Developer'
-    ports:
-      - "1433:1433"
-    volumes:
-      - sql_data:/var/opt/mssql
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Your_strong_password123' -Q 'SELECT 1' || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
-    networks:
-      - backend
-
+  # Certbot for SSL
   certbot:
     image: certbot/certbot
-    container_name: certbot
+    container_name: electric_car_certbot
     volumes:
       - ./certs:/etc/letsencrypt
       - ./www:/var/www/certbot
 
-networks:
-  backend:
-    driver: bridge
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: electric_car_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Admin@2025!
+      - MSSQL_PID=Developer 
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - electric-car-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Admin@2025!' -Q 'SELECT 1' || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10  
+      start_period: 30s
+
+  # User API Service (không còn expose port ra ngoài)
+  userapi:
+    build:
+      context: .
+      dockerfile: UserAPIService/Dockerfile
+    container_name: electric_car_userapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - electric-car-network
+    restart: unless-stopped
+
+  # Agency API Service
+  agencyapi:
+    build:
+      context: .
+      dockerfile: AgencyAPIService/Dockerfile
+    container_name: electric_car_agencyapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices__AllocationApi=http://allocationapi"
+      - "GrpcServices__UserApi=http://userapi"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - electric-car-network
+    restart: unless-stopped
+
+  # Allocation API Service
+  allocationapi:
+    build:
+      context: .
+      dockerfile: AllocationAPIService/Dockerfile
+    container_name: electric_car_allocationapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - electric-car-network
+    restart: unless-stopped
+
+  # Order API Service
+  orderapi:
+    build:
+      context: .
+      dockerfile: OrderAPIService/Dockerfile
+    container_name: electric_car_orderapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices__AgencyApi=http://agencyapi"
+      - "GrpcServices__AllocationApi=http://allocationapi"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - electric-car-network
+    restart: unless-stopped
 
 volumes:
-  sql_data:
+  sqlserver_data:
+
+networks:
+  electric-car-network:
+    driver: bridge
 
