@@ -15,10 +15,12 @@ namespace AgencyService.Services
     {
         private readonly IAgencyRepository _AgencyRepository;
         private readonly IUserGrpcServiceClient _userGrpcServiceClient;
-        public AgencyService(IAgencyRepository AgencyRepository, IUserGrpcServiceClient userGrpcServiceClient)
+        private readonly IUploadPhotoService _uploadPhotoService;
+        public AgencyService(IAgencyRepository AgencyRepository, IUserGrpcServiceClient userGrpcServiceClient, IUploadPhotoService uploadPhotoService)
         {
             _AgencyRepository = AgencyRepository;
             _userGrpcServiceClient = userGrpcServiceClient;
+            _uploadPhotoService = uploadPhotoService;
         }
         public async Task<AgencyResponse> CreateAgencyAsync(CreateAgencyRequest request)
         {
@@ -27,6 +29,13 @@ namespace AgencyService.Services
             {
                 throw new InvalidOperationException($"Agency with name [{request.AgencyName}] already exists!");
             }
+
+            string? avatarUrl = null;
+            if (request.Avartar != null)
+            {
+                avatarUrl = _uploadPhotoService.UploadPhoto(request.Avartar);
+            }
+
             var Agency = new Agency
             {
                 AgencyName = request.AgencyName,
@@ -34,9 +43,12 @@ namespace AgencyService.Services
                 Phone = request.Phone,
                 Email = request.Email,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status,
+                Avatar = avatarUrl,
+                Location = request.Location,
                 Created_At = DateTime.UtcNow,
                 Updated_At = DateTime.UtcNow
             };
+
             await _AgencyRepository.AddAsync(Agency);
             await _AgencyRepository.SaveChangesAsync();
             return MapToResponse(Agency);
@@ -90,7 +102,7 @@ namespace AgencyService.Services
             {
                 throw new KeyNotFoundException($"Agency with ID {id} not found.");
             }
-            // Nếu có giá trị mới thì update, còn nếu null/empty thì giữ nguyên cũ
+
             if (!string.IsNullOrWhiteSpace(request.AgencyName))
                 Agency.AgencyName = request.AgencyName;
             if (!string.IsNullOrWhiteSpace(request.Address))
@@ -101,9 +113,21 @@ namespace AgencyService.Services
                 Agency.Email = request.Email;
             if (!string.IsNullOrWhiteSpace(request.Status))
                 Agency.Status = request.Status;
+            if (!string.IsNullOrWhiteSpace(request.Location))
+                Agency.Location = request.Location;
+
+            // Upload ảnh mới nếu có
+            if (request.Avartar != null)
+            {
+                var avatarUrl = _uploadPhotoService.UploadPhoto(request.Avartar);
+                Agency.Avatar = avatarUrl;
+            }
+
             Agency.Updated_At = DateTime.UtcNow;
+
             _AgencyRepository.Update(Agency);
             await _AgencyRepository.SaveChangesAsync();
+
             return MapToResponse(Agency);
         }
         public AgencyResponse MapToResponse(Agency agency)
@@ -115,6 +139,8 @@ namespace AgencyService.Services
                 Address = agency.Address,
                 Phone = agency.Phone,
                 Email = agency.Email,
+                Avatar = agency.Avatar,
+                Location = agency.Location,
                 Status = agency.Status,
                 Created_At = agency.Created_At,
                 Updated_At = agency.Updated_At

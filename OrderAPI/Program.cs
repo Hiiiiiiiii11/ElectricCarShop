@@ -50,6 +50,7 @@ namespace OrderAPI
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository.Repositories.OrderRepository>();
             builder.Services.AddScoped<IContractRepository, ContractRepository>();
+            builder.Services.AddScoped<IEmailVerificationGrpcServiceClient, EmailVerificationGrpcServiceClient>();
 
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
@@ -93,13 +94,26 @@ namespace OrderAPI
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
             builder.Services.AddGrpc();
+            var emailServiceUrl = builder.Environment.IsDevelopment()
+               ? "https://localhost:7022"
+               : "https://user.agencymanagement.online";
+            var agencyServiceUrl = builder.Environment.IsDevelopment()
+               ? "https://localhost:7198"
+               : "https://agency.agencymanagement.online";
+            var vehicleServiceUrl = builder.Environment.IsDevelopment()
+               ? "https://localhost:7055"
+               : "https://agency.agencymanagement.online";
+            builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
+            {
+                o.Address = new Uri(emailServiceUrl);
+            });
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://agency.agencymanagement.online");
+                o.Address = new Uri(agencyServiceUrl);
             });
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://allocation.agencymanagement.online");
+                o.Address = new Uri(agencyServiceUrl);
             });
 
             var app = builder.Build();
@@ -155,7 +169,7 @@ namespace OrderAPI
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-
+            app.MapGrpcService<CustomerGrpcServiceImpl>();
             app.Run();
         }
     }

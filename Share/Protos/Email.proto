@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+// Service để kiểm tra trạng thái xác thực email.
+service EmailVerificationGrpcService {
+  // Gửi yêu cầu kiểm tra email
+  rpc IsEmailVerified (IsEmailVerifiedRequest) returns (IsEmailVerifiedReply);
+}
+
+// Request message chứa email cần kiểm tra.
+message IsEmailVerifiedRequest {
+  string email = 1;
+}
+
+// Response message chứa kết quả kiểm tra.
+message IsEmailVerifiedReply {
+  bool isVerified = 1;
+}

@@ -1,6 +1,7 @@
 ﻿using OrderRepository.Model;
 using OrderRepository.Model.Request;
 using OrderRepository.Repositories;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,20 +13,33 @@ namespace OrderService.Services
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
-        public CustomerService(ICustomerRepository customerRepository)
+        private readonly IEmailVerificationGrpcServiceClient _emailVerificationGrpcClient;
+        public CustomerService(ICustomerRepository customerRepository, IEmailVerificationGrpcServiceClient emailVerificationGrpcServiceClient )
         {
             _customerRepository = customerRepository;
+            _emailVerificationGrpcClient = emailVerificationGrpcServiceClient;
         }
 
         public async Task<CustomerResponse> CreateAsync(CustomerRequest request)
         {
+            // ===== BƯỚC KIỂM TRA MỚI =====
+            // 1. Kiểm tra xem email đã được xác thực chưa bằng gRPC
+            var isEmailVerified = await _emailVerificationGrpcClient.IsEmailVerifiedAsync(request.Email);
+            if (!isEmailVerified)
+            {
+                // Nếu chưa, ném ra lỗi và không cho tạo
+                throw new InvalidOperationException($"Email '{request.Email}' has not been verified. Please verify the email before creating a customer.");
+            }
+            // =============================
+
+            // 2. Nếu đã xác thực, tiếp tục tạo customer như cũ
             var newCustomer = new Customers
             {
                 FullName = request.FullName,
                 Email = request.Email,
                 Phone = request.Phone,
                 Address = request.Address,
-                CreateAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                CreateAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
             await _customerRepository.AddAsync(newCustomer);

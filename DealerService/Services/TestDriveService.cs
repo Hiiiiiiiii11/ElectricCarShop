@@ -2,8 +2,8 @@
 using AgencyRepository.Model;
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
-using GrpcService; // Make sure this is the namespace for your gRPC client
-using Share.ShareServices; // Assuming the client wrapper is here
+using GrpcService;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +14,27 @@ namespace AgencyService.Services
     public class TestDriveService : ITestDriveService
     {
         private readonly ITestDriveRepository _testDriveRepository;
-        private readonly IVehicleGrpcServiceClient _vehicleGrpcClient; // gRPC client
+        private readonly IVehicleGrpcServiceClient _vehicleGrpcClient;
+        private readonly ICustomerGrpcServiceClient _customerGrpcClient; // Thêm client mới
 
-        public TestDriveService(ITestDriveRepository testDriveRepository, IVehicleGrpcServiceClient vehicleGrpcClient)
+        public TestDriveService(
+            ITestDriveRepository testDriveRepository,
+            IVehicleGrpcServiceClient vehicleGrpcClient,
+            ICustomerGrpcServiceClient customerGrpcClient) // Inject client mới
         {
             _testDriveRepository = testDriveRepository;
             _vehicleGrpcClient = vehicleGrpcClient;
+            _customerGrpcClient = customerGrpcClient;
         }
 
+        // ... Các phương thức Create, Update, Delete giữ nguyên ...
         public async Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request)
         {
             var newTestDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
                 VehicleId = request.VehicleId,
+                CustomerId = request.CustomerId, // Thêm CustomerId
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
                 Status = "Scheduled", // Default status
@@ -38,9 +45,29 @@ namespace AgencyService.Services
             await _testDriveRepository.AddAsync(newTestDrive);
             await _testDriveRepository.SaveChangesAsync();
 
-            // Get full details to return
             var createdTestDrive = await _testDriveRepository.GetDetailByIdAsync(newTestDrive.Id);
             return await MapToResponse(createdTestDrive);
+        }
+
+        public async Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request)
+        {
+            var testDrive = await _testDriveRepository.GetByIdAsync(id);
+            if (testDrive == null)
+            {
+                throw new KeyNotFoundException($"Test drive with ID {id} not found.");
+            }
+
+            testDrive.AppointmentDate = request.AppointmentDate ?? testDrive.AppointmentDate;
+            testDrive.Status = request.Status ?? testDrive.Status;
+            testDrive.Notes = request.Notes ?? testDrive.Notes;
+            testDrive.Feedback = request.Feedback ?? testDrive.Feedback;
+            testDrive.UpdateAt = DateTime.UtcNow;
+
+            _testDriveRepository.Update(testDrive);
+            await _testDriveRepository.SaveChangesAsync();
+
+            var updatedTestDrive = await _testDriveRepository.GetDetailByIdAsync(id);
+            return await MapToResponse(updatedTestDrive);
         }
 
         public async Task<bool> DeleteTestDriveAsync(int id)
@@ -72,51 +99,29 @@ namespace AgencyService.Services
             return await MapToResponse(testDrive);
         }
 
-        public async Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request)
-        {
-            var testDrive = await _testDriveRepository.GetByIdAsync(id);
-            if (testDrive == null)
-            {
-                throw new KeyNotFoundException($"Test drive with ID {id} not found.");
-            }
-
-            // Update properties
-            testDrive.AppointmentDate = request.AppointmentDate ?? testDrive.AppointmentDate;
-            testDrive.Status = request.Status ?? testDrive.Status;
-            testDrive.Notes = request.Notes ?? testDrive.Notes;
-            testDrive.Feedback = request.Feedback ?? testDrive.Feedback;
-            testDrive.UpdateAt = DateTime.UtcNow;
-
-            _testDriveRepository.Update(testDrive);
-            await _testDriveRepository.SaveChangesAsync();
-
-            var updatedTestDrive = await _testDriveRepository.GetDetailByIdAsync(id);
-            return await MapToResponse(updatedTestDrive);
-        }
-
         // Private mapping method
         private async Task<TestDriveResponse> MapToResponse(TestDrive td)
         {
             if (td == null) return null;
 
-            // Call gRPC service to get vehicle information
-            VehicleReply vehicleInfo = null;
-            try
-            {
-                vehicleInfo = await _vehicleGrpcClient.GetVehicleByIdAsync(td.VehicleId);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error fetching vehicle info for ID {td.VehicleId}: {ex.Message}");
-            }
+            // Gọi song song 2 gRPC service để tăng hiệu năng
+            var vehicleTask = _vehicleGrpcClient.GetVehicleByIdAsync(td.VehicleId);
+            var customerTask = _customerGrpcClient.GetCustomerByIdAsync(td.CustomerId);
+
+            await Task.WhenAll(vehicleTask, customerTask);
+
+            var vehicleInfo = vehicleTask.Result;
+            var customerInfo = customerTask.Result;
 
             return new TestDriveResponse
             {
                 Id = td.Id,
                 AgencyId = td.AgencyId,
-                AgencyName = td.Agency?.AgencyName, // Relational data
+                AgencyName = td.Agency?.AgencyName,
                 VehicleId = td.VehicleId,
-                Vehicle = vehicleInfo, // gRPC data
+                Vehicle = vehicleInfo,
+                CustomerId = td.CustomerId,
+                Customer = customerInfo,
                 AppointmentDate = td.AppointmentDate,
                 Status = td.Status,
                 Notes = td.Notes,

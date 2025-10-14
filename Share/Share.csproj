@@ -32,6 +32,8 @@
 		<Protobuf Include="Protos\User.proto" GrpcServices="Both" />
 		<Protobuf Include="Protos\Agency.proto" GrpcServices="Both" />
 		<Protobuf Include="Protos\Vehicle.proto" GrpcServices="Both" />
+		<Protobuf Include="Protos\Customer.proto" GrpcServices="Both" />
+		<Protobuf Include="Protos\Email.proto" GrpcServices="Both" />
 	</ItemGroup>
 
 </Project>

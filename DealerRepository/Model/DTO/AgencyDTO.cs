@@ -1,4 +1,5 @@
 ﻿using GrpcService;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,6 +20,8 @@ namespace AgencyRepository.Model.DTO
         [Required(ErrorMessage = "Phone is required")]
         public string Phone { get; set; }
         [Required(ErrorMessage = "Email is required")]
+        public IFormFile Avartar { get; set; }
+        public string? Location { get; set; }
         public string Email { get; set; }
         [Required(ErrorMessage = "Status is required")]
         public string Status { get; set; }
@@ -30,6 +33,8 @@ namespace AgencyRepository.Model.DTO
         public string? AgencyName { get; set; }
         public string? Address { get; set; }
         public string? Phone { get; set; }
+        public IFormFile? Avartar { get; set; }
+        public string? Location { get; set; }
         public string? Email { get; set; }
         public string? Status { get; set; }
     }
@@ -50,6 +55,8 @@ namespace AgencyRepository.Model.DTO
         public string Phone { get; set; }
         public string Email { get; set; }
         public string Status { get; set; }
+        public string Avatar { get; set; }
+        public string Location { get; set; }
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
         public IEnumerable<UserReply> Users { get; set; }
@@ -265,6 +272,8 @@ namespace AgencyRepository.Model.DTO
 
         [Required]
         public int VehicleId { get; set; }
+        [Required]
+        public int CustomerId { get; set; }
 
         [Required]
         public DateTime? AppointmentDate { get; set; }
@@ -285,7 +294,9 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
         public string AgencyName { get; set; } // Populated from Agency relationship
         public int VehicleId { get; set; }
-        public VehicleReply Vehicle { get; set; } // Populated from gRPC call
+        public int CustomerId { get; set; }
+        public CustomerReply Customer { get; set; }
+        public VehicleReply Vehicle { get; set; } 
         public DateTime? AppointmentDate { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }

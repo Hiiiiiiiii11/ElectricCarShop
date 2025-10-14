@@ -85,9 +85,13 @@ namespace AllocationAPI
                 });
 
             builder.Services.AddGrpc();
+
+            var agencyServiceUrl = builder.Environment.IsDevelopment()
+                ? "https://localhost:7198"
+                : "https://agency.agencymanagement.online";
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://agency.agencymanagement.online");
+                o.Address = new Uri(agencyServiceUrl);
             });
 
             var app = builder.Build();

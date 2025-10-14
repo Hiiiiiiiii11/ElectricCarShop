@@ -1,0 +1,23 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+// The customer service definition.
+service CustomerGrpcService {
+  // Sends a customer lookup request
+  rpc GetCustomerById (GetCustomerByIdRequest) returns (CustomerReply);
+}
+
+// The request message containing the customer's ID.
+message GetCustomerByIdRequest {
+  int32 id = 1;
+}
+
+// The response message containing the customer's details.
+message CustomerReply {
+  int32 id = 1;
+  string fullName = 2;
+  string email = 3;
+  string phone = 4;
+  string address = 5;
+}
