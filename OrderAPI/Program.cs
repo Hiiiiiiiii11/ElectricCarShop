@@ -153,11 +153,7 @@ namespace OrderAPI
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
-                    c.RoutePrefix = string.Empty;
-                });
+                app.UseSwaggerUI();
             }
 
             //app.UseHttpsRedirection();
