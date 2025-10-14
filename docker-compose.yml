@@ -1,6 +1,6 @@
 ﻿# =================================================================
 # === FILE CẤU HÌNH DOCKER COMPOSE CHO ELECTRICCAR MANAGEMENT ===
-# === PHIÊN BẢN HOÀN THIỆN NHẤT - SỬ DỤNG PRODUCTION ENV & HEALTHCHECK ===
+# === PHIÊN BẢN HOÀN THIỆN - ĐÃ TẮT HEALTHCHECK ===
 # =================================================================
 
 services:
@@ -47,12 +47,7 @@ services:
     networks:
       - electric-car-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Admin@2025!' -Q 'SELECT 1' || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+    # --- HEALTHCHECK ĐÃ ĐƯỢC XÓA ---
 
   # User API Service
   userapi:
@@ -66,7 +61,7 @@ services:
       - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
-        condition: service_healthy
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -81,11 +76,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices__AllocationApi=http://allocationapi"
-      - "GrpcServices__UserApi=http://userapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
     depends_on:
       sqlserver:
-        condition: service_healthy
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -100,10 +95,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices__AgencyApi=http://agencyapi"
     depends_on:
       sqlserver:
-        condition: service_healthy
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -118,11 +112,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices__AgencyApi=http://agencyapi"
-      - "GrpcServices__AllocationApi=http://allocationapi"
+      - "GrpcServices:AgencyApi=http://agencyapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
     depends_on:
       sqlserver:
-        condition: service_healthy
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
