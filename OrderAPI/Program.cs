@@ -25,7 +25,11 @@ namespace OrderAPI
 
             // --- Đăng ký các services ---
             builder.Services.AddDbContext<OrderDbContext>(options =>
-               options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection")));
+               options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection"),
+               sqlServerOptionsAction: sqlOptions =>
+               {
+                   sqlOptions.EnableRetryOnFailure();
+               }));
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);

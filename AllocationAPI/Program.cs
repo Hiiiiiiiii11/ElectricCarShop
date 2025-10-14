@@ -20,9 +20,13 @@ namespace AllocationAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // --- Đăng ký các services ---
+            // ✅ BẬT TÍNH NĂNG TỰ ĐỘNG THỬ LẠI KHI KẾT NỐI DB
             builder.Services.AddDbContext<AllocationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection"),
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure();
+                }));
 
             builder.Services.AddScoped<IAllocationRepository, AllocationRepository.Repositories.AllocationRepository>();
             builder.Services.AddScoped<IEVInventoryRepository, EVInventoryRepository>();

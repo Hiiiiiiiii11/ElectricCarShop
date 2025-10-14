@@ -22,8 +22,13 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // ✅ BẬT TÍNH NĂNG TỰ ĐỘNG THỬ LẠI KHI KẾT NỐI DB
             builder.Services.AddDbContext<UserDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection"),
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure();
+                }));
 
             builder.Services.AddSingleton(sp =>
                 sp.GetRequiredService<IOptions<AdminAccountSettings>>().Value);

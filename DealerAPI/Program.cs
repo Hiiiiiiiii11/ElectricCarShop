@@ -21,7 +21,11 @@ namespace AgencyAPI
 
             // --- Đăng ký các services ---
             builder.Services.AddDbContext<AgencyDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure();
+                }));
 
             builder.Services.AddScoped<IAgencyRepository, AgencyRepository.Repositories.AgencyRepository>();
             builder.Services.AddScoped<IAgencyContractRepository, AgencyContractRepository>();
