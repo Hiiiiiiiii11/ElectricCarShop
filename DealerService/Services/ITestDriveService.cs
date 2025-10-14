@@ -9,8 +9,11 @@ namespace AgencyService.Services
 {
     public interface ITestDriveService
     {
-        Task<TestDriveResponse> GetTestDriveScheduleByVehilceId(int vehicleId);
-        //Task<TestDriveResponse> GetTestDriveScheduleByAgencyId();
+        Task<TestDriveResponse?> GetTestDriveByIdAsync(int id);
+        Task<IEnumerable<TestDriveResponse>> GetAllTestDrivesAsync();
+        Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request);
+        Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request);
+        Task<bool> DeleteTestDriveAsync(int id);
 
     }
 }

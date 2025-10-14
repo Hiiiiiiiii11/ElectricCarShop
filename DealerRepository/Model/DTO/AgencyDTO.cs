@@ -117,7 +117,8 @@ namespace AgencyRepository.Model.DTO
         public string Status { get; set; }
     }
     //response model cho AgencyContract
-    public class AgencyContractResponse {
+    public class AgencyContractResponse
+    {
         public int Id { get; set; }
         public int AgencyId { get; set; }
         public string ContractNumber { get; set; }
@@ -165,9 +166,9 @@ namespace AgencyRepository.Model.DTO
     public class AddAgencyDebtRequest
     {
         public decimal Amount { get; set; }                  // Số tiền công nợ
-/*        public int AgencyContractId { get; set; }  */          // Mã hợp đồng (liên kết)
-/*        public DateTime? DueDate { get; set; }         */      // Hạn thanh toán
-/*        public string PaymentMethod { get; set; }    */        // Hình thức thanh toán
+        /*        public int AgencyContractId { get; set; }  */          // Mã hợp đồng (liên kết)
+        /*        public DateTime? DueDate { get; set; }         */      // Hạn thanh toán
+        /*        public string PaymentMethod { get; set; }    */        // Hình thức thanh toán
         public string Notes { get; set; }                    // Ghi chú
         //public string CreatedBy { get; set; }
     }
@@ -175,9 +176,9 @@ namespace AgencyRepository.Model.DTO
     // Request khi thanh toán
     public class MakePaymentRequest
     {
-/*        public int AgencyContractId { get; set; }      */      // Mã hợp đồng liên quan
+        /*        public int AgencyContractId { get; set; }      */      // Mã hợp đồng liên quan
         public decimal Amount { get; set; }                  // Số tiền thanh toán
-/*        public string PaymentMethod { get; set; }   */         // Hình thức thanh toán
+        /*        public string PaymentMethod { get; set; }   */         // Hình thức thanh toán
         public string Notes { get; set; }                    // Ghi chú khi thanh toán
         //public string UpdatedBy { get; set; }
     }
@@ -256,32 +257,40 @@ namespace AgencyRepository.Model.DTO
         public int Quantity { get; set; }
         public AgencyResponseForTarget? Agency { get; set; }
     }
+
+    public class CreateTestDriveRequest
+    {
+        [Required]
+        public int AgencyId { get; set; }
+
+        [Required]
+        public int VehicleId { get; set; }
+
+        [Required]
+        public DateTime? AppointmentDate { get; set; }
+
+        public string? Notes { get; set; }
+    }
+    public class UpdateTestDriveRequest
+    {
+        public DateTime? AppointmentDate { get; set; }
+        public string? Status { get; set; } // e.g., Scheduled, Completed, Canceled
+        public string? Notes { get; set; }
+        public string? Feedback { get; set; }
+    }
     //response model cho test drive
     public class TestDriveResponse
     {
         public int Id { get; set; }
         public int AgencyId { get; set; }
+        public string AgencyName { get; set; } // Populated from Agency relationship
         public int VehicleId { get; set; }
-        public DateTime AppointmentDate { get; set; }
-        public string Status { get; set; } // e.g., Scheduled, Completed, Canceled
-        public string Notes { get; set; }
+        public VehicleReply Vehicle { get; set; } // Populated from gRPC call
+        public DateTime? AppointmentDate { get; set; }
+        public string? Status { get; set; }
+        public string? Notes { get; set; }
+        public string? Feedback { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
-    }
-
-    // create testdrive model
-    public class CreateTestDrive
-    {
-        public int AgencyId { get; set; }
-        public int VehicleId { get; set; }
-    }
-    //update test drive model
-    public class UpdateTestDrive
-    {
-        public int AgencyId { get; set; }
-        public int VehicleId { get; set; }
-        public DateTime AppointmentDate { get; set; }
-        public string Status { get; set; }
-        public string Notes { get; set; }
     }
 }

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Share\Share.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
