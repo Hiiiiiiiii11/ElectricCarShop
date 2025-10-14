@@ -66,11 +66,8 @@ jobs:
             docker-compose up --build -d orderapi
             
             echo "--- Restarting NGINX with latest config ---"
-            docker-compose up -d --force-recreate nginx
+            docker-compose up -d nginx
             
-            # Dọn dẹp toàn bộ hệ thống Docker (container, network, image cũ) để tiết kiệm dung lượng
-            echo "🧹 Pruning Docker system..."
-            docker system prune -af
             
             echo "✅ Deployment successful!"
 
