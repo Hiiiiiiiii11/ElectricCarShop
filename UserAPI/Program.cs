@@ -22,6 +22,12 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
             builder.Services.AddDbContext<UserDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection")));
 
@@ -95,7 +101,6 @@ namespace UserAPI
 
             app.UseForwardedHeaders();
 
-            // Logic tạo DB chỉ chạy trong môi trường Production
             if (app.Environment.IsProduction())
             {
                 Thread.Sleep(TimeSpan.FromSeconds(15));
@@ -157,8 +162,7 @@ namespace UserAPI
                 }
             }
 
-            // Bật Swagger cho cả Development và Production
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
