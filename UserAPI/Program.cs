@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,6 +22,13 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // =================== CẤU HÌNH REVERSE PROXY ===================
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            // =============================================================
 
             // --- Đăng ký các services ---
             builder.Services.AddDbContext<UserDbContext>(options =>
@@ -111,13 +119,13 @@ namespace UserAPI
 
             var app = builder.Build();
 
-            // =================================================================
-            // === LOGIC TỰ ĐỘNG TẠO DATABASE KHI DEPLOY (ÁP DỤNG TỪ DỰ ÁN CŨ) ===
-            // =================================================================
+            // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
+            // Phải đặt ở đây, trước các middleware khác
+            app.UseForwardedHeaders();
+            // =======================================================================
+
             if (app.Environment.IsEnvironment("Docker"))
             {
-                // Thêm một độ trễ nhỏ để đảm bảo SQL Server có đủ thời gian khởi động hoàn toàn
-                // ngay cả sau khi health check đã pass.
                 Thread.Sleep(TimeSpan.FromSeconds(10));
 
                 using (var scope = app.Services.CreateScope())
@@ -127,8 +135,6 @@ namespace UserAPI
                     try
                     {
                         var dbContext = services.GetRequiredService<UserDbContext>();
-
-                        // Bước 1: Tự tạo DB nếu chưa có
                         var defaultConnStr = builder.Configuration.GetConnectionString("UserDbConnection");
                         var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
                         var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
@@ -144,13 +150,10 @@ namespace UserAPI
                             logger.LogInformation("✅ Step 1/3: Database '{DbName}' created or already exists.", dbName);
                         }
 
-                        // Bước 2: Tạo schema (các bảng)
                         dbContext.Database.EnsureCreated();
                         logger.LogInformation("✅ Step 2/3: Schema has been created successfully.");
 
-                        // Bước 3: Seed admin account (và role)
                         var adminSettings = services.GetRequiredService<IOptions<AdminAccountSettings>>().Value;
-
                         var adminRole = dbContext.Roles.FirstOrDefault(r => r.RoleName == "Admin");
                         if (adminRole == null)
                         {
@@ -182,7 +185,6 @@ namespace UserAPI
                 }
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
             {
                 app.UseSwagger();
