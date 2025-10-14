@@ -26,11 +26,14 @@ namespace OrderAPI
             // --- Đăng ký các services ---
             builder.Services.AddDbContext<OrderDbContext>(options =>
                options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection"),
-               sqlServerOptionsAction: sqlOptions =>
-               {
-                   sqlOptions.EnableRetryOnFailure();
-               }));
-
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    // Kích hoạt tính năng tự động thử lại khi có lỗi tạm thời
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                }));
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
             builder.Services.AddControllers();

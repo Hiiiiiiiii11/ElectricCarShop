@@ -27,7 +27,11 @@ namespace UserAPI
                 options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    sqlOptions.EnableRetryOnFailure();
+                    // Kích hoạt tính năng tự động thử lại khi có lỗi tạm thời
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
                 }));
 
             builder.Services.AddSingleton(sp =>
