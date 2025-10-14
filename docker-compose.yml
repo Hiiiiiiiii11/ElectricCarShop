@@ -34,7 +34,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Admin@2025!
-      - MSSQL_PID=Developer 
+      - MSSQL_PID=Developer
     ports:
       - "1433:1433"
     volumes:
@@ -43,13 +43,13 @@ services:
       - electric-car-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Admin@2025!' -Q 'SELECT 1' || exit 1"]
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Admin@2025!", "-Q", "SELECT 1"]
       interval: 20s
       timeout: 10s
-      retries: 10  
+      retries: 10
       start_period: 30s
 
-  # User API Service (không còn expose port ra ngoài)
+  # User API Service
   userapi:
     build:
       context: .
@@ -76,8 +76,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices__AllocationApi=http://allocationapi"
-      - "GrpcServices__UserApi=http://userapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -112,8 +112,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-      - "GrpcServices__AgencyApi=http://agencyapi"
-      - "GrpcServices__AllocationApi=http://allocationapi"
+      - "GrpcServices:AgencyApi=http://agencyapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
     depends_on:
       sqlserver:
         condition: service_healthy
