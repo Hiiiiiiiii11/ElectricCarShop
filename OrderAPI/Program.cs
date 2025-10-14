@@ -149,10 +149,15 @@ namespace OrderAPI
             }
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
+            // Bật Swagger cho cả Development và Production
+            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
 
             app.UseHttpsRedirection();

@@ -22,15 +22,6 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // =================== CẤU HÌNH REVERSE PROXY ===================
-            builder.Services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            });
-            // =============================================================
-
-            // --- Đăng ký các services ---
             builder.Services.AddDbContext<UserDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("UserDbConnection")));
 
@@ -71,25 +62,8 @@ namespace UserAPI
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "User API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter JWT."
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... Cấu hình JWT ... */ });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... Cấu hình JWT ... */ });
             });
             builder.Services.AddCors(options =>
             {
@@ -119,14 +93,12 @@ namespace UserAPI
 
             var app = builder.Build();
 
-            // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
-            // Phải đặt ở đây, trước các middleware khác
             app.UseForwardedHeaders();
-            // =======================================================================
 
-            if (app.Environment.IsEnvironment("Docker"))
+            // Logic tạo DB chỉ chạy trong môi trường Production
+            if (app.Environment.IsProduction())
             {
-                Thread.Sleep(TimeSpan.FromSeconds(10));
+                Thread.Sleep(TimeSpan.FromSeconds(15));
 
                 using (var scope = app.Services.CreateScope())
                 {
@@ -185,10 +157,15 @@ namespace UserAPI
                 }
             }
 
-            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
+            // Bật Swagger cho cả Development và Production
+            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
 
             app.UseHttpsRedirection();

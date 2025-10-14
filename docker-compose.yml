@@ -56,7 +56,7 @@ services:
       dockerfile: UserAPI/Dockerfile
     container_name: electric_car_userapi
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
@@ -73,7 +73,7 @@ services:
       dockerfile: DealerAPI/Dockerfile
     container_name: electric_car_agencyapi
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
       - "GrpcServices:AllocationApi=http://allocationapi"
@@ -92,7 +92,7 @@ services:
       dockerfile: AllocationAPI/Dockerfile
     container_name: electric_car_allocationapi
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
@@ -109,7 +109,7 @@ services:
       dockerfile: OrderAPI/Dockerfile
     container_name: electric_car_orderapi
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
       - "GrpcServices:AgencyApi=http://agencyapi"
