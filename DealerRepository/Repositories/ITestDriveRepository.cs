@@ -27,7 +27,5 @@ namespace AgencyRepository.Repositories
         // Lấy chi tiết 1 lịch lái thử cụ thể kèm Agency, vehicle
         Task<TestDrive?> GetDetailByIdAsync(int id);
 
-        // Kiểm tra trùng lịch (cùng vehicle cùng giờ)
-        Task<bool> IsScheduleConflictAsync(int vehicleId, DateTime appointmentDate);
     }
 }

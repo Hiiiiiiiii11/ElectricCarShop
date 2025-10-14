@@ -1,0 +1,25 @@
+﻿syntax = "proto3";
+
+// Namespace C# sẽ được sinh ra
+option csharp_namespace = "GrpcService";
+
+// Định nghĩa service Vehicle
+service VehicleGrpcService {
+  // RPC method để lấy thông tin vehicle bằng ID
+  rpc GetVehicleById (GetVehicleByIdRequest) returns (VehicleReply);
+}
+
+// Message cho request
+message GetVehicleByIdRequest {
+  int32 id = 1;
+}
+
+// Message cho response (chỉ chứa các trường cần thiết)
+message VehicleReply {
+  int32 id = 1;
+  string variantName = 2;
+  string color = 3;
+  string batteryCapacity = 4;
+  int32 rangeKM = 5;
+  string status = 6;
+}

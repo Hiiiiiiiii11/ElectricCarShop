@@ -9,13 +9,15 @@ namespace OrderRepository.Model
     public class Feedback
     {
         public int Id { get; set; }
-        public int CustomerId { get; set; } 
+        public int CustomerId { get; set; }
+        public Customers Customer { get; set; }
         public string Comment { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
         public string Status { get; set; }
+
 
     }
 }

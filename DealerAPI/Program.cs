@@ -28,6 +28,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<IAgencyContractRepository, AgencyContractRepository>();
             builder.Services.AddScoped<IAgencyDebtRepository, AgencyDebtRepository>();
             builder.Services.AddScoped<IAgencyTargetRepository, AgencyTargetRepository>();
+            builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
 
             builder.Services.AddScoped<IAgencyInventoryRepository, AgencyInventoryRepository>();
             builder.Services.AddScoped<IAgencyService,AgencyService.Services.AgencyService>();
@@ -35,9 +36,11 @@ namespace AgencyAPI
             builder.Services.AddScoped<IAgencyDebtService, AgencyDebtService>();
             builder.Services.AddScoped<IAgencyTargetService, AgencyTargetService>();
             builder.Services.AddScoped<IAgencyInventoryService, AgencyInventoryService>();
+            builder.Services.AddScoped<ITestDriveService, TestDriveService>();
 
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
-            
+            builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
+
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
@@ -143,6 +146,11 @@ namespace AgencyAPI
             {
                 // URL của UserService (port gRPC)
                 o.Address = new Uri("https://localhost:7022");
+            });
+            builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
+            {
+                // URL của Vehicle (port gRPC)
+                o.Address = new Uri("https://localhost:7055");
             });
 
             var app = builder.Build();

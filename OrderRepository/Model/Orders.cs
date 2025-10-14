@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AllocationRepository.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +16,7 @@ namespace OrderRepository.Model
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
+        public Customers Customer { get; set; }
+        public Quotations Quotation { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OrderRepository.Model.Request;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace AllocationService.Services
 {
-    internal class IQuotationService
+    public interface IQuotationService
     {
+        Task<QuotationResponse> GetQuotationByIdAsync(int id);
+        Task<QuotationResponse> CreateQuotationAsync(CreateQuotationRequest request);
+        Task<QuotationResponse> UpdateQuotationAsync(int id, UpdateQuotationRequest request);
+        Task<bool> DeleteQuotationAsync(int id);
     }
 }

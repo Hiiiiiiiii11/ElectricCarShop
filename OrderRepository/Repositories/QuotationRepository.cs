@@ -1,5 +1,6 @@
-﻿using AllocationRepository.Data;
+﻿
 using AllocationRepository.Model;
+using OrderRepository.Data;
 using Share.ShareRepo;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace AllocationRepository.Repositories
 {
     public class QuotationRepository : GenericRepository<Quotations>, IQuotationRepository
     {
-        public QuotationRepository(AllocationDbContext context) : base(context)
+        public QuotationRepository(OrderDBContext context) : base(context)
         {
         }
     }

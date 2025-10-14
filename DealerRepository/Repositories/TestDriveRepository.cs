@@ -5,12 +5,11 @@ using Share.ShareRepo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AgencyRepository.Repositories
 {
-    public class TestDriveRepository : GenericRepository<TestDrive>, ITestDriveRepository 
+    public class TestDriveRepository : GenericRepository<TestDrive>, ITestDriveRepository
     {
         private readonly AgencyDbContext _context;
         public TestDriveRepository(AgencyDbContext context) : base(context)
@@ -29,39 +28,41 @@ namespace AgencyRepository.Repositories
         {
             return await _context.TestDrives
                 .Include(td => td.Agency)
-                .Where(td => td.AppointmentDate == date)
+                .Where(td => td.AppointmentDate.HasValue && td.AppointmentDate.Value.Date == date.Date)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<TestDrive>> GetTestDrivesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.TestDrives
-                .Include (td => td.Agency)
-                .Where(td => td.AppointmentDate >= startDate && td.AppointmentDate <= endDate)
+                .Include(td => td.Agency)
+                .Where(td => td.AppointmentDate.HasValue && td.AppointmentDate.Value.Date >= startDate.Date && td.AppointmentDate.Value.Date <= endDate.Date)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TestDrive>> GetTestDrivesByAgencyIdAsync(int AgencyId)
+        public async Task<IEnumerable<TestDrive>> GetTestDrivesByAgencyIdAsync(int agencyId)
         {
             return await _context.TestDrives
                 .Include(d => d.Agency)
-                .Where(td => td.AgencyId == AgencyId)
+                .Where(td => td.AgencyId == agencyId)
                 .ToListAsync();
         }
 
-        public Task<IEnumerable<TestDrive>> GetTestDrivesByStatusAsync(string status)
+        public async Task<IEnumerable<TestDrive>> GetTestDrivesByStatusAsync(string status)
         {
-            throw new NotImplementedException();
+            return await _context.TestDrives
+                .Include(td => td.Agency)
+                .Where(td => td.Status != null && td.Status.ToLower() == status.ToLower())
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<TestDrive>> GetTestDrivesByVehicleIdAsync(int vehicleId)
+        public async Task<IEnumerable<TestDrive>> GetTestDrivesByVehicleIdAsync(int vehicleId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> IsScheduleConflictAsync(int vehicleId, DateTime appointmentDate)
-        {
-            throw new NotImplementedException();
+            return await _context.TestDrives
+                .Include(td => td.Agency)
+                .Where(td => td.VehicleId == vehicleId)
+                .ToListAsync();
         }
     }
 }
+

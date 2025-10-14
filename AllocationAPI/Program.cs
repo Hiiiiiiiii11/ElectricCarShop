@@ -1,4 +1,5 @@
 ﻿
+using AllocationAPIService.Services;
 using AllocationRepository.Data;
 using AllocationRepository.Repositories;
 using AllocationService.Services;
@@ -27,6 +28,7 @@ namespace AllocationAPI
             builder.Services.AddScoped<IVehiclePriceRepository, VehiclePriceRepository>();
             builder.Services.AddScoped<IVehiclePromotionRepository,VehiclePromotionRepository>();
             builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+
 
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
 
@@ -138,6 +140,7 @@ namespace AllocationAPI
 
 
             var app = builder.Build();
+            app.MapGrpcService<VehicleGrpcServiceImpl>();
             app.MapGet("/", () => "Allocation Service is running");
 
 
