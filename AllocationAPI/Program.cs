@@ -1,5 +1,4 @@
-﻿
-using AllocationAPIService.Services;
+﻿using AllocationAPIService.Services;
 using AllocationRepository.Data;
 using AllocationRepository.Repositories;
 using AllocationService.Services;
@@ -20,40 +19,33 @@ namespace AllocationAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // --- Đăng ký các services ---
             builder.Services.AddDbContext<AllocationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection")));
 
             builder.Services.AddScoped<IAllocationRepository, AllocationRepository.Repositories.AllocationRepository>();
-            builder.Services.AddScoped<IEVInventoryRepository,EVInventoryRepository>();
+            builder.Services.AddScoped<IEVInventoryRepository, EVInventoryRepository>();
             builder.Services.AddScoped<IVehicleOptionRepository, VehicleOptionRepository>();
             builder.Services.AddScoped<IVehiclePriceRepository, VehiclePriceRepository>();
-            builder.Services.AddScoped<IVehiclePromotionRepository,VehiclePromotionRepository>();
+            builder.Services.AddScoped<IVehiclePromotionRepository, VehiclePromotionRepository>();
             builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-
-
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
-
             builder.Services.AddScoped<IAllocationService, AllocationService.Services.AllocationService>();
             builder.Services.AddScoped<IEVInventoryService, EVInventoryService>();
             builder.Services.AddScoped<IVehiclePriceService, VehiclePriceService>();
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IVehicleOptionService, VehicleOptionService>();
             builder.Services.AddScoped<IVehiclePromotionService, VehiclePromotionService>();
+
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
-            // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-                {
-                    Title = "Allocation API",
-                    Version = "v1",
-                    Description = "API for Allocation Application"
-                });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Allocation API", Version = "v1" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -68,11 +60,7 @@ namespace AllocationAPI
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
                         },
                         Array.Empty<string>()
                     }
@@ -82,23 +70,13 @@ namespace AllocationAPI
             {
                 options.AddPolicy("AllowAll", policyBuilder =>
                 {
-                    policyBuilder.AllowAnyOrigin()
-                                 .AllowAnyMethod()
-                                 .AllowAnyHeader();
+                    policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
-            //dang ký Jwt
-            builder.Services.Configure<JwtSettings>(
-            builder.Configuration.GetSection("Jwt")
-            );
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
-
-            builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -109,110 +87,71 @@ namespace AllocationAPI
                         ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(key)
                     };
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnChallenge = async context =>
-                        {
-                            // Ngăn ASP.NET Core tự gửi 401 mặc định
-                            context.HandleResponse();
-
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            context.Response.ContentType = "application/json";
-
-                            await context.Response.WriteAsync(
-                                "{\"message\":\"Unauthorized - Token is missing or invalid.\"}");
-                        },
-                        OnForbidden = async context =>
-                        {
-                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                            context.Response.ContentType = "application/json";
-
-                            await context.Response.WriteAsync(
-                                "{\"message\":\"Forbidden - You do not have permission to access this resource.\"}");
-                        },
-                    };
-
                 });
+
             builder.Services.AddGrpc();
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
-                o.Address = new Uri("https://localhost:7198"); // URL của AgencyService
+                o.Address = new Uri(builder.Configuration["GrpcServices:AgencyApi"]);
             });
 
-
             var app = builder.Build();
-            app.MapGrpcService<VehicleGrpcServiceImpl>();
-            app.MapGet("/", () => "Allocation Service is running");
 
-            if (app.Environment.IsEnvironment("Production") || app.Environment.IsEnvironment("Docker"))
+            // =================================================================
+            // === LOGIC TỰ ĐỘNG TẠO DATABASE KHI DEPLOY ===
+            // =================================================================
+            if (app.Environment.IsEnvironment("Docker"))
             {
-                int maxRetries = 10;
-                int delayInSeconds = 5;
+                Thread.Sleep(TimeSpan.FromSeconds(10));
 
-                for (int i = 0; i < maxRetries; i++)
+                using (var scope = app.Services.CreateScope())
                 {
+                    var services = scope.ServiceProvider;
+                    var logger = services.GetRequiredService<ILogger<Program>>();
                     try
                     {
-                        using (var scope = app.Services.CreateScope())
+                        var dbContext = services.GetRequiredService<AllocationDbContext>();
+                        var defaultConnStr = builder.Configuration.GetConnectionString("AllocationDbConnection");
+                        var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                        var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
+
+                        using (var connection = new SqlConnection(masterConnStr))
                         {
-                            var services = scope.ServiceProvider;
-                            var dbContext = services.GetRequiredService<AllocationDbContext>();
-                            var logger = services.GetRequiredService<ILogger<Program>>();
-
-                            // Bước 1: Tự tạo DB nếu chưa có
-                            var defaultConnStr = builder.Configuration.GetConnectionString("AllocationDbConnection");
-                            var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
-                            var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
-
-                            using (var connection = new SqlConnection(masterConnStr))
+                            connection.Open();
+                            using (var command = connection.CreateCommand())
                             {
-                                connection.Open();
-                                using (var command = connection.CreateCommand())
-                                {
-                                    command.CommandText = $"IF DB_ID('{dbName}') IS NULL CREATE DATABASE [{dbName}]";
-                                    command.ExecuteNonQuery();
-                                }
-                                logger.LogInformation("✅ Step 1/2: Database '{DbName}' created or already exists.", dbName);
+                                command.CommandText = $"IF DB_ID('{dbName}') IS NULL CREATE DATABASE [{dbName}]";
+                                command.ExecuteNonQuery();
                             }
-
-                            // Bước 2: Tạo schema (các bảng)
-                            dbContext.Database.EnsureCreated();
-                            logger.LogInformation("✅ Step 2/2: Schema has been created successfully.");
-
-                            break; // Thoát vòng lặp nếu tất cả thành công
+                            logger.LogInformation("✅ Step 1/2: Database '{DbName}' created or already exists.", dbName);
                         }
-                    }
-                    catch (SqlException ex)
-                    {
-                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-                        logger.LogWarning(ex, "❌ Attempt {Attempt} of {MaxRetries}: Database is not ready yet. Retrying in {Delay} seconds...", i + 1, maxRetries, delayInSeconds);
-                        Thread.Sleep(TimeSpan.FromSeconds(delayInSeconds));
+
+                        dbContext.Database.EnsureCreated();
+                        logger.LogInformation("✅ Step 2/2: Schema has been created successfully.");
                     }
                     catch (Exception ex)
                     {
-                        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-                        logger.LogError(ex, "❌ An unexpected error occurred during database setup.");
-                        break;
+                        logger.LogError(ex, "❌ An error occurred during database setup.");
                     }
                 }
             }
 
-
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowAll");
+            app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
+            app.MapGrpcService<VehicleGrpcServiceImpl>();
 
             app.Run();
         }
     }
 }
+
