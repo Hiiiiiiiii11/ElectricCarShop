@@ -106,7 +106,7 @@ services:
   orderapi:
     build:
       context: .
-      dockerfile: OrderAPIService/Dockerfile
+      dockerfile: OrderAPI/Dockerfile
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
