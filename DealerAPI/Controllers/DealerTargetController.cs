@@ -23,7 +23,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -37,7 +37,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("Agency/{AgencyId}/current-target")]
@@ -54,7 +54,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("Agency/{AgencyId}/target")]
@@ -71,7 +71,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpPut("Agency/{AgencyId}/target")]
@@ -92,7 +92,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -122,7 +122,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }

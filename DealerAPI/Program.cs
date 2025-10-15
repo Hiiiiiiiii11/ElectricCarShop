@@ -13,6 +13,7 @@ using Share.Setting;
 using Share.ShareServices;
 using System.Text;
 using CloudinaryDotNet;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace AgencyAPI
 {
@@ -27,7 +28,11 @@ namespace AgencyAPI
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(5000, o => o.Protocols = HttpProtocols.Http1);
+                options.ListenAnyIP(5001, o => o.Protocols = HttpProtocols.Http2);
+            });
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),

@@ -30,7 +30,7 @@ namespace OrderAPIService.Services
             var quotation = await _quotationRepository.GetByIdAsync(id);
             if (quotation == null)
             {
-                return null;
+                throw new KeyNotFoundException($"Quotation with ID {id} not found.");
             }
 
             // Gọi gRPC song song để tối ưu hiệu năng
@@ -102,7 +102,7 @@ namespace OrderAPIService.Services
             var quotation = await _quotationRepository.GetByIdAsync(id);
             if (quotation == null)
             {
-                return false;
+                throw new KeyNotFoundException($"Quotation with ID {id} not found.");
             }
 
             _quotationRepository.Remove(quotation);

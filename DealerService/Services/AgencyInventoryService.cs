@@ -44,7 +44,11 @@ namespace AgencyService.Services
         public async Task<AgencyInventoryResponse?> GetInventoryAsync(int AgencyId, int variantId)
         {
             var inventory = await _AgencyInventoryRepository.GetInventoryAsync(AgencyId, variantId);
-            return inventory == null ? null : MapToResponse(inventory);
+            if (inventory == null)
+            {
+                throw new Exception("Inventory item not found.");
+            }
+            return MapToResponse(inventory);
         }
 
         public Task<bool> HasSufficientStockAsync(int AgencyId, int variantId, int requiredQuantity)

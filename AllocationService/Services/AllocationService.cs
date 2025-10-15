@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Azure.Core;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,9 @@ namespace AllocationService.Services
         public async Task<IEnumerable<AllocationResponse>> GetByAgencyIdAsync(int agencyId)
         {
             var allocations = await _allocationRepository.GetByAgencyIdAsync(agencyId);
+            if (allocations == null)
+                throw new Exception($"Không tìm thấy đại lý với ID {agencyId}");
+
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
 
             return allocations.Select(a =>
@@ -65,7 +69,8 @@ namespace AllocationService.Services
         public async Task<AllocationResponse?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId)
         {
             var entity = await _allocationRepository.GetByAgencyAndVehicleAsync(agencyId, vehicleId);
-            if (entity == null) return null;
+            if (entity == null)
+                throw new Exception($"Không tìm thấy đại lý với ID {agencyId} hoặc xe với ID {vehicleId}");
 
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
             var response = MapToResponse(entity);
@@ -78,7 +83,10 @@ namespace AllocationService.Services
         public async Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId)
         {
             var entity = await _allocationRepository.GetByInventoryIdAsync(evInventoryId);
-            if (entity == null) return null;
+            if (entity == null)
+            {
+                throw new Exception($"Không tìm thấy kho với ID {evInventoryId}");
+            }
 
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
             var response = MapToResponse(entity);
@@ -91,6 +99,10 @@ namespace AllocationService.Services
         public async Task<IEnumerable<AllocationResponse>> GetByVehicleIdAsync(int vehicleId)
         {
             var entities = await _allocationRepository.GetByVehicleIdAsync(vehicleId);
+            if(entities == null)
+            {
+                throw new Exception($"Không tìm thấy xe với ID {vehicleId}");
+            }
 
             var result = new List<AllocationResponse>();
             foreach (var entity in entities)

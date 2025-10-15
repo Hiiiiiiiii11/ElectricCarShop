@@ -279,6 +279,7 @@ namespace AgencyRepository.Model.DTO
         public DateTime? AppointmentDate { get; set; }
 
         public string? Notes { get; set; }
+        public string? Status { get; set; } // e.g., Scheduled, Completed, Canceled
     }
     public class UpdateTestDriveRequest
     {

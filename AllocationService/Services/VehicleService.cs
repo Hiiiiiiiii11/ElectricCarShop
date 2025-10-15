@@ -87,7 +87,9 @@ namespace AllocationService.Services
         public async Task<VehicleResponse?> GetVehicleByIdAsync(int id)
         {
             var vehicle = await _vehicleRepository.GetByIdAsync(id);
-            return vehicle == null ? null : MapToResponse(vehicle);
+            if (vehicle == null)
+                throw new KeyNotFoundException($"Vehicle {id} not found");
+            return MapToResponse(vehicle);
         }
 
         public async Task<IEnumerable<VehicleResponse>> GetVehiclesByStatusAsync(string status)
@@ -124,7 +126,10 @@ namespace AllocationService.Services
                 {
                     Id = v.VehicleOption.Id,
                     ModelName = v.VehicleOption.ModelName,
-                    Description = v.VehicleOption.Description
+                    Description = v.VehicleOption.Description,
+                    CreateAt = v.VehicleOption.CreateAt,
+                    UpdateAt = v.VehicleOption.UpdateAt,
+
                 },
                 //Allocations = v.Allocations.Select(a => new AllocationResponse
                 //{
