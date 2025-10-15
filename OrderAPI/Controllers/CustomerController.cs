@@ -13,31 +13,30 @@ namespace OrderAPI.Controllers
         {
             _customerService = customerService;
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
                 var createdCustomer = await _customerService.CreateAsync(request);
                 return Ok(createdCustomer);
             }
-
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
                 var updatedCustomer = await _customerService.UpdateAsync(id, request);
@@ -45,29 +44,45 @@ namespace OrderAPI.Controllers
             }
             catch (KeyNotFoundException knfEx)
             {
-                return NotFound(knfEx.Message);
+                return NotFound(new { message = knfEx.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAllCustomers()
         {
-            var customers = await _customerService.GetAllAsync();
-            return Ok(customers);
+            try
+            {
+                var customers = await _customerService.GetAllAsync();
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomerById(int id)
         {
-            var customer = await _customerService.GetByIdAsync(id);
-            if (customer == null)
+            try
             {
-                return NotFound($"Customer with ID {id} not found.");
+                var customer = await _customerService.GetByIdAsync(id);
+                if (customer == null)
+                    return NotFound(new { message = $"Customer with ID {id} not found." });
+
+                return Ok(customer);
             }
-            return Ok(customer);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -75,43 +90,62 @@ namespace OrderAPI.Controllers
             {
                 var result = await _customerService.DeleteAsync(id);
                 if (!result)
-                {
-                    return NotFound($"Customer with ID {id} not found.");
-                }
-                return Ok(new { Message = $"Customer with ID {id} deleted successfully." });
+                    return NotFound(new { message = $"Customer with ID {id} not found." });
+
+                return Ok(new { message = $"Customer with ID {id} deleted successfully." });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        // Extra features
+
         [HttpGet("by-email")]
         public async Task<IActionResult> GetCustomerByEmail([FromQuery] string email)
         {
-            var customer = await _customerService.GetByEmailAsync(email);
-            if (customer == null)
+            try
             {
-                return NotFound($"Customer with Email {email} not found.");
+                var customer = await _customerService.GetByEmailAsync(email);
+                if (customer == null)
+                    return NotFound(new { message = $"Customer with Email {email} not found." });
+
+                return Ok(customer);
             }
-            return Ok(customer);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("by-phone")]
         public async Task<IActionResult> GetCustomerByPhone([FromQuery] string phone)
         {
-            var customer = await _customerService.GetByPhoneAsync(phone);
-            if (customer == null)
+            try
             {
-                return NotFound($"Customer with Phone {phone} not found.");
+                var customer = await _customerService.GetByPhoneAsync(phone);
+                if (customer == null)
+                    return NotFound(new { message = $"Customer with Phone {phone} not found." });
+
+                return Ok(customer);
             }
-            return Ok(customer);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("search-by-name")]
         public async Task<IActionResult> SearchCustomersByName([FromQuery] string name)
         {
-            var customers = await _customerService.SearchByNameAsync(name);
-            return Ok(customers);
+            try
+            {
+                var customers = await _customerService.SearchByNameAsync(name);
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
-
     }
 }

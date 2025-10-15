@@ -32,14 +32,14 @@ namespace UserAPI.Controllers
                     return Unauthorized(new { message = "Invalid token. No user id found." });
                 }
 
-                request.Created_By = int.Parse(userIdClaim);
+                request.CreateBy = int.Parse(userIdClaim);
 
                 var result = await _userService.CreateUserAsync(request);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -59,7 +59,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -78,7 +78,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -93,7 +93,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -112,7 +112,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("created-by-id")]
@@ -125,7 +125,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }

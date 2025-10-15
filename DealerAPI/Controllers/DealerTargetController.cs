@@ -21,9 +21,9 @@ namespace AgencyAPI.Controllers
                 var result = await _AgencyTargetService.CreateTargetAsync(AgencyId, request);
                 return Ok(result);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -37,7 +37,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("Agency/{AgencyId}/current-target")]
@@ -54,7 +54,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("Agency/{AgencyId}/target")]
@@ -71,7 +71,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpPut("Agency/{AgencyId}/target")]
@@ -92,7 +92,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -122,7 +122,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }

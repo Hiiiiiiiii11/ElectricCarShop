@@ -6,98 +6,133 @@ namespace OrderAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentController : Controller
+    public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
+
         public PaymentController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
         }
+
         [HttpGet("GetTotalPaidByOrder/{orderId}")]
-        public IActionResult GetTotalPaidByOrder(int orderId)
+        public async Task<IActionResult> GetTotalPaidByOrder(int orderId)
         {
-            var totalPaid = _paymentService.GetTotalPaidByOrderAsync(orderId);
-            return Ok(totalPaid);
-        }
-        // Additional endpoints for payment operations can be added here    
-        [HttpGet("GetPaymentById/{id}")]
-        public IActionResult GetPaymentById(int id)
-        {
-            var payment = _paymentService.GetPaymentByIdAsync(id);
-            if (payment == null)
-            {
-                return NotFound($"Payment with ID {id} not found.");
-            }
-            return Ok(payment);
-        }
-        [HttpGet("GetPaymentsByOrderId/{orderId}")]
-        public IActionResult GetPaymentsByOrderId(int orderId)
-        {
-            var payments = _paymentService.GetPaymentsByOrderIdAsync(orderId);
-            return Ok(payments);
-        }
-        [HttpGet("GetPaymentsByStatus/{status}")]
-        public IActionResult GetPaymentsByStatus(string status)
-        {
-            var payments = _paymentService.GetPaymentsByStatusAsync(status);
-            return Ok(payments);
-        }
-        [HttpPost("CreatePayment")]
-        public IActionResult CreatePayment([FromBody] CreatePaymentRequest request)
-        {
-            if (request == null)
-            {
-                return BadRequest("Request body is null.");
-            }
             try
             {
-                var createdPayment = _paymentService.CreatePaymentAsync(request);
+                var totalPaid = await _paymentService.GetTotalPaidByOrderAsync(orderId);
+                return Ok(totalPaid);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("GetPaymentById/{id}")]
+        public async Task<IActionResult> GetPaymentById(int id)
+        {
+            try
+            {
+                var payment = await _paymentService.GetPaymentByIdAsync(id);
+                if (payment == null)
+                    return NotFound(new { message = $"Payment with ID {id} not found." });
+
+                return Ok(payment);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("GetPaymentsByOrderId/{orderId}")]
+        public async Task<IActionResult> GetPaymentsByOrderId(int orderId)
+        {
+            try
+            {
+                var payments = await _paymentService.GetPaymentsByOrderIdAsync(orderId);
+                if (payments == null || !payments.Any())
+                    return NotFound(new { message = $"No payments found for Order ID {orderId}." });
+
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("GetPaymentsByStatus/{status}")]
+        public async Task<IActionResult> GetPaymentsByStatus(string status)
+        {
+            try
+            {
+                var payments = await _paymentService.GetPaymentsByStatusAsync(status);
+                if (payments == null || !payments.Any())
+                    return NotFound(new { message = $"No payments found with status '{status}'." });
+
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("CreatePayment")]
+        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Request body is null." });
+
+                var createdPayment = await _paymentService.CreatePaymentAsync(request);
                 return Ok(createdPayment);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
+
         [HttpPut("UpdatePayment/{id}")]
-        public IActionResult UpdatePayment(int id, [FromBody] UpdatePaymentRequest request)
+        public async Task<IActionResult> UpdatePayment(int id, [FromBody] UpdatePaymentRequest request)
         {
-            if (request == null)
-            {
-                return BadRequest("Request body is null.");
-            }
             try
             {
-                var updatedPayment = _paymentService.UpdatePaymentAsync(id, request);
+                if (request == null)
+                    return BadRequest(new { message = "Request body is null." });
+
+                var updatedPayment = await _paymentService.UpdatePaymentAsync(id, request);
                 return Ok(updatedPayment);
             }
             catch (KeyNotFoundException knfEx)
             {
-                return NotFound(knfEx.Message);
+                return NotFound(new { message = knfEx.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
+
         [HttpDelete("DeletePayment/{id}")]
-        public IActionResult DeletePayment(int id)
+        public async Task<IActionResult> DeletePayment(int id)
         {
             try
             {
-                var result = _paymentService.DeletePaymentAsync(id);
-                if (result == null)
-                {
-                    return NotFound($"Payment with ID {id} not found.");
-                }
-                return Ok($"Payment with ID {id} deleted successfully.");
+                var result = await _paymentService.DeletePaymentAsync(id);
+                if (!result)
+                    return NotFound(new { message = $"Payment with ID {id} not found." });
+
+                return Ok(new { message = $"Payment with ID {id} deleted successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
-
         }
-
     }
 }

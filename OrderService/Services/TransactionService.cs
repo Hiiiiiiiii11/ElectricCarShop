@@ -26,13 +26,17 @@ namespace OrderAPIService.Services
         public async Task<TransactionResponse?> GetByIdAsync(int id)
         {
             var transaction = await _transactionRepository.GetByIdAsync(id);
-            return transaction == null ? null : MapToResponse(transaction);
+            if (transaction == null)
+                throw new KeyNotFoundException($"Transaction with ID {id} not found.");
+            return MapToResponse(transaction);
         }
 
         public async Task<TransactionResponse?> GetByTransactionCodeAsync(string code)
         {
             var transaction = await _transactionRepository.GetByTransactionCodeAsync(code);
-            return transaction == null ? null : MapToResponse(transaction);
+            if (transaction == null)
+                throw new KeyNotFoundException($"Transaction with code {code} not found.");
+            return MapToResponse(transaction);
         }
 
         public async Task<TransactionResponse> CreateTransactionAsync(CreateTransactionRequest request)
@@ -69,7 +73,8 @@ namespace OrderAPIService.Services
         public async Task<bool> DeleteTransactionAsync(int id)
         {
             var transaction = await _transactionRepository.GetByIdAsync(id);
-            if (transaction == null) return false;
+            if (transaction == null)
+                throw new KeyNotFoundException($"Transaction with ID {id} not found.");
 
             _transactionRepository.Remove(transaction);
             await _transactionRepository.SaveChangesAsync();

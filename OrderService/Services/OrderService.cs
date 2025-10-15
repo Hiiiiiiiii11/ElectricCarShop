@@ -43,7 +43,9 @@ namespace OrderService.Services
         public async Task<OrderResponse?> GetOrderByIdAsync(int id)
         {
             var order = await _orderRepository.GetByIdAsync(id);
-            return order == null ? null : MapToResponse(order);
+            if (order == null)
+                throw new KeyNotFoundException($"Order with ID {id} not found.");
+            return MapToResponse(order);
         }
 
        
@@ -66,9 +68,10 @@ namespace OrderService.Services
         public async Task<bool> DeleteOrderAsync(int id)
         {
             var order = await _orderRepository.GetByIdAsync(id);
-            if (order == null) return false;
+            if (order == null)
+                throw new KeyNotFoundException($"Order with ID {id} not found.");
 
-             _orderRepository.Remove(order);
+            _orderRepository.Remove(order);
             await _orderRepository.SaveChangesAsync();
             return true;
         }
@@ -83,7 +86,9 @@ namespace OrderService.Services
         public async Task<OrderResponse?> GetOrderByQuotationIdAsync(int quotationId)
         {
             var order = await _orderRepository.GetByQuotationIdAsync(quotationId);
-            return order == null ? null : MapToResponse(order);
+            if (order == null)
+                throw new KeyNotFoundException($"Order with Quotation ID {quotationId} not found.");
+            return MapToResponse(order);
         }
 
         public async Task<IEnumerable<OrderResponse>> GetOrdersByStatusAsync(string status)

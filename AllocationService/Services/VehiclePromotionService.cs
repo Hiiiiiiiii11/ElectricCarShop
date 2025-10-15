@@ -62,7 +62,8 @@ namespace AllocationService.Services
         public async Task<bool> DeleteAsync(int id)
         {
             var entity = await _vehiclePromotionRepository.GetByIdAsync(id);
-            if (entity == null) return false;
+            if (entity == null)
+                throw new KeyNotFoundException("Vehicle promotion not found.");
 
             _vehiclePromotionRepository.Remove(entity);
             await _vehiclePromotionRepository.SaveChangesAsync();

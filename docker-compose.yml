@@ -1,9 +1,7 @@
 ﻿# =================================================================
 # === FILE CẤU HÌNH DOCKER COMPOSE CHO ELECTRICCAR MANAGEMENT ===
-# === PHIÊN BẢN HOÀN THIỆN - KHÔNG CÓ CONDITION ===
+# === PHIÊN BẢN HOÀN THIỆN CUỐI CÙNG - XÓA HEALTHCHECK ===
 # =================================================================
-
-version: '3.9'
 
 services:
   # NGINX Reverse Proxy
@@ -49,19 +47,21 @@ services:
     networks:
       - electric-car-network
     restart: unless-stopped
+    # --- HEALTHCHECK ĐÃ ĐƯỢC XÓA HOÀN TOÀN ---
 
   # User API Service
   userapi:
     build:
       context: .
-      dockerfile: UserAPI/Dockerfile
+      dockerfile: UserAPIService/Dockerfile
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -70,14 +70,18 @@ services:
   agencyapi:
     build:
       context: .
-      dockerfile: DealerAPI/Dockerfile
+      dockerfile: AgencyAPIService/Dockerfile
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
+      - "GrpcServices:OrderApi=http://orderapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -86,14 +90,16 @@ services:
   allocationapi:
     build:
       context: .
-      dockerfile: AllocationAPI/Dockerfile
+      dockerfile: AllocationAPIService/Dockerfile
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AgencyApi=http://agencyapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -102,14 +108,18 @@ services:
   orderapi:
     build:
       context: .
-      dockerfile: OrderAPI/Dockerfile
+      dockerfile: OrderAPIService/Dockerfile
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AgencyApi=http://agencyapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -120,3 +130,4 @@ volumes:
 networks:
   electric-car-network:
     driver: bridge
+

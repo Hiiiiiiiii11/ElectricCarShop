@@ -37,12 +37,16 @@ namespace OrderAPIService.Services
         public async Task<PaymentResponse?> GetPaymentByIdAsync(int id)
         {
             var payment = await _paymentRepository.GetByIdAsync(id);
-            return payment == null ? null : MapToResponse(payment);
+            if (payment == null)
+                throw new KeyNotFoundException($"Payment with ID {id} not found.");
+            return MapToResponse(payment);
         }
 
         public async Task<IEnumerable<PaymentResponse>> GetPaymentsByOrderIdAsync(int orderId)
         {
             var payments = await _paymentRepository.GetByOrderIdAsync(orderId);
+            if (payments == null || !payments.Any())
+                throw new KeyNotFoundException($"No payments found for Order ID {orderId}.");
             return payments.Select(MapToResponse);
         }
 
@@ -80,9 +84,9 @@ namespace OrderAPIService.Services
         {
             var payment = await _paymentRepository.GetByIdAsync(id);
             if (payment == null)
-                return false;
+                throw new KeyNotFoundException($"Payment with ID {id} not found.");
 
-             _paymentRepository.Remove(payment);
+            _paymentRepository.Remove(payment);
             await _paymentRepository.SaveChangesAsync();
             return true;
         }

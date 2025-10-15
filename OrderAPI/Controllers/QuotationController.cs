@@ -26,62 +26,51 @@ namespace OrderAPI.Controllers
             {
                 var quotation = await _quotationService.GetQuotationByIdAsync(id);
                 if (quotation == null)
-                {
-                    return NotFound($"Quotation with ID {id} not found.");
-                }
+                    return NotFound(new { message = $"Quotation with ID {id} not found." });
+
                 return Ok(quotation);
             }
             catch (Exception ex)
             {
-                // Log the exception details here
-                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
-
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateQuotation([FromBody] CreateQuotationRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { message = "Invalid request data." });
+
                 var newQuotation = await _quotationService.CreateQuotationAsync(request);
                 return Ok(newQuotation);
             }
             catch (Exception ex)
             {
-                // Log the exception details here
-                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
-
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateQuotation(int id, [FromBody] UpdateQuotationRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { message = "Invalid request data." });
+
                 var updatedQuotation = await _quotationService.UpdateQuotationAsync(id, request);
                 return Ok(updatedQuotation);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                // Log the exception details here
-                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
-
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
 
@@ -92,16 +81,13 @@ namespace OrderAPI.Controllers
             {
                 var result = await _quotationService.DeleteQuotationAsync(id);
                 if (!result)
-                {
-                    return NotFound($"Quotation with ID {id} not found.");
-                }
-                return Ok(new { message = "Delete quotation success" }); 
+                    return NotFound(new { message = $"Quotation with ID {id} not found." });
+
+                return Ok(new { message = "Quotation deleted successfully." });
             }
             catch (Exception ex)
             {
-                // Log the exception details here
-                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
-
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
     }

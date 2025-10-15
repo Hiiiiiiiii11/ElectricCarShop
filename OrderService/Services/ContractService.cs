@@ -38,7 +38,9 @@ namespace OrderAPIService.Services
         public async Task<ContractResponse?> GetContractByIdAsync(int id)
         {
             var contract = await _contractRepository.GetByIdAsync(id);
-            return contract == null ? null : MapToResponse(contract);
+            if (contract == null)
+                throw new KeyNotFoundException($"Contract with ID {id} not found.");
+            return MapToResponse(contract);
         }
 
         public async Task<IEnumerable<ContractResponse>> GetContractsByQuotationIdAsync(int quotationId)
@@ -50,7 +52,9 @@ namespace OrderAPIService.Services
         public async Task<ContractResponse?> GetByContractNumberAsync(string contractNumber)
         {
             var contract = await _contractRepository.GetByContractNumberAsync(contractNumber);
-            return contract == null ? null : MapToResponse(contract);
+            if (contract == null)
+                throw new KeyNotFoundException($"Contract with Number {contractNumber} not found.");
+            return MapToResponse(contract);
         }
 
         public async Task<ContractResponse> UpdateContractAsync(int id, UpdateContractRequest request)
@@ -59,22 +63,36 @@ namespace OrderAPIService.Services
             if (contract == null)
                 throw new KeyNotFoundException($"Contract with ID {id} not found.");
 
-            contract.ContractName = request.ContractName;
-            contract.ContractDate = request.ContractDate;
-            contract.SignedBy = request.SignedBy;
-            contract.Terms = request.Terms;
+            // Giữ giá trị cũ nếu không có dữ liệu mới
+            if (!string.IsNullOrWhiteSpace(request.ContractName))
+                contract.ContractName = request.ContractName;
+
+            if (request.ContractDate.HasValue)
+                contract.ContractDate = request.ContractDate.Value;
+
+            if (!string.IsNullOrWhiteSpace(request.SignedBy))
+                contract.SignedBy = request.SignedBy;
+
+            if (!string.IsNullOrWhiteSpace(request.Terms))
+                contract.Terms = request.Terms;
+
+            // Cập nhật thời gian sửa đổi nếu có
+
 
             _contractRepository.Update(contract);
             await _contractRepository.SaveChangesAsync();
+
             return MapToResponse(contract);
         }
+
 
         public async Task<bool> DeleteContractAsync(int id)
         {
             var contract = await _contractRepository.GetByIdAsync(id);
-            if (contract == null) return false;
+            if (contract == null)
+                throw new KeyNotFoundException($"Contract with ID {id} not found.");
 
-             _contractRepository.Remove(contract);
+            _contractRepository.Remove(contract);
             await _contractRepository.SaveChangesAsync();
             return true;
         }

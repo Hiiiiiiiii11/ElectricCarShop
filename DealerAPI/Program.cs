@@ -13,6 +13,7 @@ using Share.Setting;
 using Share.ShareServices;
 using System.Text;
 using CloudinaryDotNet;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace AgencyAPI
 {
@@ -27,7 +28,13 @@ namespace AgencyAPI
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(80, o =>
+                {
+                    o.Protocols = HttpProtocols.Http1AndHttp2;
+                });
+            });
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
@@ -91,13 +98,13 @@ namespace AgencyAPI
 
             var userServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7022"
-                : "https://user.agencymanagement.online";
+                : "http://userapi:80";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7055"
-                : "https://allocation.agencymanagement.online";
+                : "http://allocationapi:80";
             var customerServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7114"
-                : "https://agency.agencymanagement.online";
+                : "http://orderapi:80";
 
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {

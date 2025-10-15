@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -28,6 +29,13 @@ namespace UserAPI
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(80, o =>
+                {
+                    o.Protocols = HttpProtocols.Http1AndHttp2;
+                });
             });
             // =============================================================
 

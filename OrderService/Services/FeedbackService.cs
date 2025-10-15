@@ -27,7 +27,9 @@ namespace OrderService.Service
         public async Task<FeedbackResponse?> GetByIdAsync(int id)
         {
             var feedback = await _feedbackRepository.GetByIdAsync(id);
-            return feedback == null ? null : MapToResponse(feedback);
+            if (feedback == null)
+                throw new KeyNotFoundException($"Feedback with ID {id} not found.");
+            return MapToResponse(feedback);
         }
 
         public async Task<IEnumerable<FeedbackResponse>> GetByCustomerIdAsync(int customerId)

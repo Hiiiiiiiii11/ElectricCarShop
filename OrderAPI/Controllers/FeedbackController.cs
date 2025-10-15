@@ -9,6 +9,7 @@ namespace OrderAPI.Controllers
     public class FeedbackController : Controller
     {
         private readonly IFeedbackService _feedbackService;
+
         public FeedbackController(IFeedbackService feedbackService)
         {
             _feedbackService = feedbackService;
@@ -17,36 +18,67 @@ namespace OrderAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllFeedbacks()
         {
-            var feedbacks = await _feedbackService.GetAllAsync();
-            return Ok(feedbacks);
+            try
+            {
+                var feedbacks = await _feedbackService.GetAllAsync();
+                return Ok(feedbacks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFeedbackById(int id)
         {
-            var feedback = await _feedbackService.GetByIdAsync(id);
-            if (feedback == null)
-                return NotFound($"Feedback with ID {id} not found.");
-            return Ok(feedback);
+            try
+            {
+                var feedback = await _feedbackService.GetByIdAsync(id);
+                if (feedback == null)
+                    return NotFound("Feedback not found");
+                return Ok(feedback);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetFeedbacksByCustomerId(int customerId)
         {
-            var feedbacks = await _feedbackService.GetByCustomerIdAsync(customerId);
-            return Ok(feedbacks);
+            try
+            {
+                var feedbacks = await _feedbackService.GetByCustomerIdAsync(customerId);
+                return Ok(feedbacks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetFeedbacksByStatus(string status)
         {
-            var feedbacks = await _feedbackService.GetByStatusAsync(status);
-            return Ok(feedbacks);
+            try
+            {
+                var feedbacks = await _feedbackService.GetByStatusAsync(status);
+                return Ok(feedbacks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateFeedback([FromBody] FeedbackRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
                 var createdFeedback = await _feedbackService.CreateAsync(request);
@@ -54,30 +86,31 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFeedback(int id, [FromBody] FeedbackRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
                 var updatedFeedback = await _feedbackService.UpdateAsync(id, request);
                 return Ok(updatedFeedback);
             }
-            catch (KeyNotFoundException knfEx)
+            catch (KeyNotFoundException)
             {
-                return NotFound(knfEx.Message);
+                return NotFound("Feedback not found");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFeedback(int id)
         {
@@ -85,14 +118,14 @@ namespace OrderAPI.Controllers
             {
                 var deleted = await _feedbackService.DeleteAsync(id);
                 if (!deleted)
-                    return NotFound($"Feedback with ID {id} not found.");
-                return NoContent();
+                    return NotFound("Feedback not found");
+
+                return Ok("Feedback deleted successfully");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
     }
 }

@@ -138,10 +138,10 @@ namespace OrderRepository.Model.Request
 
     public class UpdateContractRequest
     {
-        public string ContractName { get; set; }
-        public DateTime ContractDate { get; set; }
-        public string SignedBy { get; set; }
-        public string Terms { get; set; }
+        public string? ContractName { get; set; }
+        public DateTime? ContractDate { get; set; }
+        public string? SignedBy { get; set; }
+        public string? Terms { get; set; }
     }
 
     public class ContractResponse
