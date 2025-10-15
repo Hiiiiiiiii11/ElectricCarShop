@@ -1,20 +1,18 @@
 ﻿using AgencyRepository.Data;
 using AgencyRepository.Repositories;
 using AgencyService.Services;
+using CloudinaryDotNet;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Setting;
 using Share.ShareServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using CloudinaryDotNet;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using System.Security.Cryptography.X509Certificates; // Thêm using này
 
 namespace AgencyAPI
 {
@@ -24,31 +22,26 @@ namespace AgencyAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Dòng AppContext này không còn cần thiết khi dùng HTTPS, nhưng để lại cũng không sao
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
-
             // =================== REVERSE PROXY ===================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-
             if (builder.Environment.IsProduction())
             {
+                // Đọc mật khẩu của file .pfx từ biến môi trường trong docker-compose.yml
                 var pfxPassword = builder.Configuration["Kestrel:CertificatePassword"];
 
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    // Endpoint cho REST API (HTTP/1.1) từ Nginx
+                    // Endpoint cho REST API (HTTP/1.1) từ Nginx, vẫn giữ cổng 80
                     options.ListenAnyIP(80, o => o.Protocols = HttpProtocols.Http1);
 
-                    // Endpoint MỚI cho gRPC nội bộ (HTTP/2 qua HTTPS)
+                    // Endpoint MỚI cho gRPC nội bộ (HTTP/2 qua HTTPS) trên cổng 443
                     options.ListenAnyIP(443, o =>
                     {
                         o.Protocols = HttpProtocols.Http2;
+                        // Sử dụng file chứng chỉ tương ứng với service
                         o.UseHttps("/https/certs/agencyapi.pfx", pfxPassword);
                     });
                 });
@@ -112,7 +105,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
             builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
 
-            // =================== gRPC ===================
+            // =================== gRPC Client Configuration ===================
             builder.Services.AddGrpc();
 
             var userServiceUrl = builder.Environment.IsDevelopment()
@@ -125,7 +118,7 @@ namespace AgencyAPI
                 ? "https://localhost:7114"
                 : "https://orderapi:443";
 
-            // --- BỔ SUNG PHẦN CẤU HÌNH CLIENT SSL ---
+            // Tạo một HttpClientHandler duy nhất để tái sử dụng
             var handler = new HttpClientHandler();
             var caCert = new X509Certificate2("/https/certs/ca.crt");
             handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
@@ -134,24 +127,25 @@ namespace AgencyAPI
                 using var customChain = new X509Chain();
                 customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                // THÊM DÒNG NÀY: Bỏ qua kiểm tra thu hồi chứng chỉ
+                customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                 return customChain.Build(serverCert);
             };
-            // --- KẾT THÚC PHẦN BỔ SUNG ---
 
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(userServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
 
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(vehicleServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
 
             builder.Services.AddGrpcClient<CustomerGrpcService.CustomerGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(customerServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
 
 
             // =================== Controllers & Swagger ===================
@@ -205,10 +199,10 @@ namespace AgencyAPI
                 {
                     var dbContext = services.GetRequiredService<AgencyDbContext>();
                     var defaultConnStr = builder.Configuration.GetConnectionString("AgencyDbConnection");
-                    var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                    var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
                     var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
 
-                    using var connection = new SqlConnection(masterConnStr);
+                    using var connection = new Microsoft.Data.SqlClient.SqlConnection(masterConnStr);
                     connection.Open();
                     using var command = connection.CreateCommand();
                     command.CommandText = $"IF DB_ID('{dbName}') IS NULL CREATE DATABASE [{dbName}]";
@@ -243,3 +237,4 @@ namespace AgencyAPI
         }
     }
 }
+
