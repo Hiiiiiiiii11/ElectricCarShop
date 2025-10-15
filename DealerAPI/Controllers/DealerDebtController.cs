@@ -25,7 +25,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpGet("Remaining")]
@@ -38,7 +38,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpGet("GetAll/{AgencyId}")]
@@ -51,7 +51,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpGet("Remaining/{AgencyId}")]
@@ -64,7 +64,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpGet("{AgencyId}")]
@@ -81,7 +81,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpPost("Add/{AgencyId}")]
@@ -101,7 +101,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while adding debt.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpPost("Payment/{AgencyId}")]
@@ -158,7 +158,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
 

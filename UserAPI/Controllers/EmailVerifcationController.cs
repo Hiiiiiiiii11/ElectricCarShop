@@ -23,7 +23,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpPost("verify-otp")]
@@ -43,7 +43,7 @@ namespace UserAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
     }
