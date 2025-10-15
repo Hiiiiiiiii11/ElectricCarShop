@@ -40,7 +40,6 @@ namespace UserService.Services
                 Status = "Active",
                 Created_At = DateTime.UtcNow,
                 Updated_At = DateTime.UtcNow,
-                Created_By = request.Created_By ?? 0
             };
 
             await _userRepository.AddAsync(user);
@@ -78,8 +77,8 @@ namespace UserService.Services
 
             if (!string.IsNullOrWhiteSpace(request.Status))
                 user.Status = request.Status;
-            if (!string.IsNullOrWhiteSpace(request.RoleId))
-                user.RoleId = request.RoleId;
+            if (request.RoleId.HasValue)
+                user.RoleId = request.RoleId.Value;
 
             user.Updated_At = DateTime.UtcNow;
 
