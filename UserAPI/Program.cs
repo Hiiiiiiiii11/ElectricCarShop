@@ -24,7 +24,10 @@ namespace UserAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
             // =================== CẤU HÌNH REVERSE PROXY ===================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -40,10 +43,7 @@ namespace UserAPI
                     });
                 });
             }
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+            
             // =============================================================
 
             // --- Đăng ký các services ---

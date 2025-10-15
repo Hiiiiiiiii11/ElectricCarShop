@@ -21,6 +21,10 @@ namespace AllocationAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -36,11 +40,7 @@ namespace AllocationAPI
                     });
                 });
             }
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
-
+           
             builder.Services.AddDbContext<AllocationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection"),
                 sqlServerOptionsAction: sqlOptions =>

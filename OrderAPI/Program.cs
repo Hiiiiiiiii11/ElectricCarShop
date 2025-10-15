@@ -24,7 +24,10 @@ namespace OrderAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -39,10 +42,7 @@ namespace OrderAPI
                     });
                 });
             }
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+            
 
             builder.Services.AddDbContext<OrderDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection"),

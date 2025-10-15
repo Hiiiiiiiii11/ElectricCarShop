@@ -22,7 +22,10 @@ namespace AgencyAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
             // =================== REVERSE PROXY ===================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -38,10 +41,7 @@ namespace AgencyAPI
                     });
                 });
             }
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+           
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
