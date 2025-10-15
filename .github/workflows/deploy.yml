@@ -42,11 +42,6 @@ jobs:
             # Dừng và xóa các container cũ
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
-
-            # Dọn dẹp volume cũ của database để đảm bảo bắt đầu sạch
-            echo "🧹 Removing old database volume..."
-            docker volume rm electriccarshop_sqlserver_data || echo "Volume not found, skipping."
-
             # Build và khởi động tuần tự từng service
             echo "🚀 Starting sequential build and deployment..."
             
