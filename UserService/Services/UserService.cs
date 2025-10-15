@@ -40,6 +40,7 @@ namespace UserService.Services
                 Status = "Active",
                 Created_At = DateTime.UtcNow,
                 Updated_At = DateTime.UtcNow,
+                Created_By = request.CreateBy ?? 0
             };
 
             await _userRepository.AddAsync(user);
