@@ -38,6 +38,10 @@ namespace AgencyAPI
                     });
                 });
             }
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
@@ -158,10 +162,7 @@ namespace AgencyAPI
             });
 
             var app = builder.Build();
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+
 
             app.UseForwardedHeaders();
 

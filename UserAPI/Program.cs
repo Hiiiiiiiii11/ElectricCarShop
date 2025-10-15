@@ -40,6 +40,10 @@ namespace UserAPI
                     });
                 });
             }
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
             // =============================================================
 
             // --- Đăng ký các services ---
@@ -137,10 +141,7 @@ namespace UserAPI
             builder.Services.AddGrpc();
 
             var app = builder.Build();
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+
 
             // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
             app.UseForwardedHeaders();

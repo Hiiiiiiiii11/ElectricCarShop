@@ -39,6 +39,10 @@ namespace OrderAPI
                     });
                 });
             }
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
 
             builder.Services.AddDbContext<OrderDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection"),
@@ -145,11 +149,6 @@ namespace OrderAPI
             });
 
             var app = builder.Build();
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
-
             app.UseForwardedHeaders();
 
             if (app.Environment.IsProduction())

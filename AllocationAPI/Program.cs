@@ -36,6 +36,10 @@ namespace AllocationAPI
                     });
                 });
             }
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
 
             builder.Services.AddDbContext<AllocationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection"),
@@ -123,10 +127,7 @@ namespace AllocationAPI
             });
 
             var app = builder.Build();
-            if (builder.Environment.IsProduction())
-            {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+
 
             app.UseForwardedHeaders();
 
