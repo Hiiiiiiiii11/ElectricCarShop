@@ -34,7 +34,6 @@ namespace OrderAPI.Controllers
                 });
             }
         }
-        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerRequest request)

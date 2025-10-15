@@ -32,7 +32,7 @@ namespace UserAPI.Controllers
                     return Unauthorized(new { message = "Invalid token. No user id found." });
                 }
 
-                request.Created_By = int.Parse(userIdClaim);
+                request.CreateBy = int.Parse(userIdClaim);
 
                 var result = await _userService.CreateUserAsync(request);
                 return Ok(result);
