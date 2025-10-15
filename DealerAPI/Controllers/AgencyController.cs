@@ -1,5 +1,7 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Greet;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -148,6 +150,26 @@ namespace AgencyAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpGet("testgrpc")]
+        public async Task<IActionResult> TestGrpcConnection()
+        {
+            try
+            {
+                // Tạo channel và client một cách thủ công, không qua DI
+                // để đảm bảo test kết nối thuần túy nhất.
+                using var channel = GrpcChannel.ForAddress("http://userapi:80");
+                var client = new Greeter.GreeterClient(channel);
+
+                var reply = await client.SayHelloAsync(new HelloRequest { Name = "AgencyAPI" });
+
+                return Ok($"✅ SUCCESS! gRPC Response: '{reply.Message}'");
+            }
+            catch (Exception ex)
+            {
+                // Trả về toàn bộ lỗi để chúng ta xem
+                return StatusCode(500, $"❌ FAILED! Exception: {ex.ToString()}");
             }
         }
     }

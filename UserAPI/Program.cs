@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Share.Setting;
 using Share.ShareServices;
 using System.Text;
+using UserAPI.Services;
 using UserAPIService.Services;
 using UserRepository.Data;
 using UserRepository.Model;
@@ -229,6 +230,7 @@ namespace UserAPI
             app.MapControllers();
             app.MapGrpcService<UserGrpcServiceImpl>();
             app.MapGrpcService<EmailVerificationGrpcServiceImpl>();
+            app.MapGrpcService<GreeterService>();
 
 
             app.Run();
