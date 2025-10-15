@@ -27,11 +27,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "An error occurred",
-                    ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -45,11 +41,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "An error occurred",
-                    ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -65,11 +57,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "An error occurred",
-                    ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -86,11 +74,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "Error creating contract.",
-                    detail = ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -111,11 +95,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "Error updating contract.",
-                    detail = ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -132,11 +112,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = "Error deleting contract.",
-                    detail = ex.Message
-                });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }

@@ -26,7 +26,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
             }
         }
 
@@ -44,7 +44,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.",ex.Message });
             }
         }
         [HttpPost]
@@ -61,7 +61,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
             }
         }
         [HttpPost("{agencyId}/assign-user")]
@@ -112,7 +112,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
             }
         }
 
@@ -130,7 +130,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
             }
         }
         [HttpGet("search")]
@@ -143,7 +143,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.",ex.Message });
             }
         }
 

@@ -87,7 +87,9 @@ namespace AllocationService.Services
         public async Task<VehicleResponse?> GetVehicleByIdAsync(int id)
         {
             var vehicle = await _vehicleRepository.GetByIdAsync(id);
-            return vehicle == null ? null : MapToResponse(vehicle);
+            if (vehicle == null)
+                throw new KeyNotFoundException($"Vehicle {id} not found");
+            return MapToResponse(vehicle);
         }
 
         public async Task<IEnumerable<VehicleResponse>> GetVehiclesByStatusAsync(string status)

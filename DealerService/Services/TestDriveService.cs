@@ -1,5 +1,4 @@
-﻿
-using AgencyRepository.Model;
+﻿using AgencyRepository.Model;
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
 using GrpcService;
@@ -14,114 +13,142 @@ namespace AgencyService.Services
     public class TestDriveService : ITestDriveService
     {
         private readonly ITestDriveRepository _testDriveRepository;
-        private readonly IVehicleGrpcServiceClient _vehicleGrpcClient;
-        private readonly ICustomerGrpcServiceClient _customerGrpcClient; // Thêm client mới
+        private readonly IVehicleGrpcServiceClient _vehicleGrpcServiceClient;
+        private readonly ICustomerGrpcServiceClient _customerGrpcServiceClient;
 
         public TestDriveService(
             ITestDriveRepository testDriveRepository,
-            IVehicleGrpcServiceClient vehicleGrpcClient,
-            ICustomerGrpcServiceClient customerGrpcClient) // Inject client mới
+            IVehicleGrpcServiceClient vehicleGrpcServiceClient,
+            ICustomerGrpcServiceClient customerGrpcServiceClient)
         {
             _testDriveRepository = testDriveRepository;
-            _vehicleGrpcClient = vehicleGrpcClient;
-            _customerGrpcClient = customerGrpcClient;
+            _vehicleGrpcServiceClient = vehicleGrpcServiceClient;
+            _customerGrpcServiceClient = customerGrpcServiceClient;
         }
 
-        // ... Các phương thức Create, Update, Delete giữ nguyên ...
+        // ===== CREATE =====
         public async Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request)
         {
-            var newTestDrive = new TestDrive
+            var testDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
                 VehicleId = request.VehicleId,
-                CustomerId = request.CustomerId, // Thêm CustomerId
+                CustomerId = request.CustomerId,
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
-                Status = "Scheduled", // Default status
+                Status = string.IsNullOrWhiteSpace(request.Status) ? "Scheduled" : request.Status,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow
             };
 
-            await _testDriveRepository.AddAsync(newTestDrive);
+            await _testDriveRepository.AddAsync(testDrive);
             await _testDriveRepository.SaveChangesAsync();
 
-            var createdTestDrive = await _testDriveRepository.GetDetailByIdAsync(newTestDrive.Id);
-            return await MapToResponse(createdTestDrive);
+            // Lấy thông tin vehicle & customer từ gRPC
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
+
+            var response = MapToResponse(testDrive);
+            response.Vehicle = vehicle;
+            response.Customer = customer;
+
+            return response;
         }
 
+        // ===== UPDATE =====
         public async Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request)
         {
             var testDrive = await _testDriveRepository.GetByIdAsync(id);
             if (testDrive == null)
-            {
                 throw new KeyNotFoundException($"Test drive with ID {id} not found.");
-            }
 
-            testDrive.AppointmentDate = request.AppointmentDate ?? testDrive.AppointmentDate;
-            testDrive.Status = request.Status ?? testDrive.Status;
-            testDrive.Notes = request.Notes ?? testDrive.Notes;
-            testDrive.Feedback = request.Feedback ?? testDrive.Feedback;
+            if (request.AppointmentDate.HasValue)
+                testDrive.AppointmentDate = request.AppointmentDate.Value;
+            if (!string.IsNullOrWhiteSpace(request.Status))
+                testDrive.Status = request.Status;
+            if (!string.IsNullOrWhiteSpace(request.Notes))
+                testDrive.Notes = request.Notes;
+            if (!string.IsNullOrWhiteSpace(request.Feedback))
+                testDrive.Feedback = request.Feedback;
+
             testDrive.UpdateAt = DateTime.UtcNow;
 
             _testDriveRepository.Update(testDrive);
             await _testDriveRepository.SaveChangesAsync();
 
-            var updatedTestDrive = await _testDriveRepository.GetDetailByIdAsync(id);
-            return await MapToResponse(updatedTestDrive);
+            // Lấy dữ liệu gRPC
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
+
+            var response = MapToResponse(testDrive);
+            response.Vehicle = vehicle;
+            response.Customer = customer;
+
+            return response;
         }
 
+        // ===== DELETE =====
         public async Task<bool> DeleteTestDriveAsync(int id)
         {
             var testDrive = await _testDriveRepository.GetByIdAsync(id);
             if (testDrive == null)
-            {
                 throw new KeyNotFoundException($"Test drive with ID {id} not found.");
-            }
+
             _testDriveRepository.Remove(testDrive);
             await _testDriveRepository.SaveChangesAsync();
             return true;
         }
 
+        // ===== GET ALL =====
         public async Task<IEnumerable<TestDriveResponse>> GetAllTestDrivesAsync()
         {
             var testDrives = await _testDriveRepository.GetAllAsync();
-            var responseTasks = testDrives.Select(td => MapToResponse(td));
-            return await Task.WhenAll(responseTasks);
-        }
+            var result = new List<TestDriveResponse>();
 
-        public async Task<TestDriveResponse?> GetTestDriveByIdAsync(int id)
-        {
-            var testDrive = await _testDriveRepository.GetDetailByIdAsync(id);
-            if (testDrive == null)
+            foreach (var td in testDrives)
             {
-                return null;
+                var response = MapToResponse(td);
+
+                // Gọi gRPC
+                var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(td.VehicleId);
+                var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(td.CustomerId);
+
+                response.Vehicle = vehicle;
+                response.Customer = customer;
+
+                result.Add(response);
             }
-            return await MapToResponse(testDrive);
+
+            return result;
         }
 
-        // Private mapping method
-        private async Task<TestDriveResponse> MapToResponse(TestDrive td)
+        // ===== GET BY ID =====
+        public async Task<TestDriveResponse> GetTestDriveByIdAsync(int id)
         {
-            if (td == null) return null;
+            var testDrive = await _testDriveRepository.GetByIdAsync(id);
+            if (testDrive == null)
+                throw new KeyNotFoundException($"Test drive with ID {id} not found.");
 
-            // Gọi song song 2 gRPC service để tăng hiệu năng
-            var vehicleTask = _vehicleGrpcClient.GetVehicleByIdAsync(td.VehicleId);
-            var customerTask = _customerGrpcClient.GetCustomerByIdAsync(td.CustomerId);
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
 
-            await Task.WhenAll(vehicleTask, customerTask);
+            var response = MapToResponse(testDrive);
+            response.Vehicle = vehicle;
+            response.Customer = customer;
 
-            var vehicleInfo = vehicleTask.Result;
-            var customerInfo = customerTask.Result;
+            return response;
+        }
 
+        // ===== MAP =====
+        public TestDriveResponse MapToResponse(TestDrive td)
+        {
             return new TestDriveResponse
             {
                 Id = td.Id,
                 AgencyId = td.AgencyId,
                 AgencyName = td.Agency?.AgencyName,
                 VehicleId = td.VehicleId,
-                Vehicle = vehicleInfo,
                 CustomerId = td.CustomerId,
-                Customer = customerInfo,
                 AppointmentDate = td.AppointmentDate,
                 Status = td.Status,
                 Notes = td.Notes,
@@ -132,4 +159,3 @@ namespace AgencyService.Services
         }
     }
 }
-

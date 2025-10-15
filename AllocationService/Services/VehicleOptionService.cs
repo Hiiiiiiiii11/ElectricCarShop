@@ -49,19 +49,24 @@ namespace AllocationService.Services
         public async Task<VehicleOptionResponse?> GetByIdAsync(int id)
         {
             var option = await _vehicleOptionRepository.GetByIdAsync(id);
-            return option == null ? null : MapToResponse(option);
+            if (option == null)
+                throw new KeyNotFoundException($"Vehicle option {id} not found");
+            return MapToResponse(option);
         }
 
         public  async Task<VehicleOptionResponse> GetByModelNameAsync(string modelName)
         {
             var entity = await _vehicleOptionRepository.GetByModelNameAsync(modelName);
-            return entity == null ? null : MapToResponse(entity);
+            if (entity == null)
+                throw new KeyNotFoundException($"Vehicle option with model name '{modelName}' not found");
+            return MapToResponse(entity);
         }
 
         public async Task<VehicleOptionResponse?> UpdateAsync(int vehicleOptionId,UpdateVehicleOptionRequest request)
         {
             var entity = await _vehicleOptionRepository.GetByIdAsync(vehicleOptionId);
-            if (entity == null) return null;
+            if (entity == null)
+                throw new KeyNotFoundException($"Vehicle option {vehicleOptionId} not found");
 
             // Nếu request.ModelName có giá trị thì mới update, không thì giữ nguyên
             if (!string.IsNullOrWhiteSpace(request.ModelName))

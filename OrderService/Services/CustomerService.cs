@@ -88,7 +88,9 @@ namespace OrderService.Services
         public async Task<CustomerResponse?> GetByEmailAsync(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
-            return customer == null ? null : MapToResponse(customer);
+            if (customer == null)
+                throw new KeyNotFoundException($"Customer with Email {email} not found.");
+            return  MapToResponse(customer);
         }
         public async Task<IEnumerable<CustomerResponse>> GetAllAsync()
         {
@@ -100,7 +102,9 @@ namespace OrderService.Services
         public async Task<CustomerResponse?> GetByIdAsync(int id)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
-            return customer == null ? null : MapToResponse(customer);
+            if (customer == null)
+                throw new KeyNotFoundException($"Customer with ID {id} not found.");
+            return  MapToResponse(customer);
         }
 
         public async Task<CustomerResponse?> GetByPhoneAsync(string phone)
