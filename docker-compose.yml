@@ -67,7 +67,7 @@ services:
   agencyapi:
     build:
       context: .
-      dockerfile: AgencyAPI/Dockerfile
+      dockerfile: DealerAPI/Dockerfile
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
