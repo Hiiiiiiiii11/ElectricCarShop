@@ -23,7 +23,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
 
         }
@@ -42,7 +42,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
 
@@ -56,7 +56,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
 
@@ -105,7 +105,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { message = "An error occurred while processing your request.", detail = ex.Message });
             }
         }
         [HttpPut("Agency/{AgencyId}/inventory/{variantId}/adjust-quantity")]

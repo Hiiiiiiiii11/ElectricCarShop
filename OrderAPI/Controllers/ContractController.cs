@@ -18,38 +18,66 @@ namespace OrderAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetContractByIdAsync(int id)
         {
-            var contract = await _contractService.GetContractByIdAsync(id);
-            if (contract == null)
-                return NotFound(new { message = $"Contract with id {id} not found." });
-
-            return Ok(contract);
+            try
+            {
+                var contract = await _contractService.GetContractByIdAsync(id);
+                if (contract == null)
+                    return NotFound("Contract not found");
+                return Ok(contract);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred",
+                    ex.Message
+                });
+            }
         }
 
-        [HttpGet("GetContractsByQuotationId/{quotationId}")]
+        [HttpGet("quotation/{quotationId}")]
         public async Task<IActionResult> GetContractsByQuotationId(int quotationId)
         {
-            var contracts = await _contractService.GetContractsByQuotationIdAsync(quotationId);
-            return Ok(contracts);
+            try
+            {
+                var contracts = await _contractService.GetContractsByQuotationIdAsync(quotationId);
+                return Ok(contracts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred",
+                    ex.Message
+                });
+            }
         }
 
-        [HttpGet("GetByContractNumber/{contractNumber}")]
+        [HttpGet("number/{contractNumber}")]
         public async Task<IActionResult> GetByContractNumber(string contractNumber)
         {
-            var contract = await _contractService.GetByContractNumberAsync(contractNumber);
-            if (contract == null)
+            try
             {
-                return NotFound(new {message= $"Contract with number {contractNumber} not found." });
+                var contract = await _contractService.GetByContractNumberAsync(contractNumber);
+                if (contract == null)
+                    return NotFound("Contract not found");
+                return Ok(contract);
             }
-            return Ok(contract);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred",
+                    ex.Message
+                });
+            }
         }
 
-        [HttpPost("CreateContract")]
+        [HttpPost]
         public async Task<IActionResult> CreateContract([FromBody] CreateContractRequest request)
         {
             if (request == null)
-            {
                 return BadRequest("Request body is null.");
-            }
 
             try
             {
@@ -58,48 +86,57 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    message = "Error creating contract.",
+                    detail = ex.Message
+                });
             }
         }
 
-        [HttpPut("UpdateContract/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateContract(int id, [FromBody] UpdateContractRequest request)
         {
             if (request == null)
-            {
                 return BadRequest("Request body is null.");
-            }
 
             try
             {
                 var updatedContract = await _contractService.UpdateContractAsync(id, request);
                 return Ok(updatedContract);
             }
-            catch (KeyNotFoundException knfEx)
+            catch (KeyNotFoundException)
             {
-                return NotFound(knfEx.Message);
+                return NotFound("Contract not found");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    message = "Error updating contract.",
+                    detail = ex.Message
+                });
             }
         }
 
-        [HttpDelete("DeleteContract/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContract(int id)
         {
             try
             {
                 var result = await _contractService.DeleteContractAsync(id);
                 if (!result)
-                {
-                    return NotFound($"Contract with ID {id} not found.");
-                }
-                return Ok($"Contract with ID {id} deleted successfully.");
+                    return NotFound("Contract not found");
+
+                return Ok("Contract deleted successfully");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    message = "Error deleting contract.",
+                    detail = ex.Message
+                });
             }
         }
     }
