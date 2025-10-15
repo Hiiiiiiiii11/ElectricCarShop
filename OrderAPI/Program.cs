@@ -4,7 +4,6 @@ using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,7 +14,7 @@ using OrderService.Service;
 using OrderService.Services;
 using Share.Setting;
 using Share.ShareServices;
-using System.Security.Cryptography.X509Certificates; // Thêm using này
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace OrderAPI
@@ -25,11 +24,7 @@ namespace OrderAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            if (builder.Environment.IsProduction())
-            {
-                // Dòng này không còn cần thiết khi dùng HTTPS
-                // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
+
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -145,9 +140,8 @@ namespace OrderAPI
                : "https://agencyapi:443";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7055"
-               : "https://allocationapi:443"; // Sửa lại đúng tên service
+               : "https://allocationapi:443";
 
-            // --- BỔ SUNG PHẦN CẤU HÌNH CLIENT SSL ---
             var handler = new HttpClientHandler();
             var caCert = new X509Certificate2("/https/certs/ca.crt");
             handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
@@ -156,9 +150,9 @@ namespace OrderAPI
                 using var customChain = new X509Chain();
                 customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                 return customChain.Build(serverCert);
             };
-            // --- KẾT THÚC PHẦN BỔ SUNG ---
 
             builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
             {
@@ -189,10 +183,10 @@ namespace OrderAPI
                     {
                         var dbContext = services.GetRequiredService<OrderDbContext>();
                         var defaultConnStr = builder.Configuration.GetConnectionString("OrderDbConnection");
-                        var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                        var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
                         var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
 
-                        using (var connection = new SqlConnection(masterConnStr))
+                        using (var connection = new Microsoft.Data.SqlClient.SqlConnection(masterConnStr))
                         {
                             connection.Open();
                             using (var command = connection.CreateCommand())
@@ -232,3 +226,4 @@ namespace OrderAPI
         }
     }
 }
+

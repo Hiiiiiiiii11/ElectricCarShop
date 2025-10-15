@@ -6,13 +6,12 @@ using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Setting;
 using Share.ShareServices;
-using System.Security.Cryptography.X509Certificates; // Thêm using này
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace AllocationAPI
@@ -22,11 +21,6 @@ namespace AllocationAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            if (builder.Environment.IsProduction())
-            {
-                // Dòng này không còn cần thiết khi dùng HTTPS
-                // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -130,9 +124,8 @@ namespace AllocationAPI
 
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7198"
-                : "https://agencyapi:443"; // <-- SỬA URL
+                : "https://agencyapi:443";
 
-            // --- BỔ SUNG PHẦN CẤU HÌNH CLIENT SSL ---
             var handler = new HttpClientHandler();
             var caCert = new X509Certificate2("/https/certs/ca.crt");
             handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
@@ -141,17 +134,16 @@ namespace AllocationAPI
                 using var customChain = new X509Chain();
                 customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                 return customChain.Build(serverCert);
             };
-            // --- KẾT THÚC PHẦN BỔ SUNG ---
 
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(agencyServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
 
             var app = builder.Build();
-
 
             app.UseForwardedHeaders();
 
@@ -166,10 +158,10 @@ namespace AllocationAPI
                     {
                         var dbContext = services.GetRequiredService<AllocationDbContext>();
                         var defaultConnStr = builder.Configuration.GetConnectionString("AllocationDbConnection");
-                        var dbName = new SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
+                        var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
                         var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
 
-                        using (var connection = new SqlConnection(masterConnStr))
+                        using (var connection = new Microsoft.Data.SqlClient.SqlConnection(masterConnStr))
                         {
                             connection.Open();
                             using (var command = connection.CreateCommand())
@@ -210,3 +202,4 @@ namespace AllocationAPI
         }
     }
 }
+
