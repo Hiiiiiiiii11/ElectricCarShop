@@ -60,8 +60,10 @@ services:
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Kestrel__CertificatePassword=1234
       - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    volumes:
+      - ./certs/local:/https/certs:ro
     depends_on:
       sqlserver:
         condition: service_started
@@ -77,8 +79,10 @@ services:
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Kestrel__CertificatePassword=1234
       - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    volumes:
+      - ./certs/local:/https/certs:ro
     depends_on:
       sqlserver:
         condition: service_started
@@ -94,8 +98,10 @@ services:
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Kestrel__CertificatePassword=1234
       - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    volumes:
+      - ./certs/local:/https/certs:ro
     depends_on:
       sqlserver:
         condition: service_started
@@ -111,8 +117,10 @@ services:
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Kestrel__CertificatePassword=1234
       - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    volumes:
+      - ./certs/local:/https/certs:ro
     depends_on:
       sqlserver:
         condition: service_started
@@ -127,3 +135,4 @@ volumes:
 networks:
   electric-car-network:
     driver: bridge
+
