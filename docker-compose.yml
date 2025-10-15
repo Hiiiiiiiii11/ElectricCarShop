@@ -1,12 +1,9 @@
 ﻿# =================================================================
-# === FILE CẤU HÌNH DOCKER COMPOSE CHO ELECTRICCAR MANAGEMENT ===
-# === PHIÊN BẢN HOÀN THIỆN - KHÔNG CÓ CONDITION ===
+# === ELECTRICCAR MANAGEMENT - FINAL PRODUCTION DOCKER COMPOSE ===
 # =================================================================
 
-version: '3.9'
-
 services:
-  # NGINX Reverse Proxy
+  # ===================== NGINX Reverse Proxy =====================
   nginx:
     image: nginx:latest
     container_name: electric_car_nginx
@@ -26,7 +23,7 @@ services:
     networks:
       - electric-car-network
 
-  # Certbot for SSL
+  # ===================== CERTBOT for SSL =====================
   certbot:
     image: certbot/certbot
     container_name: electric_car_certbot
@@ -34,7 +31,7 @@ services:
       - ./certs:/etc/letsencrypt
       - ./www:/var/www/certbot
 
-  # SQL Server Database
+  # ===================== SQL SERVER =====================
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: electric_car_sqlserver
@@ -50,70 +47,82 @@ services:
       - electric-car-network
     restart: unless-stopped
 
-  # User API Service
+  # ===================== USER API =====================
   userapi:
     build:
       context: .
-      dockerfile: UserAPI/Dockerfile
+      dockerfile: UserAPIService/Dockerfile
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # Agency API Service
+  # ===================== AGENCY API =====================
   agencyapi:
     build:
       context: .
-      dockerfile: DealerAPI/Dockerfile
+      dockerfile: AgencyAPIService/Dockerfile
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:UserApi=http://userapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:OrderApi=http://orderapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # Allocation API Service
+  # ===================== ALLOCATION API =====================
   allocationapi:
     build:
       context: .
-      dockerfile: AllocationAPI/Dockerfile
+      dockerfile: AllocationAPIService/Dockerfile
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AgencyApi=http://agencyapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # Order API Service
+  # ===================== ORDER API =====================
   orderapi:
     build:
       context: .
-      dockerfile: OrderAPI/Dockerfile
+      dockerfile: OrderAPIService/Dockerfile
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:UserApi=http://userapi"
+      - "GrpcServices:AgencyApi=http://agencyapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_started
     networks:
       - electric-car-network
     restart: unless-stopped
 
+# ===================== VOLUMES & NETWORKS =====================
 volumes:
   sqlserver_data:
 
