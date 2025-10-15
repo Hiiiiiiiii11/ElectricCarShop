@@ -14,6 +14,7 @@ using Share.ShareServices;
 using System.Text;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System.Security.Cryptography.X509Certificates; // Thêm using này
 
 namespace AgencyAPI
 {
@@ -22,26 +23,37 @@ namespace AgencyAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Dòng AppContext này không còn cần thiết khi dùng HTTPS, nhưng để lại cũng không sao
             if (builder.Environment.IsProduction())
             {
                 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             }
+
             // =================== REVERSE PROXY ===================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
+
             if (builder.Environment.IsProduction())
             {
+                var pfxPassword = builder.Configuration["Kestrel:CertificatePassword"];
+
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    options.ListenAnyIP(80, o =>
+                    // Endpoint cho REST API (HTTP/1.1) từ Nginx
+                    options.ListenAnyIP(80, o => o.Protocols = HttpProtocols.Http1);
+
+                    // Endpoint MỚI cho gRPC nội bộ (HTTP/2 qua HTTPS)
+                    options.ListenAnyIP(443, o =>
                     {
-                        o.Protocols = HttpProtocols.Http1AndHttp2;
+                        o.Protocols = HttpProtocols.Http2;
+                        o.UseHttps("/https/certs/agencyapi.pfx", pfxPassword);
                     });
                 });
             }
-           
+
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AgencyDbConnection"),
@@ -105,26 +117,42 @@ namespace AgencyAPI
 
             var userServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7022"
-                : "http://userapi:80";
+                : "https://userapi:443";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7055"
-                : "http://allocationapi:80";
+                : "https://allocationapi:443";
             var customerServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7114"
-                : "http://orderapi:80";
+                : "https://orderapi:443";
+
+            // --- BỔ SUNG PHẦN CẤU HÌNH CLIENT SSL ---
+            var handler = new HttpClientHandler();
+            var caCert = new X509Certificate2("/https/certs/ca.crt");
+            handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+            {
+                if (serverCert == null) return false;
+                using var customChain = new X509Chain();
+                customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                return customChain.Build(serverCert);
+            };
+            // --- KẾT THÚC PHẦN BỔ SUNG ---
 
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(userServiceUrl);
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(vehicleServiceUrl);
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+
             builder.Services.AddGrpcClient<CustomerGrpcService.CustomerGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(customerServiceUrl);
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => handler); // <-- SỬ DỤNG HANDLER ĐÃ CẤU HÌNH
+
 
             // =================== Controllers & Swagger ===================
             builder.Services.AddControllers();

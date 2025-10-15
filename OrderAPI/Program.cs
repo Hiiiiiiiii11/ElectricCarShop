@@ -15,6 +15,7 @@ using OrderService.Service;
 using OrderService.Services;
 using Share.Setting;
 using Share.ShareServices;
+using System.Security.Cryptography.X509Certificates; // Thêm using này
 using System.Text;
 
 namespace OrderAPI
@@ -26,23 +27,32 @@ namespace OrderAPI
             var builder = WebApplication.CreateBuilder(args);
             if (builder.Environment.IsProduction())
             {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                // Dòng này không còn cần thiết khi dùng HTTPS
+                // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             }
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
+
             if (builder.Environment.IsProduction())
             {
+                var pfxPassword = builder.Configuration["Kestrel:CertificatePassword"];
+
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    options.ListenAnyIP(80, o =>
+                    // Endpoint cho REST API (HTTP/1.1) từ Nginx
+                    options.ListenAnyIP(80, o => o.Protocols = HttpProtocols.Http1);
+
+                    // Endpoint MỚI cho gRPC nội bộ (HTTP/2 qua HTTPS)
+                    options.ListenAnyIP(443, o =>
                     {
-                        o.Protocols = HttpProtocols.Http1AndHttp2;
+                        o.Protocols = HttpProtocols.Http2;
+                        o.UseHttps("/https/certs/orderapi.pfx", pfxPassword);
                     });
                 });
             }
-            
+
 
             builder.Services.AddDbContext<OrderDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDbConnection"),
@@ -126,27 +136,44 @@ namespace OrderAPI
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
             builder.Services.AddGrpc();
+
             var emailServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7022"
-               : "http://userapi:80";
+               : "https://userapi:443";
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7198"
-               : "http://agencyapi:80";
+               : "https://agencyapi:443";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7055"
-               : "http://agencyapi:80";
+               : "https://allocationapi:443"; // Sửa lại đúng tên service
+
+            // --- BỔ SUNG PHẦN CẤU HÌNH CLIENT SSL ---
+            var handler = new HttpClientHandler();
+            var caCert = new X509Certificate2("/https/certs/ca.crt");
+            handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+            {
+                if (serverCert == null) return false;
+                using var customChain = new X509Chain();
+                customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                return customChain.Build(serverCert);
+            };
+            // --- KẾT THÚC PHẦN BỔ SUNG ---
+
             builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(emailServiceUrl);
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(agencyServiceUrl);
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+
             builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
             {
-                o.Address = new Uri(agencyServiceUrl);
-            });
+                o.Address = new Uri(vehicleServiceUrl);
+            }).ConfigurePrimaryHttpMessageHandler(() => handler);
 
             var app = builder.Build();
             app.UseForwardedHeaders();
@@ -205,4 +232,3 @@ namespace OrderAPI
         }
     }
 }
-

@@ -17,6 +17,7 @@ using UserRepository.Model;
 using UserRepository.Repositories;
 using UserService.Implement;
 using UserService.Services;
+using System.Security.Cryptography.X509Certificates; // Thêm using này
 
 namespace UserAPI
 {
@@ -27,7 +28,8 @@ namespace UserAPI
             var builder = WebApplication.CreateBuilder(args);
             if (builder.Environment.IsProduction())
             {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                // Dòng này không còn cần thiết khi dùng HTTPS
+                // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             }
             // =================== CẤU HÌNH REVERSE PROXY ===================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -36,15 +38,24 @@ namespace UserAPI
             });
             if (builder.Environment.IsProduction())
             {
+                // Đọc mật khẩu của file .pfx từ biến môi trường trong docker-compose.yml
+                var pfxPassword = builder.Configuration["Kestrel:CertificatePassword"];
+
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    options.ListenAnyIP(80, o =>
+                    // Endpoint cho REST API (HTTP/1.1) từ Nginx, vẫn giữ cổng 80
+                    options.ListenAnyIP(80, o => o.Protocols = HttpProtocols.Http1);
+
+                    // Endpoint MỚI cho gRPC nội bộ (HTTP/2 qua HTTPS) trên cổng 443
+                    options.ListenAnyIP(443, o =>
                     {
-                        o.Protocols = HttpProtocols.Http1AndHttp2;
+                        o.Protocols = HttpProtocols.Http2;
+                        // Sử dụng file chứng chỉ tương ứng với service
+                        o.UseHttps("/https/certs/userapi.pfx", pfxPassword);
                     });
                 });
             }
-            
+
             // =============================================================
 
             // --- Đăng ký các services ---
@@ -196,7 +207,12 @@ namespace UserAPI
                                 PasswordHash = hashedPassword,
                                 UserName = adminSettings.UserName,
                                 Status = "Active",
-                                RoleId = adminRole.Id
+                                RoleId = adminRole.Id,
+                                // Thêm các giá trị mặc định cho các trường not-null khác nếu có
+                                AgencyId = 0,
+                                Created_At = DateTime.UtcNow,
+                                Updated_At = DateTime.UtcNow,
+                                Created_By = 0
                             };
                             dbContext.Users.Add(adminUser);
                             dbContext.SaveChanges();
@@ -237,4 +253,3 @@ namespace UserAPI
         }
     }
 }
-
