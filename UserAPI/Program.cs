@@ -30,13 +30,13 @@ namespace UserAPI
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            builder.WebHost.ConfigureKestrel(options =>
-            {
-                options.ListenAnyIP(80, o =>
-                {
-                    o.Protocols = HttpProtocols.Http1AndHttp2;
-                });
-            });
+            //builder.WebHost.ConfigureKestrel(options =>
+            //{
+            //    options.ListenAnyIP(80, o =>
+            //    {
+            //        o.Protocols = HttpProtocols.Http1AndHttp2;
+            //    });
+            //});
             // =============================================================
 
             // --- Đăng ký các services ---

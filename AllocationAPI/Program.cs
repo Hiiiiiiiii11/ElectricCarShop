@@ -26,13 +26,13 @@ namespace AllocationAPI
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            builder.WebHost.ConfigureKestrel(options =>
-            {
-                options.ListenAnyIP(80, o =>
-                {
-                    o.Protocols = HttpProtocols.Http1AndHttp2;
-                });
-            });
+            //builder.WebHost.ConfigureKestrel(options =>
+            //{
+            //    options.ListenAnyIP(80, o =>
+            //    {
+            //        o.Protocols = HttpProtocols.Http1AndHttp2;
+            //    });
+            //});
 
             builder.Services.AddDbContext<AllocationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AllocationDbConnection"),
