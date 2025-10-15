@@ -27,7 +27,7 @@ namespace AllocationService.Services
         {
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(request.AgencyId);
             if (agency == null)
-                throw new Exception($"Không tìm thấy đại lý với ID {request.AgencyId}");
+                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {request.AgencyId}");
 
             var allocation = new Allocations
             {
@@ -53,7 +53,7 @@ namespace AllocationService.Services
         {
             var allocations = await _allocationRepository.GetByAgencyIdAsync(agencyId);
             if (allocations == null)
-                throw new Exception($"Không tìm thấy đại lý với ID {agencyId}");
+                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyId}");
 
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
 
@@ -70,7 +70,7 @@ namespace AllocationService.Services
         {
             var entity = await _allocationRepository.GetByAgencyAndVehicleAsync(agencyId, vehicleId);
             if (entity == null)
-                throw new Exception($"Không tìm thấy đại lý với ID {agencyId} hoặc xe với ID {vehicleId}");
+                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyId} hoặc xe với ID {vehicleId}");
 
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
             var response = MapToResponse(entity);
@@ -85,7 +85,7 @@ namespace AllocationService.Services
             var entity = await _allocationRepository.GetByInventoryIdAsync(evInventoryId);
             if (entity == null)
             {
-                throw new Exception($"Không tìm thấy kho với ID {evInventoryId}");
+                throw new KeyNotFoundException($"Không tìm thấy kho với ID {evInventoryId}");
             }
 
             var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
@@ -101,7 +101,7 @@ namespace AllocationService.Services
             var entities = await _allocationRepository.GetByVehicleIdAsync(vehicleId);
             if(entities == null)
             {
-                throw new Exception($"Không tìm thấy xe với ID {vehicleId}");
+                throw new KeyNotFoundException($"Không tìm thấy xe với ID {vehicleId}");
             }
 
             var result = new List<AllocationResponse>();

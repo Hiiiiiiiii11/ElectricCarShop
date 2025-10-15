@@ -1,19 +1,18 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
-using GrpcService;
 using Microsoft.AspNetCore.Mvc;
-using Share.ShareServices;
 
 namespace AgencyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AgencyController : Controller
+    public class AgencyController : ControllerBase
     {
         private readonly IAgencyService _agencyService;
-        public AgencyController(IAgencyService AgencyService)
+
+        public AgencyController(IAgencyService agencyService)
         {
-            _agencyService = AgencyService;
+            _agencyService = agencyService;
         }
 
         [HttpGet]
@@ -21,12 +20,12 @@ namespace AgencyAPI.Controllers
         {
             try
             {
-                var Agencys = await _agencyService.GetAllAgencysAsync();
-                return Ok(Agencys);
+                var agencys = await _agencyService.GetAllAgencysAsync();
+                return Ok(agencys);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -35,8 +34,8 @@ namespace AgencyAPI.Controllers
         {
             try
             {
-                var Agency = await _agencyService.GetAgencyByIdAsync(id);
-                return Ok(Agency);
+                var agency = await _agencyService.GetAgencyByIdAsync(id);
+                return Ok(agency);
             }
             catch (KeyNotFoundException ex)
             {
@@ -44,16 +43,16 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.",ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateAgency([FromForm] CreateAgencyRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             try
             {
                 var result = await _agencyService.CreateAgencyAsync(request);
@@ -61,16 +60,16 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpPost("{agencyId}/assign-user")]
         public async Task<IActionResult> AssignUserToAgency(int agencyId, [FromBody] AssignUserAgencyRequest request)
         {
             try
             {
                 var result = await _agencyService.AssignUserAsync(request, agencyId);
-
                 if (!result)
                     return BadRequest(new { message = "Failed to assign user to agency" });
 
@@ -81,13 +80,13 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
         [HttpPost("{agencyId}/remove-user")]
         public async Task<IActionResult> RemoveUserFromAgency(int agencyId, [FromBody] RemoveUserAgencyRequest request)
         {
             try
             {
                 var result = await _agencyService.RemoveUserAsync(request, agencyId);
-
                 if (!result)
                     return BadRequest(new { message = "Failed to remove user from agency" });
 
@@ -98,9 +97,13 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAgency(int id, [FromForm] UpdateAgencyRequest request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 var result = await _agencyService.UpdateAgencyAsync(id, request);
@@ -112,7 +115,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -121,7 +124,7 @@ namespace AgencyAPI.Controllers
         {
             try
             {
-                var result = await _agencyService.DeleteAgencyAsync(id);
+                await _agencyService.DeleteAgencyAsync(id);
                 return Ok(new { message = $"Delete Agency with id = {id} success" });
             }
             catch (KeyNotFoundException ex)
@@ -130,22 +133,22 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchAgencys([FromQuery] string term)
         {
             try
             {
-                var Agencys = await _agencyService.SearchAgencysAsync(term);
-                return Ok(Agencys);
+                var agencys = await _agencyService.SearchAgencysAsync(term);
+                return Ok(agencys);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.",ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
     }
 }
