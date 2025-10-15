@@ -46,6 +46,11 @@ services:
     networks:
       - electric-car-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Admin@2025!' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ===================== USER API =====================
   userapi:
@@ -55,10 +60,11 @@ services:
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -71,11 +77,11 @@ services:
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
-
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -88,10 +94,11 @@ services:
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -104,10 +111,11 @@ services:
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
     networks:
       - electric-car-network
     restart: unless-stopped
