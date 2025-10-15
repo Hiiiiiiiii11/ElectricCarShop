@@ -57,8 +57,25 @@ namespace AllocationAPI
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Allocation API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... Cấu hình JWT ... */ });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... Cấu hình JWT ... */ });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT."
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
             builder.Services.AddCors(options =>
             {
@@ -88,7 +105,7 @@ namespace AllocationAPI
 
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7198"
-                : "https://agency.agencymanagement.online";
+                : "http://agencyapi:80";
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(agencyServiceUrl);

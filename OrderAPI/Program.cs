@@ -64,8 +64,25 @@ namespace OrderAPI
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { /* ... */ });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement { /* ... */ });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT."
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
             builder.Services.AddCors(options =>
             {
@@ -96,13 +113,13 @@ namespace OrderAPI
             builder.Services.AddGrpc();
             var emailServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7022"
-               : "https://user.agencymanagement.online";
+               : "http://userapi:80";
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7198"
-               : "https://agency.agencymanagement.online";
+               : "http://agencyapi:80";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7055"
-               : "https://agency.agencymanagement.online";
+               : "http://agencyapi:80";
             builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(emailServiceUrl);
