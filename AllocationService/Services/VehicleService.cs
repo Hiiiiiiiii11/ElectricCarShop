@@ -126,7 +126,10 @@ namespace AllocationService.Services
                 {
                     Id = v.VehicleOption.Id,
                     ModelName = v.VehicleOption.ModelName,
-                    Description = v.VehicleOption.Description
+                    Description = v.VehicleOption.Description,
+                    CreateAt = v.VehicleOption.CreateAt,
+                    UpdateAt = v.VehicleOption.UpdateAt,
+
                 },
                 //Allocations = v.Allocations.Select(a => new AllocationResponse
                 //{

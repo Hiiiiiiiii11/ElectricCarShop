@@ -3,6 +3,7 @@ using AllocationService.Services;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -27,6 +28,11 @@ namespace OrderAPI
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(5000, o => o.Protocols = HttpProtocols.Http1);
+                options.ListenAnyIP(5001, o => o.Protocols = HttpProtocols.Http2);
             });
 
             builder.Services.AddDbContext<OrderDbContext>(options =>
