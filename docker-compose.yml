@@ -55,7 +55,6 @@ services:
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
@@ -72,7 +71,6 @@ services:
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
 
     depends_on:
@@ -90,7 +88,6 @@ services:
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
@@ -107,7 +104,6 @@ services:
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
       sqlserver:
