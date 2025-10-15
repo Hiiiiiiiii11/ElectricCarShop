@@ -30,13 +30,16 @@ namespace UserAPI
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            //builder.WebHost.ConfigureKestrel(options =>
-            //{
-            //    options.ListenAnyIP(80, o =>
-            //    {
-            //        o.Protocols = HttpProtocols.Http1AndHttp2;
-            //    });
-            //});
+            if (builder.Environment.IsProduction())
+            {
+                builder.WebHost.ConfigureKestrel(options =>
+                {
+                    options.ListenAnyIP(80, o =>
+                    {
+                        o.Protocols = HttpProtocols.Http1AndHttp2;
+                    });
+                });
+            }
             // =============================================================
 
             // --- Đăng ký các services ---
@@ -134,6 +137,7 @@ namespace UserAPI
             builder.Services.AddGrpc();
 
             var app = builder.Build();
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
             app.UseForwardedHeaders();
