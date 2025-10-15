@@ -1,6 +1,10 @@
-﻿version: '3.9'
+﻿# =================================================================
+# === FILE CẤU HÌNH DOCKER COMPOSE CHO ELECTRICCAR MANAGEMENT ===
+# === PHIÊN BẢN HOÀN THIỆN CUỐI CÙNG - XÓA HEALTHCHECK ===
+# =================================================================
 
 services:
+  # NGINX Reverse Proxy
   nginx:
     image: nginx:latest
     container_name: electric_car_nginx
@@ -20,6 +24,7 @@ services:
     networks:
       - electric-car-network
 
+  # Certbot for SSL
   certbot:
     image: certbot/certbot
     container_name: electric_car_certbot
@@ -27,6 +32,7 @@ services:
       - ./certs:/etc/letsencrypt
       - ./www:/var/www/certbot
 
+  # SQL Server Database
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: electric_car_sqlserver
@@ -41,87 +47,79 @@ services:
     networks:
       - electric-car-network
     restart: unless-stopped
+    # --- HEALTHCHECK ĐÃ ĐƯỢC XÓA HOÀN TOÀN ---
 
-  # ================= USER API =================
+  # User API Service
   userapi:
     build:
       context: .
-      dockerfile: UserAPI/Dockerfile
+      dockerfile: UserAPIService/Dockerfile
     container_name: electric_car_userapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_Kestrel__Endpoints__Http__Url=http://+:5000
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:5001
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - "ConnectionStrings__UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:UserDbConnection=Server=sqlserver;Database=UserDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
     depends_on:
-      - sqlserver
-    expose:
-      - "5000"
-      - "5001"
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # ================= AGENCY API =================
+  # Agency API Service
   agencyapi:
     build:
       context: .
-      dockerfile: DealerAPI/Dockerfile
+      dockerfile: AgencyAPIService/Dockerfile
     container_name: electric_car_agencyapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_Kestrel__Endpoints__Http__Url=http://+:5000
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:5001
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - "ConnectionStrings__AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:AgencyDbConnection=Server=sqlserver;Database=AgencyDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
+      - "GrpcServices:OrderApi=http://orderapi"
     depends_on:
-      - sqlserver
-    expose:
-      - "5000"
-      - "5001"
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # ================= ALLOCATION API =================
+  # Allocation API Service
   allocationapi:
     build:
       context: .
-      dockerfile: AllocationAPI/Dockerfile
+      dockerfile: AllocationAPIService/Dockerfile
     container_name: electric_car_allocationapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_Kestrel__Endpoints__Http__Url=http://+:5000
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:5001
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - "ConnectionStrings__AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:AllocationDbConnection=Server=sqlserver;Database=AllocationDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AgencyApi=http://agencyapi"
     depends_on:
-      - sqlserver
-    expose:
-      - "5000"
-      - "5001"
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
 
-  # ================= ORDER API =================
+  # Order API Service
   orderapi:
     build:
       context: .
-      dockerfile: OrderAPI/Dockerfile
+      dockerfile: OrderAPIService/Dockerfile
     container_name: electric_car_orderapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_Kestrel__Endpoints__Http__Url=http://+:5000
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:5001
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - "ConnectionStrings__OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:OrderDbConnection=Server=sqlserver;Database=OrderDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+      - "GrpcServices:AgencyApi=http://agencyapi"
+      - "GrpcServices:AllocationApi=http://allocationapi"
+      - "GrpcServices:UserApi=http://userapi"
     depends_on:
-      - sqlserver
-    expose:
-      - "5000"
-      - "5001"
+      sqlserver:
+        condition: service_started # Đổi từ healthy sang started
     networks:
       - electric-car-network
     restart: unless-stopped
@@ -132,3 +130,4 @@ volumes:
 networks:
   electric-car-network:
     driver: bridge
+
