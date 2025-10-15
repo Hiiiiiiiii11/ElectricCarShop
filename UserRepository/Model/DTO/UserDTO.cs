@@ -28,6 +28,7 @@ namespace UserRepository.Model.DTO
 
         [Required(ErrorMessage = "Phone is required")]
         public string Phone { get; set; }
+        public int? CreateBy { get; set; } // Lấy từ token
         public IFormFile? AvartarFile { get; set; }
     }
 
