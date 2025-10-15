@@ -78,6 +78,8 @@ namespace UserService.Services
 
             if (!string.IsNullOrWhiteSpace(request.Status))
                 user.Status = request.Status;
+            if (!string.IsNullOrWhiteSpace(request.RoleId))
+                user.RoleId = request.RoleId;
 
             user.Updated_At = DateTime.UtcNow;
 
