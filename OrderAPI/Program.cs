@@ -113,13 +113,13 @@ namespace OrderAPI
             builder.Services.AddGrpc();
             var emailServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7022"
-               : "https://user.agencymanagement.online";
+               : "http://userapi:80";
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7198"
-               : "https://agency.agencymanagement.online";
+               : "http://agencyapi:80";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                ? "https://localhost:7055"
-               : "https://agency.agencymanagement.online";
+               : "http://agencyapi:80";
             builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(emailServiceUrl);

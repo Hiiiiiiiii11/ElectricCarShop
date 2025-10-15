@@ -91,13 +91,13 @@ namespace AgencyAPI
 
             var userServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7022"
-                : "https://user.agencymanagement.online";
+                : "http://userapi:80";
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7055"
-                : "https://allocation.agencymanagement.online";
+                : "http://allocationapi:80";
             var customerServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7114"
-                : "https://agency.agencymanagement.online";
+                : "http://orderapi:80";
 
             builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
             {

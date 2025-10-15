@@ -105,7 +105,7 @@ namespace AllocationAPI
 
             var agencyServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7198"
-                : "https://agency.agencymanagement.online";
+                : "http://agencyapi:80";
             builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
             {
                 o.Address = new Uri(agencyServiceUrl);
