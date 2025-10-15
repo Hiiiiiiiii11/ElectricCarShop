@@ -137,7 +137,10 @@ namespace UserAPI
             builder.Services.AddGrpc();
 
             var app = builder.Build();
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
 
             // =================== SỬ DỤNG REVERSE PROXY MIDDLEWARE ===================
             app.UseForwardedHeaders();

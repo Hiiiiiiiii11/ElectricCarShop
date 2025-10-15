@@ -145,7 +145,10 @@ namespace OrderAPI
             });
 
             var app = builder.Build();
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            if (builder.Environment.IsProduction())
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
 
             app.UseForwardedHeaders();
 
