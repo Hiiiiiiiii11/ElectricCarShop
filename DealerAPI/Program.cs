@@ -30,8 +30,10 @@ namespace AgencyAPI
             });
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenAnyIP(5000, o => o.Protocols = HttpProtocols.Http1);
-                options.ListenAnyIP(5001, o => o.Protocols = HttpProtocols.Http2);
+                options.ListenAnyIP(80, o =>
+                {
+                    o.Protocols = HttpProtocols.Http1AndHttp2;
+                });
             });
             // =================== DB ===================
             builder.Services.AddDbContext<AgencyDbContext>(options =>
