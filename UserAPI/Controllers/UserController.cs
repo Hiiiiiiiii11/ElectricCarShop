@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserRepository.Model.DTO;
 using UserService.Services;
 
@@ -14,7 +15,7 @@ namespace UserAPI.Controllers
         {
             _userService = userService;
         }
-
+        [Authorize(Roles = "Admin,EVManager,AgencyManager")]
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm] CreateUserRequest request)
         {
@@ -44,8 +45,9 @@ namespace UserAPI.Controllers
         }
 
 
-            // PUT api/user/{id}
-            [HttpPut("{id}")]
+        // PUT api/user/{id}
+        [Authorize(Roles = "Admin,EVManager,AgencyManager")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserRequest request)
         {
             try
@@ -83,6 +85,7 @@ namespace UserAPI.Controllers
         }
 
         // GET api/user
+        //[Authorize(Roles = "Admin,EVManager")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -98,6 +101,7 @@ namespace UserAPI.Controllers
         }
 
         // DELETE api/user/{id}
+        [Authorize(Roles = "Admin,EVManager,AgencyManager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -115,6 +119,7 @@ namespace UserAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize(Roles = "Admin,EVManager,AgencyManager")]
         [HttpGet("created-by-id")]
         public async Task<IActionResult> GetUserCreateByUserId([FromQuery] int userId)
         {

@@ -2,6 +2,7 @@
 using AgencyService.Services;
 using Greet;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -48,7 +49,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
+        [Authorize(Roles = "EVManager")]
         [HttpPost]
         public async Task<IActionResult> CreateAgency([FromForm] CreateAgencyRequest request)
         {
@@ -65,7 +66,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
+        [Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/assign-user")]
         public async Task<IActionResult> AssignUserToAgency(int agencyId, [FromBody] AssignUserAgencyRequest request)
         {
@@ -82,7 +83,7 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/remove-user")]
         public async Task<IActionResult> RemoveUserFromAgency(int agencyId, [FromBody] RemoveUserAgencyRequest request)
         {
@@ -99,7 +100,7 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "EVManager,AgencyManager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAgency(int id, [FromForm] UpdateAgencyRequest request)
         {
@@ -120,7 +121,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
+        [Authorize(Roles = "EVManager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAgency(int id)
         {
@@ -150,26 +151,6 @@ namespace AgencyAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
-        [HttpGet("testgrpc")]
-        public async Task<IActionResult> TestGrpcConnection()
-        {
-            try
-            {
-                // Tạo channel và client một cách thủ công, không qua DI
-                // để đảm bảo test kết nối thuần túy nhất.
-                using var channel = GrpcChannel.ForAddress("http://userapi:80");
-                var client = new Greeter.GreeterClient(channel);
-
-                var reply = await client.SayHelloAsync(new HelloRequest { Name = "AgencyAPI" });
-
-                return Ok($"✅ SUCCESS! gRPC Response: '{reply.Message}'");
-            }
-            catch (Exception ex)
-            {
-                // Trả về toàn bộ lỗi để chúng ta xem
-                return StatusCode(500, $"❌ FAILED! Exception: {ex.ToString()}");
             }
         }
     }

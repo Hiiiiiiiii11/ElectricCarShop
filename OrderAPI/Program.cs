@@ -113,20 +113,41 @@ namespace OrderAPI
             });
 
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
-                    };
-                });
+            builder.Services
+                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(options =>
+                 {
+                     options.RequireHttpsMetadata = false;
+                     options.SaveToken = true;
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         ValidateLifetime = true,
+                         ValidateIssuerSigningKey = true,
+                         ValidIssuer = jwtSettings.Issuer,
+                         ValidAudience = jwtSettings.Audience,
+                         IssuerSigningKey = new SymmetricSecurityKey(key)
+                     };
+                     options.Events = new JwtBearerEvents
+                     {
+                         OnChallenge = async context =>
+                         {
+                             context.HandleResponse();
+                             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                             context.Response.ContentType = "application/json";
+                             await context.Response.WriteAsync(
+                                 "{\"message\":\"Unauthorized - Token is missing or invalid.\"}");
+                         },
+                         OnForbidden = async context =>
+                         {
+                             context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                             context.Response.ContentType = "application/json";
+                             await context.Response.WriteAsync(
+                                 "{\"message\":\"Forbidden - You do not have permission to access this resource.\"}");
+                         },
+                     };
+                 });
 
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();

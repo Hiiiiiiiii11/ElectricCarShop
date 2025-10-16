@@ -12,11 +12,17 @@ namespace UserRepository.Repositories
 {
     public class AuthenticationRepository : GenericRepository<Users>, IAuthenticationRepository
     {
-        public AuthenticationRepository(UserDbContext context) : base(context) { }
+        private readonly UserDbContext _context;
+        public AuthenticationRepository(UserDbContext context) : base(context) 
+        {
+            _context = context;
+        }
 
         public async Task<Users> GetUserByEmailAsync(string email)
         {
-            return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users
+                         .Include(u => u.Role) // <--- DÒNG QUAN TRỌNG NHẤT
+                         .FirstOrDefaultAsync(u => u.Email == email);
         }
     }
 }
