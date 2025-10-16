@@ -1,48 +1,49 @@
-﻿# Tên của workflow, sẽ hiển thị trong tab "Actions" trên GitHub
+﻿# Tên của workflow
 name: Deploy to EC2
 
-# Điều kiện kích hoạt workflow: chạy khi có push lên nhánh 'main'
+# Điều kiện kích hoạt
 on:
   push:
     branches:
       - main
 
-# Các công việc (jobs) sẽ được thực hiện
+# Các công việc (jobs)
 jobs:
   deploy:
-    # Tên của job
     name: Deploy
-    # Chạy trên một máy ảo Ubuntu mới nhất do GitHub cung cấp
     runs-on: ubuntu-latest
 
-    # Các bước thực hiện
     steps:
-      # Bước 1: Lấy mã nguồn từ repository về máy ảo runner
+      # Bước 1: Lấy mã nguồn về máy ảo runner
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Bước 2: Thực thi các lệnh trên server EC2 của bạn qua SSH
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+      # Bước 2 (MỚI): Đồng bộ file từ runner sang EC2
+      - name: Sync repository files to EC2
+        uses: appleboy/scp-action@master
         with:
-          # Các thông tin bí mật để kết nối SSH
-          # Sẽ được cấu hình trong phần Settings của repo GitHub
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          # Script để chạy trên server EC2
+          source: "./" # Sao chép toàn bộ thư mục hiện tại
+          target: "~/ElectricCarShop" # Đến thư mục dự án trên EC2
+
+      # Bước 3 (SỬA LẠI): Chạy các lệnh Docker trên EC2
+      - name: Run deployment commands on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Đi vào thư mục dự án
             cd ~/ElectricCarShop
             
-            # Tải về phiên bản code mới nhất từ nhánh main
-            echo "🚚 Pulling latest code from main branch..."
-            git pull origin main
-
-            # Dừng và xóa các container cũ
+            # ĐÃ BỎ LỆNH 'git pull' GÂY LỖI
+            
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
-            # Build và khởi động tuần tự từng service
+            
             echo "🚀 Starting sequential build and deployment..."
             
             echo "--- Starting Database ---"
@@ -63,6 +64,4 @@ jobs:
             echo "--- Restarting NGINX with latest config ---"
             docker-compose up -d nginx
             
-            
             echo "✅ Deployment successful!"
-
