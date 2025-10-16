@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,7 +73,7 @@ namespace AllocationRepository.Model.DTO
     {
         public int AgencyId { get; set; }
         public int EvInventoryId { get; set; }
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public int AllocationQuantity { get; set; }
     }
 
@@ -81,7 +82,7 @@ namespace AllocationRepository.Model.DTO
         public int Id { get; set; }
         public int AgencyId { get; set; }
         public int EvInventoryId { get; set; }
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
 
@@ -93,14 +94,14 @@ namespace AllocationRepository.Model.DTO
     //request create evinventory
     public class EVInventoryRequest
     {
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public int Quantity { get; set; }
     }
 
     public class EVInventoryResponse
     {
         public int Id { get; set; }
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public int Quantity { get; set; }
 
         //// Thông tin chi tiết xe (nếu cần)
@@ -171,5 +172,33 @@ namespace AllocationRepository.Model.DTO
         public decimal DiscountAmount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+    }
+
+    //request model for vehicle instance
+    public class CreateVehicleInstanceRequest
+    {
+        [Required(ErrorMessage = "VehicleId is required")]
+        public int VehicleId { get; set; }
+
+        [Required(ErrorMessage = "VIN is required")]
+        public string Vin { get; set; }
+
+        [Required(ErrorMessage = "EngineNumber is required")]
+        public string EngineNumber { get; set; }
+
+    }
+    public class UpdateVehicleInstanceRequest
+    {
+        public int? VehicleId { get; set; }
+        public string? Vin { get; set; }
+        public string? EngineNumber { get; set; }
+    }
+
+    public class VehicleInstanceResponse
+    {
+        public int Id { get; set; }
+        public int VehicleId { get; set; }
+        public string Vin { get; set; }
+        public string EngineNumber { get; set; }
     }
 }

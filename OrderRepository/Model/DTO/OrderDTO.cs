@@ -57,7 +57,7 @@ namespace OrderRepository.Model.Request
         public int CustomerId { get; set; }
 
         [Required]
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
 
         [Required]
         public string QuotationName { get; set; }
@@ -94,7 +94,7 @@ namespace OrderRepository.Model.Request
 
         // Các thuộc tính được làm giàu từ gRPC
         public AgencyReply Agency { get; set; }
-        public VehicleReply Vehicle { get; set; }
+        public VehicleInstanceReply Vehicle { get; set; }
     }
 
     public class CreateOrderRequest

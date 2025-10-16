@@ -12,13 +12,6 @@ namespace AgencyRepository.Repositories
     {
         Task<IEnumerable<AgencyInventory>> GetInventoriesByAgencyIdAsync(int AgencyId);
         Task<AgencyInventory?> GetInventoryAsync(int AgencyId, int variantId);
-        Task UpdateInventoryQuantityAsync(int AgencyId, int variantId, int quantity);
-        Task SetQuantityAsync(int AgencyId, int variantId, int newQuantity);
-
-        // Kiểm tra tồn kho có đủ hay không
-        Task<bool> HasSufficientStockAsync(int AgencyId, int variantId, int requiredQuantity);
-
-        // Xóa tồn kho của 1 variant trong Agency
         Task RemoveInventoryItemAsync(int AgencyId, int variantId);
     }
 }

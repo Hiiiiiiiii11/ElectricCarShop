@@ -26,32 +26,6 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpPost("increase/{vehicleId}/{quantity}")]
-        public async Task<IActionResult> IncreaseInventory(int vehicleId, int quantity)
-        {
-            try
-            {
-                await _evInventoryService.IncreaseInventoryAsync(vehicleId, quantity);
-                return Ok(new { message = "Tăng số lượng kho thành công." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
-        [HttpPost("decrease/{vehicleId}/{quantity}")]
-        public async Task<IActionResult> DecreaseInventory(int vehicleId, int quantity)
-        {
-            try
-            {
-                await _evInventoryService.DecreaseInventoryAsync(vehicleId, quantity);
-                return Ok(new { message = "Giảm số lượng kho thành công." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInventory(int id)
         {
@@ -98,23 +72,6 @@ namespace AllocationAPI.Controllers
             {
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
-        }
-
-
-        [HttpGet("total")]
-        public async Task<IActionResult> GetTotalInventoryAsync()
-        {
-            try
-            {
-                var total = await _evInventoryService.GetTotalInventoryAsync();
-                return Ok(new { total });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-
-
         }
     }
 }

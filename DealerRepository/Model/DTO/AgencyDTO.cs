@@ -246,23 +246,21 @@ namespace AgencyRepository.Model.DTO
     //request create Agency inventory
     public class CreateAgencyInventoryRequest
     {
-        public int VehicleId { get; set; }
-        public int Quantity { get; set; }
+        public int VehicleInstanceId { get; set; }
     }
     //request update Agency inventory
     public class UpdateAgencyInventoryRequest
     {
-        public int VehicleId { get; set; }
-        public int Quantity { get; set; }
+        public int VehicleInstanceId { get; set; }
     }
     //response Agency inventory
     public class AgencyInventoryResponse
     {
         public int Id { get; set; }
         public int AgencyId { get; set; }
-        public int VehicleId { get; set; }
-        public int Quantity { get; set; }
+        public int VehicleInstanceId { get; set; }
         public AgencyResponseForTarget? Agency { get; set; }
+        public VehicleInstanceReply? VehicleDetails { get; set; }
     }
 
     public class CreateTestDriveRequest
@@ -297,7 +295,7 @@ namespace AgencyRepository.Model.DTO
         public int VehicleId { get; set; }
         public int CustomerId { get; set; }
         public CustomerReply Customer { get; set; }
-        public VehicleReply Vehicle { get; set; } 
+        public VehicleInstanceReply Vehicle { get; set; } 
         public DateTime? AppointmentDate { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }

@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Share.ShareServices
 {
-    public interface IVehicleGrpcServiceClient
+    public interface IVehicleInstanceGrpcServiceClient
     {
-        Task<VehicleReply> GetVehicleByIdAsync(int vehicleId);
+        Task<VehicleInstanceReply> GetVehicleInstanceByIdAsync(int instanceId);
     }
 }
+

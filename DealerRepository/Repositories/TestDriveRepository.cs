@@ -56,11 +56,11 @@ namespace AgencyRepository.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TestDrive>> GetTestDrivesByVehicleIdAsync(int vehicleId)
+        public async Task<IEnumerable<TestDrive>> GetTestDrivesByVehicleIdAsync(int vehicleInstanceId)
         {
             return await _context.TestDrives
                 .Include(td => td.Agency)
-                .Where(td => td.VehicleId == vehicleId)
+                .Where(td => td.VehicleInstanceId == vehicleInstanceId)
                 .ToListAsync();
         }
     }

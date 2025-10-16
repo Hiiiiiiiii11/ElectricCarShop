@@ -12,13 +12,13 @@ namespace OrderAPIService.Services
     {
         private readonly IQuotationRepository _quotationRepository;
         private readonly IAgencyGrpcServiceClient _agencyClient;
-        private readonly IVehicleGrpcServiceClient _vehicleClient;
+        private readonly IVehicleInstanceGrpcServiceClient _vehicleClient;
 
         // Đã loại bỏ IMapper khỏi constructor
         public QuotationService(
             IQuotationRepository quotationRepository,
             IAgencyGrpcServiceClient agencyClient,
-            IVehicleGrpcServiceClient vehicleClient)
+            IVehicleInstanceGrpcServiceClient vehicleClient)
         {
             _quotationRepository = quotationRepository;
             _agencyClient = agencyClient;
@@ -35,7 +35,7 @@ namespace OrderAPIService.Services
 
             // Gọi gRPC song song để tối ưu hiệu năng
             var agencyTask = _agencyClient.GetAgencyByIdAsync(quotation.AgencyId);
-            var vehicleTask = _vehicleClient.GetVehicleByIdAsync(quotation.VehicleId);
+            var vehicleTask = _vehicleClient.GetVehicleInstanceByIdAsync(quotation.VehicleInstanceId);
 
             // Chờ cả hai lời gọi hoàn tất
             await Task.WhenAll(agencyTask, vehicleTask);
@@ -55,7 +55,7 @@ namespace OrderAPIService.Services
             {
                 AgencyId = request.AgencyId,
                 CustomerId = request.CustomerId,
-                VehicleId = request.VehicleId,
+                VehicleInstanceId = request.VehicleInstanceId,
                 QuotationName = request.QuotationName,
                 QuotedPrice = request.QuotedPrice,
                 StartDate = request.StartDate,

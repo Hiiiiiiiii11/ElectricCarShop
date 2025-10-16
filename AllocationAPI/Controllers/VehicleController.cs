@@ -129,19 +129,19 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [HttpGet("available-stock")]
-        public async Task<IActionResult> GetVehiclesWithAvailableStock()
-        {
-            try
-            {
-                var vehicles = await _vehicleService.GetVehiclesWithAvailableStockAsync();
-                return Ok(vehicles);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+        //[HttpGet("available-stock")]
+        //public async Task<IActionResult> GetVehiclesWithAvailableStock()
+        //{
+        //    try
+        //    {
+        //        var vehicles = await _vehicleService.GetVehiclesWithAvailableStockAsync();
+        //        return Ok(vehicles);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
         [HttpGet("{vehicleId}/current-price")]
         public async Task<IActionResult> GetCurrentPrice(int vehicleId, [FromQuery] DateTime date)
         {

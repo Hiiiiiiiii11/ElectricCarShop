@@ -1,6 +1,8 @@
 ﻿using AgencyRepository.Model;
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
+using GrpcService;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,79 +13,106 @@ namespace AgencyService.Services
 {
     public class AgencyInventoryService : IAgencyInventoryService
     {
-        private readonly IAgencyInventoryRepository _AgencyInventoryRepository;
-        public AgencyInventoryService(IAgencyInventoryRepository AgencyInventoryRepository)
+        private readonly IAgencyInventoryRepository _agencyInventoryRepository;
+        private readonly IVehicleInstanceGrpcServiceClient _vehicleGrpcClient;
+        public AgencyInventoryService(IAgencyInventoryRepository AgencyInventoryRepository , IVehicleInstanceGrpcServiceClient vehicleInstanceGrpcServiceClient)
         {
-            _AgencyInventoryRepository = AgencyInventoryRepository;
+            _agencyInventoryRepository = AgencyInventoryRepository;
+            _vehicleGrpcClient = vehicleInstanceGrpcServiceClient;
         }
 
         public async Task<AgencyInventoryResponse> CreateAgencyInventoryAsync(int AgencyId, CreateAgencyInventoryRequest request)
         {
-            var existingInventory = _AgencyInventoryRepository.GetInventoryAsync(AgencyId, request.VehicleId);
-            if (existingInventory != null)
-            {
-                throw new Exception("Inventory item already exists for this variant in the Agency.");
-            }
             var newInventory = new AgencyInventory
             {
                 AgencyId = AgencyId,
-                VehicleId = request.VehicleId,
-                Quantity = request.Quantity
+                VehicleInstanceId = request.VehicleInstanceId,
             };
-            await _AgencyInventoryRepository.AddAsync(newInventory);
-            await _AgencyInventoryRepository.SaveChangesAsync();
+            await _agencyInventoryRepository.AddAsync(newInventory);
+            await _agencyInventoryRepository.SaveChangesAsync();
             return MapToResponse(newInventory);
         }
 
-        public async Task<IEnumerable<AgencyInventoryResponse>> GetInventoriesByAgencyIdAsync(int AgencyId)
+        public async Task<IEnumerable<AgencyInventoryResponse>> GetInventoriesByAgencyIdAsync(int agencyId)
         {
-            var inventories = await _AgencyInventoryRepository.GetInventoriesByAgencyIdAsync(AgencyId);
-            return inventories.Select(MapToResponse);
+            // 2. Lấy dữ liệu từ DB và làm giàu bằng gRPC
+            var inventories = await _agencyInventoryRepository.GetInventoriesByAgencyIdAsync(agencyId);
+            var responseList = new List<AgencyInventoryResponse>();
+
+            foreach (var inv in inventories)
+            {
+                VehicleInstanceReply vehicleDetails = null;
+                try
+                {
+                    // Gọi gRPC để lấy thông tin chi tiết của xe
+                    vehicleDetails = await _vehicleGrpcClient.GetVehicleInstanceByIdAsync(inv.VehicleInstanceId);
+                }
+                catch (Exception ex)
+                {
+                    // Ghi log lỗi nếu cần, tạm thời bỏ qua để không làm hỏng toàn bộ request
+                    Console.WriteLine($"Error fetching vehicle details for ID {inv.VehicleInstanceId}: {ex.Message}");
+                }
+
+                responseList.Add(new AgencyInventoryResponse
+                {
+                    Id = inv.Id,
+                    AgencyId = inv.AgencyId,
+                    VehicleInstanceId = inv.VehicleInstanceId,
+                    Agency = MapAgencyToResponse(inv.Agency),
+                    VehicleDetails = vehicleDetails
+                });
+            }
+
+            return responseList;
         }
 
-        public async Task<AgencyInventoryResponse?> GetInventoryAsync(int AgencyId, int variantId)
+        public async Task<AgencyInventoryResponse?> GetInventoryAsync(int agencyId, int vehicleInstanceId)
         {
-            var inventory = await _AgencyInventoryRepository.GetInventoryAsync(AgencyId, variantId);
+            var inventory = await _agencyInventoryRepository.GetInventoryAsync(agencyId, vehicleInstanceId);
             if (inventory == null)
             {
-                throw new Exception("Inventory item not found.");
+                // Trả về null hoặc throw Exception tùy theo logic bạn muốn
+                return null;
             }
-            return MapToResponse(inventory);
+
+            // Gọi gRPC để lấy thông tin chi tiết xe
+            var vehicleDetails = await _vehicleGrpcClient.GetVehicleInstanceByIdAsync(inventory.VehicleInstanceId);
+
+            return new AgencyInventoryResponse
+            {
+                Id = inventory.Id,
+                AgencyId = inventory.AgencyId,
+                VehicleInstanceId = inventory.VehicleInstanceId,
+                Agency = MapAgencyToResponse(inventory.Agency),
+                VehicleDetails = vehicleDetails
+            };
         }
 
-        public Task<bool> HasSufficientStockAsync(int AgencyId, int variantId, int requiredQuantity)
-        {
-            return _AgencyInventoryRepository.HasSufficientStockAsync(AgencyId, variantId, requiredQuantity);
-        }
+
 
         public Task RemoveInventoryItemAsync(int AgencyId, int variantId)
         {
-            var inventory = _AgencyInventoryRepository.GetInventoryAsync(AgencyId, variantId);
+            var inventory = _agencyInventoryRepository.GetInventoryAsync(AgencyId, variantId);
             if (inventory == null)
             {
                 throw new Exception("Inventory item not found.");
             }
-            return _AgencyInventoryRepository.RemoveInventoryItemAsync(AgencyId, variantId);
+            return _agencyInventoryRepository.RemoveInventoryItemAsync(AgencyId, variantId);
         }
 
-        public Task SetQuantityAsync(int AgencyId, int variantId, int newQuantity)
-        {
-            var inventory = _AgencyInventoryRepository.GetInventoryAsync(AgencyId, variantId);
-            if (inventory == null)
-            {
-                throw new Exception("Inventory item not found.");
-            }
-            return _AgencyInventoryRepository.SetQuantityAsync(AgencyId, variantId, newQuantity);
-        }
 
-        public async Task UpdateInventoryQuantityAsync(int AgencyId, UpdateAgencyInventoryRequest request)
+
+        public async Task<AgencyInventoryResponse> UpdateInventoryAsync(int AgencyId, UpdateAgencyInventoryRequest request)
         {
-            var inventory = await _AgencyInventoryRepository.GetInventoryAsync(AgencyId, request.VehicleId);
+            var inventory = await _agencyInventoryRepository.GetInventoryAsync(AgencyId, request.VehicleInstanceId);
             if (inventory == null)
             {
                 throw new Exception("Inventory item not found.");
             }
-             await _AgencyInventoryRepository.UpdateInventoryQuantityAsync(AgencyId, request.VehicleId, request.Quantity);
+            inventory.VehicleInstanceId = request.VehicleInstanceId;
+            _agencyInventoryRepository.Update(inventory);
+            await _agencyInventoryRepository.SaveChangesAsync();
+            return MapToResponse(inventory);
         }
         public AgencyInventoryResponse MapToResponse(AgencyInventory inventory)
         {
@@ -91,8 +120,7 @@ namespace AgencyService.Services
             {
                 Id = inventory.Id,
                 AgencyId = inventory.AgencyId,
-                VehicleId = inventory.VehicleId,
-                Quantity = inventory.Quantity,
+                VehicleInstanceId = inventory.VehicleInstanceId,
                 Agency = inventory.Agency == null ? null : new AgencyResponseForTarget
                 {
                     Id = inventory.Agency.Id,
@@ -102,6 +130,19 @@ namespace AgencyService.Services
                     Address = inventory.Agency.Address,
                     Status = inventory.Agency.Status,
                 }
+            };
+        }
+        private AgencyResponseForTarget? MapAgencyToResponse(Agency agency)
+        {
+            if (agency == null) return null;
+            return new AgencyResponseForTarget
+            {
+                Id = agency.Id,
+                AgencyName = agency.AgencyName,
+                Email = agency.Email,
+                Phone = agency.Phone,
+                Address = agency.Address,
+                Status = agency.Status,
             };
         }
     }

@@ -13,12 +13,12 @@ namespace AgencyService.Services
     public class TestDriveService : ITestDriveService
     {
         private readonly ITestDriveRepository _testDriveRepository;
-        private readonly IVehicleGrpcServiceClient _vehicleGrpcServiceClient;
+        private readonly IVehicleInstanceGrpcServiceClient _vehicleGrpcServiceClient;
         private readonly ICustomerGrpcServiceClient _customerGrpcServiceClient;
 
         public TestDriveService(
             ITestDriveRepository testDriveRepository,
-            IVehicleGrpcServiceClient vehicleGrpcServiceClient,
+            IVehicleInstanceGrpcServiceClient vehicleGrpcServiceClient,
             ICustomerGrpcServiceClient customerGrpcServiceClient)
         {
             _testDriveRepository = testDriveRepository;
@@ -32,7 +32,7 @@ namespace AgencyService.Services
             var testDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
-                VehicleId = request.VehicleId,
+                VehicleInstanceId = request.VehicleId,
                 CustomerId = request.CustomerId,
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
@@ -45,7 +45,7 @@ namespace AgencyService.Services
             await _testDriveRepository.SaveChangesAsync();
 
             // Lấy thông tin vehicle & customer từ gRPC
-            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
 
             var response = MapToResponse(testDrive);
@@ -77,7 +77,7 @@ namespace AgencyService.Services
             await _testDriveRepository.SaveChangesAsync();
 
             // Lấy dữ liệu gRPC
-            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
 
             var response = MapToResponse(testDrive);
@@ -110,7 +110,7 @@ namespace AgencyService.Services
                 var response = MapToResponse(td);
 
                 // Gọi gRPC
-                var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(td.VehicleId);
+                var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(td.VehicleInstanceId);
                 var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(td.CustomerId);
 
                 response.Vehicle = vehicle;
@@ -129,7 +129,7 @@ namespace AgencyService.Services
             if (testDrive == null)
                 throw new KeyNotFoundException($"Test drive with ID {id} not found.");
 
-            var vehicle = await _vehicleGrpcServiceClient.GetVehicleByIdAsync(testDrive.VehicleId);
+            var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
 
             var response = MapToResponse(testDrive);
@@ -147,7 +147,7 @@ namespace AgencyService.Services
                 Id = td.Id,
                 AgencyId = td.AgencyId,
                 AgencyName = td.Agency?.AgencyName,
-                VehicleId = td.VehicleId,
+                VehicleId = td.VehicleInstanceId,
                 CustomerId = td.CustomerId,
                 AppointmentDate = td.AppointmentDate,
                 Status = td.Status,

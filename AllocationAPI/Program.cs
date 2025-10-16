@@ -68,6 +68,8 @@ namespace AllocationAPI
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IVehicleOptionService, VehicleOptionService>();
             builder.Services.AddScoped<IVehiclePromotionService, VehiclePromotionService>();
+            builder.Services.AddScoped<IVehicleInstanceRepository, VehicleInstanceRepository>();
+            builder.Services.AddScoped<IVehicleInstanceService, VehicleInstanceService>();
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
@@ -126,22 +128,36 @@ namespace AllocationAPI
                 ? "https://localhost:7198"
                 : "https://agencyapi:443";
 
-            var handler = new HttpClientHandler();
-            var caCert = new X509Certificate2("/https/certs/ca.crt");
-            handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+            if (builder.Environment.IsProduction())
             {
-                if (serverCert == null) return false;
-                using var customChain = new X509Chain();
-                customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-                customChain.ChainPolicy.CustomTrustStore.Add(caCert);
-                customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                return customChain.Build(serverCert);
-            };
+                // Cấu hình chỉ dành cho PRODUCTION
+                var handler = new HttpClientHandler();
+                // Đường dẫn này chỉ tồn tại trong môi trường production (Docker)
+                var caCert = new X509Certificate2("/https/certs/ca.crt");
+                handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+                {
+                    if (serverCert == null) return false;
+                    using var customChain = new X509Chain();
+                    customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                    customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    return customChain.Build(serverCert);
+                };
 
-            builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+                builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+                {
+                    o.Address = new Uri(agencyServiceUrl);
+                }).ConfigurePrimaryHttpMessageHandler(() => handler);
+            }
+            else
             {
-                o.Address = new Uri(agencyServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+                // Cấu hình đơn giản cho LOCAL DEVELOPMENT
+                // Không cần handler tùy chỉnh, hệ thống sẽ tin tưởng cert của localhost
+                builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+                {
+                    o.Address = new Uri(agencyServiceUrl);
+                });
+            }
 
             var app = builder.Build();
 
@@ -182,7 +198,7 @@ namespace AllocationAPI
                 }
             }
 
-            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+            if (app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -191,12 +207,17 @@ namespace AllocationAPI
                     c.RoutePrefix = string.Empty;
                 });
             }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapGrpcService<VehicleGrpcServiceImpl>();
+            app.MapGrpcService<VehicleInstanceGrpcServiceImpl>();
 
             app.Run();
         }

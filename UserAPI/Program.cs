@@ -227,7 +227,7 @@ namespace UserAPI
             }
 
             // Bật Swagger cho cả Development và Production
-            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+            if ( app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -235,6 +235,11 @@ namespace UserAPI
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
                     c.RoutePrefix = string.Empty; // Hiển thị Swagger UI ở trang chủ
                 });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             // Bỏ UseHttpsRedirection() vì NGINX đã xử lý HTTPS

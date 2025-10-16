@@ -19,10 +19,9 @@ namespace AllocationRepository.Model
         public string Features { get; set; }
         public string Status { get; set; }
 
-        public ICollection<EVInventory> EVInventories { get; set; } = new List<EVInventory>();
         public ICollection<VehiclePromotions> VehiclePromotions { get; set; } = new List<VehiclePromotions>();
         public ICollection<VehiclePrices> VehiclePrices { get; set; } = new List<VehiclePrices>();
-        public ICollection<Allocations> Allocations { get; set; } = new List<Allocations>();
+        public ICollection<VehicleInstance> VehicleInstances { get; set; } = new List<VehicleInstance>();
 
 
     }

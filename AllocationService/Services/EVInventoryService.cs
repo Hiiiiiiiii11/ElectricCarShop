@@ -20,38 +20,37 @@ namespace AllocationService.Services
 
         public async Task<EVInventoryResponse> CreateInventoryAsync(EVInventoryRequest request)
         {
-            var existing = await _evInventoryRepository.GetByVehicleIdAsync(request.VehicleId);
-            if (existing != null)
-            {
-                throw new InvalidOperationException($"Inventory for vehicle {request.VehicleId} already exists");
-            }
+            // Đã bỏ phần kiểm tra tồn tại (if existing != null) theo yêu cầu.
+
             var inv = new EVInventory
             {
-                VehicleId = request.VehicleId,
-                Quantity = request.Quantity
+                VehicleInstanceId = request.VehicleInstanceId
+                // Trường Quantity cũng đã được bỏ đi vì mỗi VehicleInstance là duy nhất.
             };
+
             await _evInventoryRepository.AddAsync(inv);
             await _evInventoryRepository.SaveChangesAsync();
+
             return MapToResponse(inv);
         }
-        public async Task IncreaseInventoryAsync(int vehicleId, int quantity)
-        {
-            if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+        //public async Task IncreaseInventoryAsync(int vehicleId, int quantity)
+        //{
+        //    if (quantity <= 0)
+        //        throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
-            await _evInventoryRepository.IncreaseQuantityAsync(vehicleId, quantity);
-        }
-        public async  Task DecreaseInventoryAsync(int vehicleId, int quantity)
-        {
-            if (quantity <= 0)
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
+        //    await _evInventoryRepository.IncreaseQuantityAsync(vehicleId, quantity);
+        //}
+        //public async  Task DecreaseInventoryAsync(int vehicleId, int quantity)
+        //{
+        //    if (quantity <= 0)
+        //        throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
-            bool hasEnough = await _evInventoryRepository.HasEnoughStockAsync(vehicleId, quantity);
-            if (!hasEnough)
-                throw new InvalidOperationException("Không đủ xe trong kho để phân bổ.");
+        //    bool hasEnough = await _evInventoryRepository.HasEnoughStockAsync(vehicleId, quantity);
+        //    if (!hasEnough)
+        //        throw new InvalidOperationException("Không đủ xe trong kho để phân bổ.");
 
-            await _evInventoryRepository.DecreaseQuantityAsync(vehicleId, quantity);
-        }
+        //    await _evInventoryRepository.DecreaseQuantityAsync(vehicleId, quantity);
+        //}
 
         public async Task DeleteInventoryAsync(int id)
         {
@@ -71,7 +70,7 @@ namespace AllocationService.Services
 
         public async Task<EVInventoryResponse?> GetByVehicleIdAsync(int vehicleId)
         {
-            var inv = await _evInventoryRepository.GetByVehicleIdAsync(vehicleId);
+            var inv = await _evInventoryRepository.GetByVehicleInstanceIdAsync(vehicleId);
             if (inv == null)
             {
                 throw new KeyNotFoundException($"Inventory for vehicle {vehicleId} not found");
@@ -79,15 +78,15 @@ namespace AllocationService.Services
             return inv == null ? null : MapToResponse(inv);
         }
 
-        public async Task<int> GetTotalInventoryAsync()
-        {
-           return await _evInventoryRepository.GetTotalInventoryCountAsync();
-        }
+        //public async Task<int> GetTotalInventoryAsync()
+        //{
+        //   return await _evInventoryRepository.GetTotalInventoryCountAsync();
+        //}
 
-        public async Task<bool> HasEnoughStockAsync(int vehicleId, int requiredQuantity)
-        {
-            return await _evInventoryRepository.HasEnoughStockAsync(vehicleId, requiredQuantity);
-        }
+        //public async Task<bool> HasEnoughStockAsync(int vehicleId, int requiredQuantity)
+        //{
+        //    return await _evInventoryRepository.HasEnoughStockAsync(vehicleId, requiredQuantity);
+        //}
 
 
         private EVInventoryResponse MapToResponse(EVInventory inv)
@@ -95,11 +94,7 @@ namespace AllocationService.Services
             return new EVInventoryResponse
             {
                 Id = inv.Id,
-                VehicleId = inv.VehicleId,
-                Quantity = inv.Quantity,
-                //VehicleName = inv.Vehicle?.VariantName,
-                //Color = inv.Vehicle?.Color,
-                //BatteryCapacity = inv.Vehicle?.BatteryCapacity
+                VehicleInstanceId = inv.VehicleInstanceId
             };
         }
     }

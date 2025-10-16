@@ -77,52 +77,17 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpPut("Agency/{AgencyId}/inventory/{variantId}/quantity")]
-        public async Task<IActionResult> UpdateInventoryQuantity(int AgencyId, int vehicleId, [FromBody] int newQuantity)
+        [HttpPut("Agency/{id}")]                       
+        public async Task<IActionResult> UpdateInventoryItem(int id, [FromBody] UpdateAgencyInventoryRequest request)
         {
             try
             {
-                await _AgencyInventoryService.SetQuantityAsync(AgencyId, vehicleId, newQuantity);
-                return NoContent();
+                var updatedInventory = await _AgencyInventoryService.UpdateInventoryAsync(id, request);
+                return Ok(updatedInventory);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
-
-        [HttpGet("Agency/{AgencyId}/inventory/{variantId}/sufficient-stock")]
-        public async Task<IActionResult> HasSufficientStock(int AgencyId, int vehicleId, [FromQuery] int requiredQuantity)
-        {
-            try
-            {
-                var hasStock = await _AgencyInventoryService.HasSufficientStockAsync(AgencyId, vehicleId, requiredQuantity);
-                return Ok(new { hasSufficientStock = hasStock });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
-        [HttpPut("Agency/{AgencyId}/inventory/{variantId}/adjust-quantity")]
-        public async Task<IActionResult> AdjustInventoryQuantity(int AgencyId, int vehicleId, [FromBody] int quantityChange)
-        {
-            try
-            {
-                await _AgencyInventoryService.SetQuantityAsync(AgencyId, vehicleId, quantityChange);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {

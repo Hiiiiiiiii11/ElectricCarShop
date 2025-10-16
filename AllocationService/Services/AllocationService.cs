@@ -33,7 +33,7 @@ namespace AllocationService.Services
             {
                 AgencyId = request.AgencyId,
                 EvInventoryId = request.EvInventoryId,
-                VehicleId = request.VehicleId,
+                VehicleInstanceId = request.VehicleInstanceId,
                 AllocationQuantity = request.AllocationQuantity,
                 AllocationDate = DateTime.UtcNow
             };
@@ -68,7 +68,7 @@ namespace AllocationService.Services
 
         public async Task<AllocationResponse?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId)
         {
-            var entity = await _allocationRepository.GetByAgencyAndVehicleAsync(agencyId, vehicleId);
+            var entity = await _allocationRepository.GetByAgencyAndVehicleInstanceAsync(agencyId, vehicleId);
             if (entity == null)
                 throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyId} hoặc xe với ID {vehicleId}");
 
@@ -98,7 +98,7 @@ namespace AllocationService.Services
 
         public async Task<IEnumerable<AllocationResponse>> GetByVehicleIdAsync(int vehicleId)
         {
-            var entities = await _allocationRepository.GetByVehicleIdAsync(vehicleId);
+            var entities = await _allocationRepository.GetByVehicleInstanceIdAsync(vehicleId);
             if(entities == null)
             {
                 throw new KeyNotFoundException($"Không tìm thấy xe với ID {vehicleId}");
@@ -125,7 +125,7 @@ namespace AllocationService.Services
                 Id = a.Id,
                 AgencyId = a.AgencyId,
                 EvInventoryId = a.EvInventoryId,
-                VehicleId = a.VehicleId,
+                VehicleInstanceId = a.VehicleInstanceId,
                 AllocationQuantity = a.AllocationQuantity,
                 AllocationDate = a.AllocationDate,
 

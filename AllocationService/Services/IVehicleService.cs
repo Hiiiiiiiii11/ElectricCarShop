@@ -17,7 +17,7 @@ namespace AllocationService.Services
         Task DeleteVehicleAsync(int id);
         Task<IEnumerable<VehicleResponse>> SearchVehiclesAsync(string? variantName, string? color, string? batteryCapacity);
         Task<IEnumerable<VehicleResponse>> GetVehiclesByStatusAsync(string status);
-        Task<IEnumerable<VehicleResponse>> GetVehiclesWithAvailableStockAsync();
+        //Task<IEnumerable<VehicleResponse>> GetVehiclesWithAvailableStockAsync();
         Task<decimal?> GetCurrentPriceAsync(int vehicleId, DateTime date);
     }
 }
