@@ -49,7 +49,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [Authorize(Roles = "EVManager")]
+        //[Authorize(Roles = "EVManager")]
         [HttpPost]
         public async Task<IActionResult> CreateAgency([FromForm] CreateAgencyRequest request)
         {
@@ -66,7 +66,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [Authorize(Roles = "AgencyManager")]
+        //[Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/assign-user")]
         public async Task<IActionResult> AssignUserToAgency(int agencyId, [FromBody] AssignUserAgencyRequest request)
         {
@@ -83,7 +83,7 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
-        [Authorize(Roles = "AgencyManager")]
+        //[Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/remove-user")]
         public async Task<IActionResult> RemoveUserFromAgency(int agencyId, [FromBody] RemoveUserAgencyRequest request)
         {
@@ -100,7 +100,7 @@ namespace AgencyAPI.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
-        [Authorize(Roles = "EVManager,AgencyManager")]
+        //[Authorize(Roles = "EVManager,AgencyManager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAgency(int id, [FromForm] UpdateAgencyRequest request)
         {
@@ -121,7 +121,7 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [Authorize(Roles = "EVManager")]
+        //[Authorize(Roles = "EVManager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAgency(int id)
         {
