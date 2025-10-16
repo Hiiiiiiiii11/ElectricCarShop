@@ -12,9 +12,9 @@ namespace AgencyService.Services
         Task<IEnumerable<AgencyInventoryResponse>> GetInventoriesByAgencyIdAsync(int AgencyId);
         Task<AgencyInventoryResponse?> GetInventoryAsync(int AgencyId, int variantId);
         Task<AgencyInventoryResponse> CreateAgencyInventoryAsync(int AgencyId, CreateAgencyInventoryRequest request);
-        Task UpdateInventoryQuantityAsync(int AgencyId, UpdateAgencyInventoryRequest request);
-        Task<bool> HasSufficientStockAsync(int AgencyId, int variantId, int requiredQuantity);
+        Task<AgencyInventoryResponse> UpdateInventoryAsync(int AgencyId, UpdateAgencyInventoryRequest request);
+
         Task RemoveInventoryItemAsync(int AgencyId, int variantId);
-        Task SetQuantityAsync(int AgencyId, int variantId, int newQuantity);
+
     }
 }

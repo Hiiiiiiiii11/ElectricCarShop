@@ -14,12 +14,12 @@ namespace AllocationRepository.Repositories
         Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencyId);
 
         // Lấy tất cả allocation theo Vehicle
-        Task<IEnumerable<Allocations>> GetByVehicleIdAsync(int vehicleId);
+        Task<IEnumerable<Allocations>> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
 
         // Lấy allocation cụ thể theo Inventory
         Task<Allocations?> GetByInventoryIdAsync(int evInventoryId);
 
         // Tìm allocation theo Agency + Vehicle
-        Task<Allocations?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId);
+        Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencyId, int vehicleInstanceId);
     }
 }

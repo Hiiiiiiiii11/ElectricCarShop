@@ -129,45 +129,67 @@ namespace OrderAPI
                 });
 
             builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
-            builder.Services.AddScoped<IVehicleGrpcServiceClient, VehicleGrpcServiceClient>();
+            builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
             builder.Services.AddGrpc();
 
+            // 1. Khai báo các URL (phần này bạn đã làm đúng)
             var emailServiceUrl = builder.Environment.IsDevelopment()
-               ? "https://localhost:7022"
-               : "https://userapi:443";
+                ? "https://localhost:7022"      // Cổng của UserAPI chứa Email service
+                : "https://userapi:443";
+
             var agencyServiceUrl = builder.Environment.IsDevelopment()
-               ? "https://localhost:7198"
-               : "https://agencyapi:443";
+                ? "https://localhost:7198"      // Cổng của AgencyAPI
+                : "https://agencyapi:443";
+
             var vehicleServiceUrl = builder.Environment.IsDevelopment()
-               ? "https://localhost:7055"
-               : "https://allocationapi:443";
+                ? "https://localhost:7055"      // Cổng của AllocationAPI
+                : "https://allocationapi:443";
 
-            var handler = new HttpClientHandler();
-            var caCert = new X509Certificate2("/https/certs/ca.crt");
-            handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+            // 2. Tách biệt cấu hình cho từng môi trường
+            if (builder.Environment.IsProduction())
             {
-                if (serverCert == null) return false;
-                using var customChain = new X509Chain();
-                customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-                customChain.ChainPolicy.CustomTrustStore.Add(caCert);
-                customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                return customChain.Build(serverCert);
-            };
+                // --- Cấu hình cho PRODUCTION ---
+                // Handler chỉ được tạo khi chạy ở production
+                var handler = new HttpClientHandler();
+                var caCert = new X509Certificate2("/https/certs/ca.crt");
+                handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
+                {
+                    if (serverCert == null) return false;
+                    using var customChain = new X509Chain();
+                    customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    customChain.ChainPolicy.CustomTrustStore.Add(caCert);
+                    customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    return customChain.Build(serverCert);
+                };
 
-            builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
-            {
-                o.Address = new Uri(emailServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+                // Đăng ký các client và dùng chung handler
+                builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
+                    o.Address = new Uri(emailServiceUrl))
+                    .ConfigurePrimaryHttpMessageHandler(() => handler);
 
-            builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
-            {
-                o.Address = new Uri(agencyServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+                builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+                    o.Address = new Uri(agencyServiceUrl))
+                    .ConfigurePrimaryHttpMessageHandler(() => handler);
 
-            builder.Services.AddGrpcClient<VehicleGrpcService.VehicleGrpcServiceClient>(o =>
+                builder.Services.AddGrpcClient<VehicleInstanceGrpcService.VehicleInstanceGrpcServiceClient>(o =>
+                    o.Address = new Uri(vehicleServiceUrl))
+                    .ConfigurePrimaryHttpMessageHandler(() => handler);
+            }
+            else
             {
-                o.Address = new Uri(vehicleServiceUrl);
-            }).ConfigurePrimaryHttpMessageHandler(() => handler);
+                // --- Cấu hình cho LOCAL DEVELOPMENT ---
+                // Đăng ký các client một cách bình thường
+                builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
+                    o.Address = new Uri(emailServiceUrl));
+
+                builder.Services.AddGrpcClient<AgencyGrpcService.AgencyGrpcServiceClient>(o =>
+                    o.Address = new Uri(agencyServiceUrl));
+
+                builder.Services.AddGrpcClient<VehicleInstanceGrpcService.VehicleInstanceGrpcServiceClient>(o =>
+                    o.Address = new Uri(vehicleServiceUrl));
+            }
+
+            // ... các phần code khác trong Program.cs
 
             var app = builder.Build();
             app.UseForwardedHeaders();
@@ -207,7 +229,7 @@ namespace OrderAPI
                 }
             }
 
-            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+            if (app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -215,6 +237,11 @@ namespace OrderAPI
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order API V1");
                     c.RoutePrefix = string.Empty;
                 });
+            }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseCors("AllowAll");

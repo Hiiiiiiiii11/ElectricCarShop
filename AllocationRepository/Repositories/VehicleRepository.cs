@@ -38,14 +38,14 @@ namespace AllocationRepository.Repositories
                 
         }
 
-        public async Task<IEnumerable<Vehicles>> GetVehiclesWithAvailableStockAsync()
-        {
-           return await _context.Vehicles
-                .Include(v => v.VehicleOption)
-                .Include(v => v.EVInventories)
-                .Where(v => v.EVInventories.Any(inv => inv.Quantity > 0))
-                .ToListAsync();
-        }
+        //public async Task<IEnumerable<Vehicles>> GetVehiclesWithAvailableStockAsync()
+        //{
+        //   return await _context.Vehicles
+        //        .Include(v => v.VehicleOption)
+        //        .Include(v => v.VehiclePrices)
+        //        .Where(v => v.EVInventories.Any(inv => inv.Quantity > 0))
+        //        .ToListAsync();
+        //}
 
         public async Task<IEnumerable<Vehicles>> GetVehiclesWithPromotionsAsync()
         {
@@ -61,8 +61,6 @@ namespace AllocationRepository.Repositories
         {
             return await _context.Vehicles
                 .Include(v => v.VehicleOption)
-                .Include(v => v.EVInventories)
-                .Include(v => v.Allocations)
                 .Include(v => v.VehiclePrices)
                 .Include(v => v.VehiclePromotions)
                 .FirstOrDefaultAsync(v => v.Id == vehicleId);

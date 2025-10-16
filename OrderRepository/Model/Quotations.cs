@@ -13,7 +13,7 @@ namespace AllocationRepository.Model
         public int AgencyId { get; set; }
         public int CustomerId { get; set; }
         public Customers Customer { get; set; }
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public string QuotationName { get; set; }
         public decimal QuotedPrice { get; set; }
         public DateTime StartDate { get; set; }

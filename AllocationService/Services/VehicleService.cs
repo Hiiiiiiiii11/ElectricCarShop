@@ -98,11 +98,11 @@ namespace AllocationService.Services
             return vehicles.Select(MapToResponse);
         }
 
-        public async Task<IEnumerable<VehicleResponse>> GetVehiclesWithAvailableStockAsync()
-        {
-            var vehicles = await _vehicleRepository.GetVehiclesWithAvailableStockAsync();
-            return vehicles.Select(MapToResponse);
-        }
+        //public async Task<IEnumerable<VehicleResponse>> GetVehiclesWithAvailableStockAsync()
+        //{
+        //    var vehicles = await _vehicleRepository.GetVehiclesWithAvailableStockAsync();
+        //    return vehicles.Select(MapToResponse);
+        //}
 
         public async Task<IEnumerable<VehicleResponse>> SearchVehiclesAsync(string? variantName, string? color, string? batteryCapacity)
         {

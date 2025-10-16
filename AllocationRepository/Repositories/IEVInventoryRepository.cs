@@ -8,21 +8,21 @@ namespace AllocationRepository.Repositories
     public interface IEVInventoryRepository : IGenericRepository<EVInventory>
     {
         // 🔍 Lấy tồn kho theo VehicleId
-        Task<EVInventory?> GetByVehicleIdAsync(int vehicleId);
+        Task<EVInventory?> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
 
         // 🔍 Lấy tất cả tồn kho kèm thông tin xe (Include Vehicle)
         Task<IEnumerable<EVInventory>> GetAllWithVehiclesAsync();
 
         // 📦 Tăng số lượng tồn kho
-        Task IncreaseQuantityAsync(int vehicleId, int quantity);
+        //Task IncreaseQuantityAsync(int vehicleInstanceId, int quantity);
 
-        // 📦 Giảm số lượng tồn kho
-        Task DecreaseQuantityAsync(int vehicleId, int quantity);
+        //// 📦 Giảm số lượng tồn kho
+        //Task DecreaseQuantityAsync(int vehicleInstanceId, int quantity);
 
         // 🚗 Kiểm tra tồn kho có đủ số lượng không
-        Task<bool> HasEnoughStockAsync(int vehicleId, int requiredQuantity);
+        //Task<bool> HasEnoughStockAsync(int vehicleInstanceId, int requiredQuantity);
 
-        // 🔍 Lấy tổng số lượng tồn kho toàn hệ thống
-        Task<int> GetTotalInventoryCountAsync();
+        //// 🔍 Lấy tổng số lượng tồn kho toàn hệ thống
+        //Task<int> GetTotalInventoryCountAsync();
     }
 }

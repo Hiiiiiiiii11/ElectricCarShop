@@ -18,18 +18,18 @@ namespace AllocationRepository.Repositories
             _context = context;
         }
 
-        public async Task<Allocations?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId)
+        public async Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencyId, int vehicleInstanceId)
         {
             return await _context.Allocations
-                .Include(a => a.Vehicle)
-                .FirstOrDefaultAsync(a => a.AgencyId == agencyId && a.VehicleId == vehicleId);
+                .Include(a => a.VehicleInstance)
+                .FirstOrDefaultAsync(a => a.AgencyId == agencyId && a.VehicleInstanceId == vehicleInstanceId);
         }
 
         public async Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencyId)
         {
             return await _context.Allocations
                 .Where(a => a.AgencyId == agencyId)
-                .Include(a => a.Vehicle)
+                .Include(a => a.VehicleInstance)
                 .Include(a => a.EVInventory)
                 .ToListAsync();
         }
@@ -37,16 +37,16 @@ namespace AllocationRepository.Repositories
         public async Task<Allocations?> GetByInventoryIdAsync(int evInventoryId)
         {
             return await _context.Allocations
-                .Include(a => a.Vehicle)
+                .Include(a => a.VehicleInstance)
                 .Include(a => a.EVInventory)
                 .FirstOrDefaultAsync(a => a.EvInventoryId == evInventoryId);
         }
 
-        public async Task<IEnumerable<Allocations>> GetByVehicleIdAsync(int vehicleId)
+        public async Task<IEnumerable<Allocations>> GetByVehicleInstanceIdAsync(int vehicleInstanceId)
         {
             return await _context.Allocations
-               .Where(a => a.VehicleId == vehicleId)
-               .Include(a => a.Vehicle)
+               .Where(a => a.VehicleInstanceId == vehicleInstanceId)
+               .Include(a => a.VehicleInstance)
                .Include(a => a.EvInventoryId)
                .ToListAsync();
         }
