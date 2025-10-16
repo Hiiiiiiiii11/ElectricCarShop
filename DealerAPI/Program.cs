@@ -121,10 +121,9 @@ namespace AgencyAPI
             // Tạo một HttpClientHandler duy nhất để tái sử dụng
             if (builder.Environment.IsProduction())
             {
-                // --- Cấu hình cho PRODUCTION ---
-                // Tạo một HttpClientHandler duy nhất để tái sử dụng, tăng hiệu năng
                 var handler = new HttpClientHandler();
-                var caCert = new X509Certificate2("/https://certs/ca.crt");
+                // SỬA LỖI TẠI ĐÂY: Bỏ dấu "://"
+                var caCert = new X509Certificate2("/https/certs/ca.crt");
                 handler.ServerCertificateCustomValidationCallback = (message, serverCert, chain, errors) =>
                 {
                     if (serverCert == null) return false;
@@ -134,8 +133,6 @@ namespace AgencyAPI
                     customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                     return customChain.Build(serverCert);
                 };
-
-
 
                 builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
                     o.Address = new Uri(userServiceUrl))
@@ -151,9 +148,6 @@ namespace AgencyAPI
             }
             else
             {
-                // --- Cấu hình cho LOCAL DEVELOPMENT ---
-                // Đăng ký tất cả client mà không cần handler tùy chỉnh
-
                 builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
                     o.Address = new Uri(userServiceUrl));
 
