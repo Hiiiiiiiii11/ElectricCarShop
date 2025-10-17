@@ -209,8 +209,8 @@ namespace AllocationAPI
                             logger.LogInformation("✅ Step 1/2: Database '{DbName}' created or already exists.", dbName);
                         }
 
-                        dbContext.Database.EnsureCreated();
-                        logger.LogInformation("✅ Step 2/2: Schema has been created successfully.");
+                        dbContext.Database.Migrate();
+                        logger.LogInformation("✅ Step 2/2: Database schema has been migrated to the latest version.");
                     }
                     catch (Exception ex)
                     {

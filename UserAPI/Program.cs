@@ -206,8 +206,8 @@ namespace UserAPI
                             logger.LogInformation("✅ Step 1/3: Database '{DbName}' created or already exists.", dbName);
                         }
 
-                        dbContext.Database.EnsureCreated();
-                        logger.LogInformation("✅ Step 2/3: Schema has been created successfully.");
+                        dbContext.Database.Migrate();
+                        logger.LogInformation("✅ Step 2/2: Database schema has been migrated to the latest version.");
 
                         var adminSettings = services.GetRequiredService<IOptions<AdminAccountSettings>>().Value;
                         var adminRole = dbContext.Roles.FirstOrDefault(r => r.RoleName == "Admin");
