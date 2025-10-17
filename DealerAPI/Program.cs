@@ -241,8 +241,8 @@ namespace AgencyAPI
                     command.ExecuteNonQuery();
                     logger.LogInformation("✅ Database '{DbName}' created or already exists.", dbName);
 
-                    dbContext.Database.EnsureCreated();
-                    logger.LogInformation("✅ Schema created successfully.");
+                    dbContext.Database.Migrate();
+                    logger.LogInformation("✅ Step 2/2: Database schema has been migrated to the latest version.");
                 }
                 catch (Exception ex)
                 {
