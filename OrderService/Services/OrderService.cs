@@ -23,7 +23,6 @@ namespace OrderService.Services
             {
                 UserId = request.UserId,
                 CustomerId = request.CustomerId,
-                QuotationId = request.QuotationId,
                 TotalAmount = request.TotalAmount,
                 Status = request.Status,
                 OrderDate = DateTime.UtcNow
@@ -83,13 +82,13 @@ namespace OrderService.Services
             return orders.Select(MapToResponse);
         }
 
-        public async Task<OrderResponse?> GetOrderByQuotationIdAsync(int quotationId)
-        {
-            var order = await _orderRepository.GetByQuotationIdAsync(quotationId);
-            if (order == null)
-                throw new KeyNotFoundException($"Order with Quotation ID {quotationId} not found.");
-            return MapToResponse(order);
-        }
+        //public async Task<OrderResponse?> GetOrderByQuotationIdAsync(int quotationId)
+        //{
+        //    var order = await _orderRepository.GetByQuotationIdAsync(quotationId);
+        //    if (order == null)
+        //        throw new KeyNotFoundException($"Order with Quotation ID {quotationId} not found.");
+        //    return MapToResponse(order);
+        //}
 
         public async Task<IEnumerable<OrderResponse>> GetOrdersByStatusAsync(string status)
         {
@@ -110,8 +109,6 @@ namespace OrderService.Services
                 UserId = order.UserId,
                 CustomerId = order.CustomerId,
                 CustomerName = order.Customer?.FullName,
-                QuotationId = order.QuotationId,
-                QuotationName = order.Quotation?.QuotationName,
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
                 Status = order.Status

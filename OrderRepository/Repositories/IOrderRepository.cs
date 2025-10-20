@@ -11,7 +11,7 @@ namespace OrderRepository.Repositories
     public interface IOrderRepository : IGenericRepository<Orders>
     {
         Task<IEnumerable<Orders>> GetByCustomerIdAsync(int customerId);
-        Task<Orders?> GetByQuotationIdAsync(int quotationId);
+        //Task<Orders?> GetByQuotationIdAsync(int quotationId);
         Task<IEnumerable<Orders>> GetByStatusAsync(string status);
         Task<decimal> GetTotalRevenueAsync(DateTime startDate, DateTime endDate);
     }

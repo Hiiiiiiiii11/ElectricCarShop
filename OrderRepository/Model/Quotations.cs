@@ -20,11 +20,12 @@ namespace AllocationRepository.Model
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; } 
         public string Status { get; set; }
+        public int CreatedBy { get; set; }
 
 
         // 🔗 Một báo giá có thể trở thành nhiều đơn hàng
-        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
         public ICollection<Contracts> Contracts { get; set; } = new List<Contracts>();
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     }
 }

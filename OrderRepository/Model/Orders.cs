@@ -12,11 +12,10 @@ namespace OrderRepository.Model
         public int Id { get; set; }
         public int UserId { get; set; }
         public int CustomerId { get; set; }
-        public int QuotationId { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
         public Customers Customer { get; set; }
-        public Quotations Quotation { get; set; }
+        public ICollection<OrderDetail> Details { get; set; }   = new List<OrderDetail>();
     }
 }

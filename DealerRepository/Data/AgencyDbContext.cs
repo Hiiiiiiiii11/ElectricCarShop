@@ -18,40 +18,60 @@ namespace AgencyRepository.Data
         public DbSet<AgencyDebts> AgencyDebts { get; set; } 
         public DbSet<AgencyContracts>AgencyContracts { get; set; }
         public DbSet<TestDrive> TestDrives { get; set; }
+        public DbSet<AgencyOrder> AgencyOrders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // 🔹 AgencyContracts ↔ Agency
             modelBuilder.Entity<AgencyContracts>()
                 .HasOne(c => c.Agency)
-                .WithMany(d => d.Contracts)
+                .WithMany(a => a.Contracts)
                 .HasForeignKey(c => c.AgencyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // 🔹 AgencyTargets ↔ Agency
             modelBuilder.Entity<AgencyTargets>()
                 .HasOne(t => t.Agency)
-                .WithMany(d => d.Targets)
+                .WithMany(a => a.Targets)
                 .HasForeignKey(t => t.AgencyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // 🔹 AgencyInventory ↔ Agency
             modelBuilder.Entity<AgencyInventory>()
                 .HasOne(i => i.Agency)
-                .WithMany(d => d.Inventories)
+                .WithMany(a => a.Inventories)
                 .HasForeignKey(i => i.AgencyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // 🔹 TestDrive ↔ Agency
             modelBuilder.Entity<TestDrive>()
-                 .HasOne(t => t.Agency)
-                 .WithMany(d => d.TestDrives)
-                 .HasForeignKey(t => t.AgencyId)
-                 .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(td => td.Agency)
+                .WithMany(a => a.TestDrives)
+                .HasForeignKey(td => td.AgencyId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // 🔹 AgencyDebts ↔ Agency
             modelBuilder.Entity<AgencyDebts>()
-                 .HasOne(t => t.Agency)
-                 .WithMany(d => d.Debts)
-                 .HasForeignKey(t => t.AgencyId)
-                 .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(d => d.Agency)
+                .WithMany(a => a.Debts)
+                .HasForeignKey(d => d.AgencyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 🔹 AgencyOrder ↔ Agency
+            modelBuilder.Entity<AgencyOrder>()
+                .HasOne(o => o.Agency)
+                .WithMany(a => a.Orders)
+                .HasForeignKey(o => o.AgencyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 🔹 AgencyOrder ↔ AgencyContracts
+            modelBuilder.Entity<AgencyOrder>()
+                .HasOne(o => o.AgencyContracts)
+                .WithMany(c => c.Orders)
+                .HasForeignKey(o => o.AgencyContractId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
 

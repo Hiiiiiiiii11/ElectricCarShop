@@ -17,7 +17,7 @@ namespace OrderService.Services
 
         // 4 hàm mở rộng
         Task<IEnumerable<OrderResponse>> GetOrdersByCustomerIdAsync(int customerId);
-        Task<OrderResponse?> GetOrderByQuotationIdAsync(int quotationId);
+        //Task<OrderResponse?> GetOrderByQuotationIdAsync(int quotationId);
         Task<IEnumerable<OrderResponse>> GetOrdersByStatusAsync(string status);
         Task<decimal> GetTotalRevenueAsync(DateTime startDate, DateTime endDate);
     }

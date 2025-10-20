@@ -11,7 +11,9 @@ namespace OrderRepository.Model
         public int Id { get; set; }
         public int CustomerId { get; set; }
         public Customers Customer { get; set; }
-        public string Comment { get; set; }
+        public string Type { get; set; }    
+        public string Content { get; set; }
+        public string Reply { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

@@ -26,7 +26,6 @@ namespace OrderAPIService.Services
                 ContractName = request.ContractName,
                 ContractNumber = request.ContractNumber,
                 ContractDate = request.ContractDate,
-                SignedBy = request.SignedBy,
                 Terms = request.Terms
             };
 
@@ -70,9 +69,6 @@ namespace OrderAPIService.Services
             if (request.ContractDate.HasValue)
                 contract.ContractDate = request.ContractDate.Value;
 
-            if (!string.IsNullOrWhiteSpace(request.SignedBy))
-                contract.SignedBy = request.SignedBy;
-
             if (!string.IsNullOrWhiteSpace(request.Terms))
                 contract.Terms = request.Terms;
 
@@ -104,7 +100,6 @@ namespace OrderAPIService.Services
             ContractName = c.ContractName,
             ContractNumber = c.ContractNumber,
             ContractDate = c.ContractDate,
-            SignedBy = c.SignedBy,
             Terms = c.Terms
         };
     }

@@ -22,24 +22,24 @@ namespace OrderRepository.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Quotation)
+                //.Include(o => o.OrderDetail)
                 .Where(o => o.CustomerId == customerId)
                 .ToListAsync();
         }
 
-        public async Task<Orders?> GetByQuotationIdAsync(int quotationId)
-        {
-            return await _context.Orders
-                .Include(o => o.Customer)
-                .Include(o => o.Quotation)
-                .FirstOrDefaultAsync(o => o.QuotationId == quotationId);
-        }
+        //public async Task<Orders?> GetByQuotationIdAsync(int quotationId)
+        //{
+        //    return await _context.Orders
+        //        .Include(o => o.Customer)
+        //        //.Include(o => o.Quotation)
+        //        .FirstOrDefaultAsync(o => o.QuotationId == quotationId);
+        //}
 
         public async Task<IEnumerable<Orders>> GetByStatusAsync(string status)
         {
             return await _context.Orders
                 .Include(o => o.Customer)
-                .Include(o => o.Quotation)
+                //.Include(o => o.Quotation)
                 .Where(o => o.Status == status)
                 .ToListAsync();
         }

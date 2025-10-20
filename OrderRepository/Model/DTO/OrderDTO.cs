@@ -118,8 +118,6 @@ namespace OrderRepository.Model.Request
         public int UserId { get; set; }
         public int CustomerId { get; set; }
         public string? CustomerName { get; set; }
-        public int QuotationId { get; set; }
-        public string? QuotationName { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
@@ -132,7 +130,6 @@ namespace OrderRepository.Model.Request
         public string ContractName { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public string SignedBy { get; set; }
         public string Terms { get; set; }
     }
 
@@ -140,7 +137,6 @@ namespace OrderRepository.Model.Request
     {
         public string? ContractName { get; set; }
         public DateTime? ContractDate { get; set; }
-        public string? SignedBy { get; set; }
         public string? Terms { get; set; }
     }
 
@@ -151,7 +147,6 @@ namespace OrderRepository.Model.Request
         public string ContractName { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public string SignedBy { get; set; }
         public string Terms { get; set; }
     }
     public class CreatePaymentRequest

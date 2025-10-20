@@ -19,5 +19,6 @@ namespace AgencyRepository.Model
         // Navigation
         public Agency Agency { get; set; }
         public ICollection<AgencyDebts> Debts { get; set; } = new List<AgencyDebts>();
+        public ICollection<AgencyOrder> Orders { get; set; } = new List<AgencyOrder>();
     }
 }
