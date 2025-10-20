@@ -22,27 +22,36 @@ namespace OrderRepository.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Quotations> Quotations { get; set; }
+        public DbSet<OrderDetail> OrderDetail { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Customers ↔ Orders
             modelBuilder.Entity<Orders>()
-                .HasOne<Customers>()
+                .HasOne(o => o.Customer) 
                 .WithMany(c => c.Orders)
                 .HasForeignKey(o => o.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Feedback>()
-    .HasOne(f => f.Customer)
+                .HasOne(f => f.Customer)
     .WithMany(c => c.Feedbacks)
     .HasForeignKey(f => f.CustomerId)
     .OnDelete(DeleteBehavior.Restrict);
 
-            // Quotations ↔ Orders
-            modelBuilder.Entity<Orders>()
-                .HasOne<Quotations>()
-                .WithMany()
-                .HasForeignKey(o => o.QuotationId)
+            
+            // 🔹 Orders ↔ OrderDetails
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Orders)
+                .WithMany(o => o.Details)
+                .HasForeignKey(od => od.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 🔹 Quotations ↔ OrderDetails
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Quotation)
+                .WithMany(q => q.OrderDetails)
+                .HasForeignKey(od => od.QuotationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

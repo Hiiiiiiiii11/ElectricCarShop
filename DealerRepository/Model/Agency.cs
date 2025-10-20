@@ -24,6 +24,7 @@ namespace AgencyRepository.Model
         public ICollection<AgencyTargets> Targets { get; set; } = new List<AgencyTargets>();
         public ICollection<AgencyInventory> Inventories { get; set; } = new List<AgencyInventory>();
         public ICollection<TestDrive> TestDrives { get; set; }= new List<TestDrive>();
+        public ICollection<AgencyOrder> Orders { get; set; } = new List<AgencyOrder>();  
 
     }
 }

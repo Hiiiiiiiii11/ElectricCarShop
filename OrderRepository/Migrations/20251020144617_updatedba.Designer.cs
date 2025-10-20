@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OrderRepository.Data;
 
@@ -11,9 +12,11 @@ using OrderRepository.Data;
 namespace OrderRepository.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    partial class OrderDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251020144617_updatedba")]
+    partial class updatedba
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -216,6 +219,9 @@ namespace OrderRepository.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("CustomerId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -232,6 +238,8 @@ namespace OrderRepository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("CustomerId1");
 
                     b.ToTable("Orders");
                 });
@@ -357,10 +365,16 @@ namespace OrderRepository.Migrations
 
             modelBuilder.Entity("OrderRepository.Model.Orders", b =>
                 {
-                    b.HasOne("OrderRepository.Model.Customers", "Customer")
+                    b.HasOne("OrderRepository.Model.Customers", null)
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OrderRepository.Model.Customers", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId1")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");

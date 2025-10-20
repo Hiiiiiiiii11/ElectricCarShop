@@ -4,6 +4,7 @@ using AgencyRepository.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgencyRepository.Migrations
 {
     [DbContext(typeof(AgencyDbContext))]
-    partial class AgencyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251020143800_updatedba")]
+    partial class updatedba
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,39 +177,6 @@ namespace AgencyRepository.Migrations
                     b.ToTable("AgencyInventories");
                 });
 
-            modelBuilder.Entity("AgencyRepository.Model.AgencyOrder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AgencyContractId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AgencyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgencyContractId");
-
-                    b.HasIndex("AgencyId");
-
-                    b.ToTable("AgencyOrders");
-                });
-
             modelBuilder.Entity("AgencyRepository.Model.AgencyTargets", b =>
                 {
                     b.Property<int>("Id")
@@ -320,25 +290,6 @@ namespace AgencyRepository.Migrations
                     b.Navigation("Agency");
                 });
 
-            modelBuilder.Entity("AgencyRepository.Model.AgencyOrder", b =>
-                {
-                    b.HasOne("AgencyRepository.Model.AgencyContracts", "AgencyContracts")
-                        .WithMany("Orders")
-                        .HasForeignKey("AgencyContractId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AgencyRepository.Model.Agency", "Agency")
-                        .WithMany("Orders")
-                        .HasForeignKey("AgencyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Agency");
-
-                    b.Navigation("AgencyContracts");
-                });
-
             modelBuilder.Entity("AgencyRepository.Model.AgencyTargets", b =>
                 {
                     b.HasOne("AgencyRepository.Model.Agency", "Agency")
@@ -369,8 +320,6 @@ namespace AgencyRepository.Migrations
 
                     b.Navigation("Inventories");
 
-                    b.Navigation("Orders");
-
                     b.Navigation("Targets");
 
                     b.Navigation("TestDrives");
@@ -379,8 +328,6 @@ namespace AgencyRepository.Migrations
             modelBuilder.Entity("AgencyRepository.Model.AgencyContracts", b =>
                 {
                     b.Navigation("Debts");
-
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }
