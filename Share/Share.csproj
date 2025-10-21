@@ -34,7 +34,6 @@
 		<Protobuf Include="Protos\Vehicle.proto" GrpcServices="Both" />
 		<Protobuf Include="Protos\Customer.proto" GrpcServices="Both" />
 		<Protobuf Include="Protos\Email.proto" GrpcServices="Both" />
-		<Protobuf Include="Protos\Greet.proto" GrpcServices="Both" />
 	</ItemGroup>
 
 </Project>

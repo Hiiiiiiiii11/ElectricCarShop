@@ -25,92 +25,114 @@ namespace AllocationService.Services
 
         public async Task<AllocationResponse> CreateAsync(AllocationRequestModel request)
         {
-            var agency = await _agencyGrpcClient.GetAgencyByIdAsync(request.AgencyId);
-            if (agency == null)
-                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {request.AgencyId}");
+            // Lấy thông tin hợp đồng và đại lý qua gRPC
+            var contract = await _agencyGrpcClient.GetContractByIdAsync(request.AgencyContractId);
+            if (contract == null)
+                throw new KeyNotFoundException($"Không tìm thấy hợp đồng với ID {request.AgencyContractId}");
 
             var allocation = new Allocations
             {
-                AgencyId = request.AgencyId,
-                EvInventoryId = request.EvInventoryId,
+                AgencyContractId = request.AgencyContractId,
                 VehicleInstanceId = request.VehicleInstanceId,
-                AllocationQuantity = request.AllocationQuantity,
                 AllocationDate = DateTime.UtcNow
             };
 
             await _allocationRepository.AddAsync(allocation);
             await _allocationRepository.SaveChangesAsync();
 
-            // Trả về thông qua mapping
             var response = MapToResponse(allocation);
-            response.AgencyName = agency.AgencyName;
-            response.AgencyEmail = agency.Email;
+            response.ContractReply = contract;
 
             return response;
         }
-
-        public async Task<IEnumerable<AllocationResponse>> GetByAgencyIdAsync(int agencyId)
+        public async Task<AllocationResponse> UpdateAsync(int id, AllocationRequestModel request)
         {
-            var allocations = await _allocationRepository.GetByAgencyIdAsync(agencyId);
-            if (allocations == null)
-                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyId}");
+            var allocation = await _allocationRepository.GetByIdAsync(id);
+            if (allocation == null)
+                throw new KeyNotFoundException($"Không tìm thấy phân phối với ID {id}");
 
-            var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
+            // Cập nhật dữ liệu
+            allocation.AgencyContractId = request.AgencyContractId;
+            allocation.VehicleInstanceId = request.VehicleInstanceId;
+            allocation.AllocationDate = DateTime.UtcNow;
+
+            _allocationRepository.Update(allocation);
+            await _allocationRepository.SaveChangesAsync();
+
+            // Có thể gọi lại gRPC để làm giàu dữ liệu
+            var response = MapToResponse(allocation);
+            return response;
+        }
+
+        public async Task<IEnumerable<AllocationResponse>> GetByAgencyContractIdAsync(int agencyContractId)
+        {
+            var allocations = await _allocationRepository.GetByAgencyIdAsync(agencyContractId);
+            if (allocations == null)
+                throw new KeyNotFoundException($"Không tìm thấy hợp đông đại lý với ID {agencyContractId}");
+
+            var agencycontract = await _agencyGrpcClient.GetContractByIdAsync(agencyContractId);
 
             return allocations.Select(a =>
             {
                 var res = MapToResponse(a);
-                res.AgencyName = agency?.AgencyName;
-                res.AgencyEmail = agency?.Email;
+                res.ContractReply = agencycontract;
                 return res;
             });
         }
-
-        public async Task<AllocationResponse?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _allocationRepository.GetByAgencyAndVehicleInstanceAsync(agencyId, vehicleId);
-            if (entity == null)
-                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyId} hoặc xe với ID {vehicleId}");
+            var allocation = await _allocationRepository.GetByIdAsync(id);
+            if (allocation == null)
+                throw new KeyNotFoundException($"Không tìm thấy phân phối với ID {id}");
 
-            var agency = await _agencyGrpcClient.GetAgencyByIdAsync(agencyId);
+            _allocationRepository.Remove(allocation);
+            await _allocationRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<AllocationResponse?> GetByAgencyContractAndVehicleAsync(int agencyContractId, int vehicleInstanceId)
+        {
+            var entity = await _allocationRepository.GetByAgencyAndVehicleInstanceAsync(agencyContractId, vehicleInstanceId);
+            if (entity == null)
+                throw new KeyNotFoundException($"Không tìm thấy đại lý với ID {agencyContractId} hoặc xe với ID {vehicleInstanceId}");
+
+            var agencycontract = await _agencyGrpcClient.GetContractByIdAsync(agencyContractId);
             var response = MapToResponse(entity);
-            response.AgencyName = agency?.AgencyName;
-            response.AgencyEmail = agency?.Email;
+            response.ContractReply = agencycontract;
 
             return response;
         }
 
-        public async Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId)
+        //public async Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId)
+        //{
+        //    var entity = await _allocationRepository.GetByInventoryIdAsync(evInventoryId);
+        //    if (entity == null)
+        //    {
+        //        throw new KeyNotFoundException($"Không tìm thấy kho với ID {evInventoryId}");
+        //    }
+
+        //    var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
+        //    var response = MapToResponse(entity);
+        //    response.AgencyName = agency?.AgencyName;
+        //    response.AgencyEmail = agency?.Email;
+
+        //    return response;
+        //}
+
+        public async Task<IEnumerable<AllocationResponse>> GetByVehicleInstanceIdAsync(int vehicleInstanceId)
         {
-            var entity = await _allocationRepository.GetByInventoryIdAsync(evInventoryId);
-            if (entity == null)
-            {
-                throw new KeyNotFoundException($"Không tìm thấy kho với ID {evInventoryId}");
-            }
-
-            var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
-            var response = MapToResponse(entity);
-            response.AgencyName = agency?.AgencyName;
-            response.AgencyEmail = agency?.Email;
-
-            return response;
-        }
-
-        public async Task<IEnumerable<AllocationResponse>> GetByVehicleIdAsync(int vehicleId)
-        {
-            var entities = await _allocationRepository.GetByVehicleInstanceIdAsync(vehicleId);
+            var entities = await _allocationRepository.GetByVehicleInstanceIdAsync(vehicleInstanceId);
             if(entities == null)
             {
-                throw new KeyNotFoundException($"Không tìm thấy xe với ID {vehicleId}");
+                throw new KeyNotFoundException($"Không tìm thấy xe với ID {vehicleInstanceId}");
             }
 
             var result = new List<AllocationResponse>();
             foreach (var entity in entities)
             {
-                var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
+                var agencycontract = await _agencyGrpcClient.GetContractByIdAsync(entity.AgencyContractId);
                 var res = MapToResponse(entity);
-                res.AgencyName = agency?.AgencyName;
-                res.AgencyEmail = agency?.Email;
+                res.ContractReply = agencycontract;
                 result.Add(res);
             }
 
@@ -123,29 +145,16 @@ namespace AllocationService.Services
             return new AllocationResponse
             {
                 Id = a.Id,
-                AgencyId = a.AgencyId,
-                EvInventoryId = a.EvInventoryId,
+                AgencyContractId = a.AgencyContractId,
                 VehicleInstanceId = a.VehicleInstanceId,
-                AllocationQuantity = a.AllocationQuantity,
                 AllocationDate = a.AllocationDate,
-
-                // Nếu muốn include thêm thông tin liên quan thì mở comment phần dưới:
-                //Vehicle = a.Vehicle == null ? null : new VehicleResponse
-                //{
-                //    Id = a.Vehicle.Id,
-                //    VariantName = a.Vehicle.VariantName,
-                //    Color = a.Vehicle.Color,
-                //    BatteryCapacity = a.Vehicle.BatteryCapacity,
-                //    RangeKM = a.Vehicle.RangeKM,
-                //    Features = a.Vehicle.Features,
-                //    Status = a.Vehicle.Status
-                //},
-                //EVInventory = a.EVInventory == null ? null : new EVInventoryResponse
-                //{
-                //    Id = a.EVInventory.Id,
-                //    Quantity = a.EVInventory.Quantity,
-                //    ModelName = a.EVInventory.ModelName
-                //}
+                VehicleInstance = a.VehicleInstance == null ? null : new VehicleInstanceResponse
+                {
+                    Id = a.VehicleInstance.Id,
+                    VehicleId = a.VehicleInstance.VehicleId,
+                    Vin = a.VehicleInstance.Vin,
+                    EngineNumber = a.VehicleInstance.EngineNumber
+                },
             };
         }
     }

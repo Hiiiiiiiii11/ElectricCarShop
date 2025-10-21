@@ -79,9 +79,9 @@ namespace AllocationAPI.Controllers
                 var updatedTestDrive = await _testDriveService.UpdateTestDriveAsync(id, request);
                 return Ok(updatedTestDrive);
             }
-            catch (KeyNotFoundException knfEx)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = knfEx.Message });
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -103,9 +103,9 @@ namespace AllocationAPI.Controllers
 
                 return Ok(new { message = "Test drive deleted successfully." });
             }
-            catch (KeyNotFoundException knfEx)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = knfEx.Message });
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {

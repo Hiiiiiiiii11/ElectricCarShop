@@ -35,14 +35,18 @@ namespace OrderRepository.Model.Request
     public class FeedbackRequest
     {
         public int CustomerId { get; set; }
-        public string Comment { get; set; }
+        public string Type { get; set; }
+        public string Content { get; set; }
+        public string? Reply { get; set; }
         public string? Status { get; set; }
     }
     public class FeedbackResponse
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
-        public string Comment { get; set; }
+        public string Type { get; set; }
+        public string Content { get; set; }
+        public string Reply { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -66,13 +70,17 @@ namespace OrderRepository.Model.Request
         public decimal QuotedPrice { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int? CreateBy { get; set; }
+        public DateTime? CreateAt { get; set; }
     }
     public class UpdateQuotationRequest
     {
         // Có thể cho phép cập nhật một số trường
+        public int? AgencyId { get; set; }
         public string? QuotationName { get; set; }
-
+        public int? CustomerId { get; set; }
         public decimal? QuotedPrice { get; set; }
+        public int? VehicleInstanceId { get; set; }
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -91,6 +99,7 @@ namespace OrderRepository.Model.Request
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
+        public int CreateBy { get; set; }
 
         // Các thuộc tính được làm giàu từ gRPC
         public AgencyReply Agency { get; set; }
@@ -99,30 +108,50 @@ namespace OrderRepository.Model.Request
 
     public class CreateOrderRequest
     {
-        public int UserId { get; set; }
         public int CustomerId { get; set; }
-        public int QuotationId { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string Status { get; set; }
+        // TotalAmount đã bị xóa vì nó nên được tính toán bởi service
+        public string? Status { get; set; }
+        public int? CreateBy { get; set; }
+        public List<CreateOrderDetailItem>? Details { get; set; }
     }
-
-    public class UpdateOrderRequest
+    public class CreateOrderDetailItem
     {
-        public decimal TotalAmount { get; set; }
+        public int QuotationId { get; set; }
+        public decimal? UnitPrice { get; set; } // null => lấy QuotedPrice từ Quotation
+    }
+    public class UpdateOrderStatusRequest
+    {
         public string Status { get; set; }
     }
-
+    public class CreateOrderDetailRequest
+    {
+        public int OrderId { get; set; }
+        public int QuotationId { get; set; }
+        public decimal? UnitPrice { get; set; } // null => lấy QuotedPrice từ Quotation
+    }
+    public class UpdateOrderDetailPriceRequest
+    {
+        public decimal NewUnitPrice { get; set; }
+    }
     public class OrderResponse
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
         public int CustomerId { get; set; }
-        public string? CustomerName { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
+        public int CreateBy { get; set; }
+        public List<CreateOrderDetailItem>? Details { get; set; }
     }
 
+    //orderdetail response
+    public class OrderDetailResponse
+    {
+        public int Id { get; set; }
+        public int OrderId { get; set; }
+        public int QuotationId { get; set; }
+        public decimal UnitPrice { get; set; }
+    }
 
     public class CreateContractRequest
     {

@@ -11,15 +11,13 @@ namespace AllocationRepository.Repositories
     public interface IAllocationRepository :IGenericRepository<Allocations>
     {
         // Lấy tất cả allocation theo Agency
-        Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencyId);
+        Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencycontractId);
 
         // Lấy tất cả allocation theo Vehicle
         Task<IEnumerable<Allocations>> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
 
-        // Lấy allocation cụ thể theo Inventory
-        Task<Allocations?> GetByInventoryIdAsync(int evInventoryId);
 
         // Tìm allocation theo Agency + Vehicle
-        Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencyId, int vehicleInstanceId);
+        Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencycontractId, int vehicleInstanceId);
     }
 }

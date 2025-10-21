@@ -14,6 +14,7 @@ namespace AllocationRepository.Repositories
     {
         public QuotationRepository(OrderDbContext context) : base(context)
         {
+
         }
     }
 }

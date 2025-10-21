@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Repositories;
 using AllocationService.Services;
+using Azure.Core;
 using OrderRepository.Model.Request;
 using Share.ShareServices;
 using System;
@@ -61,6 +62,7 @@ namespace OrderAPIService.Services
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CreatedAt = DateTime.UtcNow,
+                CreateBy = request.CreateBy ?? 0,
                 Status = "Pending" // Gán trạng thái mặc định khi tạo mới
             };
 
@@ -80,6 +82,12 @@ namespace OrderAPIService.Services
             }
 
             // Cập nhật thủ công các thuộc tính
+            if (request.AgencyId.HasValue)
+                quotation.AgencyId = request.AgencyId.Value;
+            if(request.CustomerId.HasValue)
+                quotation.CustomerId = request.CustomerId.Value;
+            if (request.VehicleInstanceId.HasValue)
+                quotation.VehicleInstanceId = request.VehicleInstanceId.Value;
             if (!string.IsNullOrWhiteSpace(request.QuotationName))
                 quotation.QuotationName = request.QuotationName;
             if (request.QuotedPrice.HasValue)
@@ -123,6 +131,7 @@ namespace OrderAPIService.Services
                 EndDate = q.EndDate,
                 CreatedAt = q.CreatedAt,
                 Status = q.Status,
+                CreateBy = q.CreateBy,
                 // Agency và Vehicle sẽ được gán sau khi gọi gRPC
                 Agency = null,
                 Vehicle = null

@@ -1,6 +1,5 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
-using Greet;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

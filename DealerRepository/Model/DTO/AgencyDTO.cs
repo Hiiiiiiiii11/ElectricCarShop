@@ -65,6 +65,7 @@ namespace AgencyRepository.Model.DTO
     public class AgencyResponseForContract
     {
         public int Id { get; set; }
+        public int AgencyId { get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
@@ -74,6 +75,7 @@ namespace AgencyRepository.Model.DTO
     public class AgencyResponseForTarget
     {
         public int Id { get; set; }
+        public int AgencyId { get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
@@ -83,6 +85,7 @@ namespace AgencyRepository.Model.DTO
     public class AgencyResponseforDebt
     {
         public int Id { get; set; }
+        public int AgencyId{ get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
@@ -302,5 +305,33 @@ namespace AgencyRepository.Model.DTO
         public string? Feedback { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
+    }
+
+    //create agency order  request
+    public class CreateAgencyOrderRequest
+    {
+    public int AgencyId { get; set; }
+    public int AgencyContractId { get; set; }
+    public int VehicleId { get; set; }
+    public int Quantity { get; set; }
+    }
+    public class UpdateAgencyOrderRequest
+    {
+        public int Id { get; set; }
+        public int? VehicleId { get; set; }
+        public int? Quantity { get; set; }
+        public string? Status { get; set; }
+    }
+    public class AgencyOrderResponse
+    {
+        public int Id { get; set; }
+        public int AgencyId { get; set; }
+        public int AgencyContractId { get; set; }
+        public int VehicleId { get; set; }
+        public int Quantity { get; set; }
+        public string Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public VehicleReply VehicleReply { get; set; }
+        //public AgencyContractResponse AgencyContractResponse { get; set; }
     }
 }

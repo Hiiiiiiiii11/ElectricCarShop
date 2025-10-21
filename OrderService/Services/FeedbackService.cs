@@ -50,7 +50,8 @@ namespace OrderService.Service
             var feedback = new Feedback
             {
                 CustomerId = request.CustomerId,
-                Content = request.Comment,
+                Content = request.Content,
+                Type = request.Type,
                 Status = request.Status ?? "Pending",
                 Reply = string.Empty,
                 CreatedAt = DateTime.UtcNow,
@@ -69,12 +70,15 @@ namespace OrderService.Service
             if (feedback == null)
                 throw new KeyNotFoundException($"Feedback with ID {id} not found.");
 
-            if (!string.IsNullOrWhiteSpace(request.Comment))
-                feedback.Content = request.Comment;
+            if (!string.IsNullOrWhiteSpace(request.Content))
+                feedback.Content = request.Content;
 
             if (!string.IsNullOrWhiteSpace(request.Status))
                 feedback.Status = request.Status;
-
+           if(!string.IsNullOrEmpty(request.Type))
+                feedback.Type = request.Type;
+           if(!string.IsNullOrEmpty(request.Reply))
+                feedback.Reply = request.Reply;
             feedback.UpdatedAt = DateTime.UtcNow;
 
             _feedbackRepository.Update(feedback);
@@ -101,7 +105,9 @@ namespace OrderService.Service
             {
                 Id = f.Id,
                 CustomerId = f.CustomerId,
-                Comment = f.Content,
+                Type = f.Type,
+                Content = f.Content,
+                Reply= f.Reply, 
                 Status = f.Status,
                 CreatedAt = f.CreatedAt,
                 UpdatedAt = f.UpdatedAt

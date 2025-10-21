@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace AllocationService.Services
         // ================== GET BY ID ==================
         public async Task<VehicleInstanceResponse?> GetByIdAsync(int id)
         {
-            var entity = await _vehicleInstanceRepository.GetByIdAsync(id);
+            var entity = await _vehicleInstanceRepository.GetByIdWithDetailsAsync(id);
             return entity == null ? null : MapToResponse(entity);
         }
 
@@ -114,6 +115,25 @@ namespace AllocationService.Services
                 VehicleId = instance.VehicleId,
                 Vin = instance.Vin,
                 EngineNumber = instance.EngineNumber,
+                Vehicle = instance.Vehicle == null ? null : new VehicleResponse
+                {
+                    Id = instance.Vehicle.Id,
+                    VehicleOptionId = instance.Vehicle.VehicleOptionId,
+                    VariantName = instance.Vehicle.VariantName,
+                    Color = instance.Vehicle.Color,
+                    BatteryCapacity = instance.Vehicle.BatteryCapacity,
+                    RangeKM = instance.Vehicle.RangeKM,
+                    Features = instance.Vehicle.Features,
+                    Status = instance.Vehicle.Status,
+
+                },
+                //VehicleInstance = a.VehicleInstance == null ? null : new VehicleInstanceResponse
+                //{
+                //    Id = a.VehicleInstance.Id,
+                //    VehicleId = a.VehicleInstance.VehicleId,
+                //    Vin = a.VehicleInstance.Vin,
+                //    EngineNumber = a.VehicleInstance.EngineNumber
+                //},
             };
         }
     }

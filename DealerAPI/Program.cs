@@ -114,6 +114,8 @@ namespace AgencyAPI
             builder.Services.AddScoped<IAgencyTargetRepository, AgencyTargetRepository>();
             builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
             builder.Services.AddScoped<IAgencyInventoryRepository, AgencyInventoryRepository>();
+            builder.Services.AddScoped<IAgencyOrderRepository, AgencyOrderRepository>();
+
 
             builder.Services.AddScoped<IAgencyService, AgencyService.Services.AgencyService>();
             builder.Services.AddScoped<IAgencyContractService, AgencyContractService>();
@@ -121,6 +123,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<IAgencyTargetService, AgencyTargetService>();
             builder.Services.AddScoped<IAgencyInventoryService, AgencyInventoryService>();
             builder.Services.AddScoped<ITestDriveService, TestDriveService>();
+            builder.Services.AddScoped<IAgencyOrderService, AgencyOrderService>();
 
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();

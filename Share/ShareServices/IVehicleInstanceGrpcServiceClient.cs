@@ -10,6 +10,7 @@ namespace Share.ShareServices
     public interface IVehicleInstanceGrpcServiceClient
     {
         Task<VehicleInstanceReply> GetVehicleInstanceByIdAsync(int instanceId);
+        Task<VehicleReply> GetVehicleByIdAsync(int vehicleId);
     }
 }
 

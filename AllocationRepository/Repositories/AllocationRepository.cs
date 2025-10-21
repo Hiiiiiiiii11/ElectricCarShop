@@ -18,36 +18,27 @@ namespace AllocationRepository.Repositories
             _context = context;
         }
 
-        public async Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencyId, int vehicleInstanceId)
+        public async Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencycontractId, int vehicleInstanceId)
         {
             return await _context.Allocations
                 .Include(a => a.VehicleInstance)
-                .FirstOrDefaultAsync(a => a.AgencyId == agencyId && a.VehicleInstanceId == vehicleInstanceId);
+                .FirstOrDefaultAsync(a => a.AgencyContractId == agencycontractId && a.VehicleInstanceId == vehicleInstanceId);
         }
 
-        public async Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencyId)
+        public async Task<IEnumerable<Allocations>> GetByAgencyIdAsync(int agencycontractId)
         {
             return await _context.Allocations
-                .Where(a => a.AgencyId == agencyId)
+                .Where(a => a.AgencyContractId == agencycontractId)
                 .Include(a => a.VehicleInstance)
-                .Include(a => a.EVInventory)
                 .ToListAsync();
         }
 
-        public async Task<Allocations?> GetByInventoryIdAsync(int evInventoryId)
-        {
-            return await _context.Allocations
-                .Include(a => a.VehicleInstance)
-                .Include(a => a.EVInventory)
-                .FirstOrDefaultAsync(a => a.EvInventoryId == evInventoryId);
-        }
 
         public async Task<IEnumerable<Allocations>> GetByVehicleInstanceIdAsync(int vehicleInstanceId)
         {
             return await _context.Allocations
                .Where(a => a.VehicleInstanceId == vehicleInstanceId)
                .Include(a => a.VehicleInstance)
-               .Include(a => a.EvInventoryId)
                .ToListAsync();
         }
     }

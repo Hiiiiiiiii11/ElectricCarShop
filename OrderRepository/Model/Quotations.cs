@@ -20,7 +20,7 @@ namespace AllocationRepository.Model
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; } 
         public string Status { get; set; }
-        public int CreatedBy { get; set; }
+        public int CreateBy { get; set; }
 
 
         // 🔗 Một báo giá có thể trở thành nhiều đơn hàng
