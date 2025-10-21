@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OrderRepository.Data;
 using OrderRepository.Model;
+using OrderRepository.Model.Request;
 using OrderRepository.Repositories; // nơi có IOrderDetailRepository, IOrderRepository, IQuotationRepository
 using OrderService.Services;
 using System;
@@ -11,129 +12,160 @@ using System.Threading.Tasks;
 
 public class OrderDetailService : IOrderDetailService
 {
-    private readonly OrderDbContext _context;
-    private readonly IOrderDetailRepository _orderDetailRepo;
-    private readonly IOrderRepository _orderRepo;
-    private readonly IQuotationRepository _quotationRepo;
+    private readonly IOrderDetailRepository _orderDetailRepository;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IQuotationRepository _quotationRepository;
 
-    public OrderDetailService(
-        OrderDbContext context,
-        IOrderDetailRepository orderDetailRepo,
-        IOrderRepository orderRepo,
-        IQuotationRepository quotationRepo)
+    public OrderDetailService(IOrderDetailRepository orderDetailRepository, IOrderRepository orderRepository, IQuotationRepository quotationRepository)
     {
-        _context = context;
-        _orderDetailRepo = orderDetailRepo;
-        _orderRepo = orderRepo;
-        _quotationRepo = quotationRepo;
+        _orderDetailRepository = orderDetailRepository;
+        _orderRepository = orderRepository;
+        _quotationRepository = quotationRepository;
     }
 
-    public async Task<OrderDetail> AddAsync(int orderId, int quotationId, decimal? unitPrice = null)
+    public async Task<OrderDetailResponse> CreateOrderDetailAsync(CreateOrderDetailRequest request)
     {
-        var order = await _orderRepo.GetByIdAsync(orderId)
-                    ?? throw new KeyNotFoundException("Order not found.");
-        if (string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Order is not editable.");
-
-        var quotation = await _quotationRepo.GetByIdAsync(quotationId)
-                        ?? throw new KeyNotFoundException("Quotation not found.");
-
-        // Chống trùng (OrderId, QuotationId)
-        var existed = await _orderDetailRepo.GetByOrderAndQuotationAsync(orderId, quotationId);
-        if (existed != null) return existed;
-
-        // ==== DateTime (không nullable) check ====
-        // Nếu cột DB cho phép null nhưng entity đang là DateTime (non-nullable),
-        // EF sẽ set default(DateTime) khi null => kiểm tra '!= default'
-        var orderDate = order.OrderDate.Date;
-
-        if (quotation.StartDate != default && orderDate < quotation.StartDate.Date)
-            throw new InvalidOperationException("Quotation is not effective for this order date.");
-
-        if (quotation.EndDate != default && orderDate > quotation.EndDate.Date)
-            throw new InvalidOperationException("Quotation expired for this order date.");
-        // ==========================================
-
-        var price = unitPrice ?? quotation.QuotedPrice; // đổi tên nếu property khác
-        var detail = new OrderDetail
+        // 1. Kiểm tra Order cha
+        var order = await _orderRepository.GetByIdAsync(request.OrderId);
+        if (order == null)
         {
-            OrderId = orderId,
-            QuotationId = quotationId,
-            UnitPrice = price
+            throw new KeyNotFoundException($"Order with ID {request.OrderId} not found.");
+        }
+
+        // 2. Lấy giá
+        decimal unitPrice;
+        if (request.UnitPrice.HasValue)
+        {
+            unitPrice = request.UnitPrice.Value;
+        }
+        else
+        {
+            var quotation = await _quotationRepository.GetByIdAsync(request.QuotationId);
+            if (quotation == null)
+            {
+                throw new KeyNotFoundException($"Quotation with ID {request.QuotationId} not found.");
+            }
+            unitPrice = quotation.QuotedPrice; // Giả định
+        }
+
+        // 3. Tạo và lưu OrderDetail
+        var newDetail = new OrderDetail
+        {
+            OrderId = request.OrderId,
+            QuotationId = request.QuotationId,
+            UnitPrice = unitPrice
         };
+        await _orderDetailRepository.AddAsync(newDetail);
 
-        await using var tx = await _context.Database.BeginTransactionAsync();
-        await _orderDetailRepo.AddAsync(detail);
-        await _context.SaveChangesAsync();
+        // ******** SỬA LỖI (FIX) ********
+        // Phải lưu detail mới TRƯỚC KHI tính toán lại tổng tiền
+        await _orderDetailRepository.SaveChangesAsync();
 
+        // 4. Tính toán và cập nhật lại tổng tiền Order cha
+        await RecalculateOrderTotalAsync(request.OrderId);
+
+        // 5. Map và trả về
+        return MapToResponse(newDetail);
+    }
+
+    /// <summary>
+    /// Cập nhật giá của một Detail và cập nhật lại tổng tiền
+    /// </summary>
+    public async Task<OrderDetailResponse> UpdateOrderDetailPriceAsync(int orderDetailId, UpdateOrderDetailPriceRequest request)
+    {
+        // 1. Tìm detail
+        var detail = await _orderDetailRepository.GetByIdAsync(orderDetailId);
+        if (detail == null)
+        {
+            throw new KeyNotFoundException($"OrderDetail with ID {orderDetailId} not found.");
+        }
+
+        // 2. Cập nhật giá và lưu
+        detail.UnitPrice = request.NewUnitPrice;
+         _orderDetailRepository.Update(detail);
+
+        // ******** SỬA LỖI (FIX) ********
+        // Phải lưu thay đổi TRƯỚC KHI tính toán lại tổng tiền
+        await _orderDetailRepository.SaveChangesAsync();
+
+        // 3. Tính toán và cập nhật lại tổng tiền Order cha
+        await RecalculateOrderTotalAsync(detail.OrderId);
+
+        // 4. Map và trả về
+        return MapToResponse(detail);
+    }
+
+    /// <summary>
+    /// Xóa một Detail và cập nhật lại tổng tiền
+    /// </summary>
+    public async Task DeleteOrderDetailAsync(int orderDetailId)
+    {
+        // 1. Tìm detail
+        var detail = await _orderDetailRepository.GetByIdAsync(orderDetailId);
+        if (detail == null)
+        {
+           throw new KeyNotFoundException($"OrderDetail with ID {orderDetailId} not found.");
+        }
+
+        int orderId = detail.OrderId;
+
+        // 2. Xóa detail
+        _orderDetailRepository.Remove(detail);
+
+        // ******** SỬA LỖI (FIX) ********
+        // Phải lưu thay đổi (xóa) TRƯỚC KHI tính toán lại tổng tiền
+        await _orderDetailRepository.SaveChangesAsync();
+
+        // 3. Tính toán và cập nhật lại tổng tiền Order cha
         await RecalculateOrderTotalAsync(orderId);
-
-        await tx.CommitAsync();
-        return detail;
     }
 
-    public async Task<bool> UpdateUnitPriceAsync(int detailId, decimal newUnitPrice)
+    /// <summary>
+    /// Hàm helper private để đóng gói logic tính toán lại tổng tiền
+    /// </summary>
+    private async Task RecalculateOrderTotalAsync(int orderId)
     {
-        var detail = await _orderDetailRepo.GetByIdAsync(detailId)
-                     ?? throw new KeyNotFoundException("OrderDetail not found.");
-        var order = await _orderRepo.GetByIdAsync(detail.OrderId)
-                    ?? throw new KeyNotFoundException("Order not found.");
+        // 1. Lấy tổng mới từ repo
+        decimal newTotal = await _orderDetailRepository.GetTotalAmountByOrderAsync(orderId);
 
-        if (string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Order is not editable.");
+        // 2. Lấy Order cha
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
-        await using var tx = await _context.Database.BeginTransactionAsync();
-
-        detail.UnitPrice = newUnitPrice;
-        _orderDetailRepo.Update(detail);
-        await _context.SaveChangesAsync();
-
-        await RecalculateOrderTotalAsync(detail.OrderId);
-
-        await tx.CommitAsync();
-        return true;
+        // 3. Cập nhật và lưu
+        if (order != null)
+        {
+            order.TotalAmount = newTotal;
+            _orderRepository.Update(order);
+            await _orderRepository.SaveChangesAsync();
+        }
     }
 
-    public async Task<bool> RemoveAsync(int detailId)
+    public async Task<OrderDetailResponse> GetOrderDetailByIdAsync(int orderDetailId)
     {
-        var detail = await _orderDetailRepo.GetByIdAsync(detailId)
-                     ?? throw new KeyNotFoundException("OrderDetail not found.");
-        var order = await _orderRepo.GetByIdAsync(detail.OrderId)
-                    ?? throw new KeyNotFoundException("Order not found.");
-
-        if (string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Order is not editable.");
-
-        await using var tx = await _context.Database.BeginTransactionAsync();
-
-        // IOrderDetailRepository không có Delete(...) → dùng DbContext trực tiếp
-        _context.OrderDetail.Remove(detail);
-        await _context.SaveChangesAsync();
-
-        await RecalculateOrderTotalAsync(detail.OrderId);
-
-        await tx.CommitAsync();
-        return true;
+        var detail = await _orderDetailRepository.GetByIdAsync(orderDetailId);
+        if (detail == null)
+        {
+            throw new KeyNotFoundException($"OrderDetail with ID {orderDetailId} not found.");
+        }
+        return MapToResponse(detail);
     }
 
-    public async Task<IReadOnlyList<OrderDetail>> GetByOrderAsync(int orderId)
+    public async Task<IEnumerable<OrderDetailResponse>> GetOrderDetailsByOrderIdAsync(int orderId)
     {
-        var list = await _orderDetailRepo.GetByOrderIdAsync(orderId);
-        return list.ToList();
+        // Giả định bạn có hàm GetByOrderIdAsync trong repository
+        var details = await _orderDetailRepository.GetByOrderIdAsync(orderId);
+        return details.Select(MapToResponse);
     }
-
-    public async Task<decimal> RecalculateOrderTotalAsync(int orderId)
+    private static OrderDetailResponse MapToResponse(OrderDetail detail)
     {
-        var total = await _orderDetailRepo.GetTotalAmountByOrderAsync(orderId);
+        if (detail == null) return null;
 
-        var order = await _context.Orders.FindAsync(orderId)
-                    ?? throw new KeyNotFoundException("Order not found.");
-        order.TotalAmount = total;
-
-        await _context.SaveChangesAsync();
-        return total;
+        return new OrderDetailResponse
+        {
+            Id = detail.Id,
+            OrderId = detail.OrderId,
+            QuotationId = detail.QuotationId,
+            UnitPrice = detail.UnitPrice
+        };
     }
 }

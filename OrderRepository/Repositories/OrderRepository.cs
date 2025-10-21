@@ -67,6 +67,13 @@ namespace OrderRepository.Repositories
                     .ThenInclude(od => od.Quotation)     // ✅
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
+        public async Task<IEnumerable<Orders?>> GetAllWithDetailsAsync()
+        {
+            return await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Details)                 // ✅
+                .ThenInclude(od => od.Quotation).ToListAsync();    // ✅
+        }
 
         // ✅ DbSet trong DbContext là "OrderDetail" (số ít) → giữ nguyên
         public async Task<decimal> GetTotalRevenueFromDetailsAsync(DateTime startDate, DateTime endDate)

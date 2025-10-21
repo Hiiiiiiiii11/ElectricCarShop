@@ -19,6 +19,7 @@ namespace OrderRepository.Repositories
 
         // ✅ Mới: load đầy đủ 1 Order với Details + Quotations
         Task<Orders?> GetWithDetailsAsync(int orderId);
+        Task<IEnumerable<Orders?>> GetAllWithDetailsAsync();
 
         // ✅ (Tùy chọn) doanh thu tính từ OrderDetails thay vì Orders.TotalAmount
         Task<decimal> GetTotalRevenueFromDetailsAsync(DateTime startDate, DateTime endDate);

@@ -108,11 +108,10 @@ namespace OrderRepository.Model.Request
 
     public class CreateOrderRequest
     {
-        public int UserId { get; set; }
         public int CustomerId { get; set; }
-        public int QuotationId { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string Status { get; set; }
+        // TotalAmount đã bị xóa vì nó nên được tính toán bởi service
+        public string? Status { get; set; }
+        public int? CreateBy { get; set; }
         public List<CreateOrderDetailItem>? Details { get; set; }
     }
     public class CreateOrderDetailItem
@@ -120,9 +119,8 @@ namespace OrderRepository.Model.Request
         public int QuotationId { get; set; }
         public decimal? UnitPrice { get; set; } // null => lấy QuotedPrice từ Quotation
     }
-    public class UpdateOrderRequest
+    public class UpdateOrderStatusRequest
     {
-        public decimal TotalAmount { get; set; }
         public string Status { get; set; }
     }
     public class CreateOrderDetailRequest
@@ -138,14 +136,22 @@ namespace OrderRepository.Model.Request
     public class OrderResponse
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
         public int CustomerId { get; set; }
-        public string? CustomerName { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
+        public int CreateBy { get; set; }
+        public List<CreateOrderDetailItem>? Details { get; set; }
     }
 
+    //orderdetail response
+    public class OrderDetailResponse
+    {
+        public int Id { get; set; }
+        public int OrderId { get; set; }
+        public int QuotationId { get; set; }
+        public decimal UnitPrice { get; set; }
+    }
 
     public class CreateContractRequest
     {

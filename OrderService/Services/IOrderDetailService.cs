@@ -1,4 +1,5 @@
 ﻿using OrderRepository.Model;
+using OrderRepository.Model.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,11 @@ namespace OrderService.Services
 {
     public interface IOrderDetailService
     {
-        Task<OrderDetail> AddAsync(int orderId, int quotationId, decimal? unitPrice = null);
-        Task<bool> UpdateUnitPriceAsync(int detailId, decimal newUnitPrice);
-        Task<bool> RemoveAsync(int detailId);
-        Task<IReadOnlyList<OrderDetail>> GetByOrderAsync(int orderId);
-        Task<decimal> RecalculateOrderTotalAsync(int orderId);
+        Task<OrderDetailResponse> CreateOrderDetailAsync(CreateOrderDetailRequest request);
+        Task<OrderDetailResponse> UpdateOrderDetailPriceAsync(int orderDetailId, UpdateOrderDetailPriceRequest request);
+        Task DeleteOrderDetailAsync(int orderDetailId);
+        Task<OrderDetailResponse> GetOrderDetailByIdAsync(int orderDetailId);
+        Task<IEnumerable<OrderDetailResponse>> GetOrderDetailsByOrderIdAsync(int orderId);
     }
 
 }

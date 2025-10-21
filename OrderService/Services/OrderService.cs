@@ -5,130 +5,158 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AllocationRepository.Repositories;
 
 namespace OrderService.Services
 {
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IOrderDetailService _orderDetailService; // ✅ new
+        private readonly IOrderDetailRepository _orderDetailRepository;
+        private readonly IQuotationRepository _quotationRepository;
 
-        public OrderService(IOrderRepository orderRepository,
-                            IOrderDetailService orderDetailService) // ✅ new
+        public OrderService(IOrderRepository orderRepository , IOrderDetailRepository orderDetailRepository, IQuotationRepository quotationRepository)
         {
             _orderRepository = orderRepository;
-            _orderDetailService = orderDetailService; // ✅ new
-        }
+            _orderDetailRepository = orderDetailRepository;
+            _quotationRepository = quotationRepository;
 
+        }
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request)
         {
-            // 1) Tạo order với tổng tiền = 0; sẽ tính lại sau khi thêm chi tiết
-            var order = new Orders
+            // 1. Tạo đối tượng Order ban đầu
+            var newOrder = new Orders
             {
-                UserId = request.UserId,
                 CustomerId = request.CustomerId,
-                TotalAmount = 0m,                // ✅ set 0
-                Status = string.IsNullOrWhiteSpace(request.Status) ? "Draft" : request.Status,
-                OrderDate = DateTime.UtcNow
+                Status = "Pending", // Gán một status mặc định
+                CreateBy = request.CreateBy ?? 0,
+                OrderDate = DateTime.UtcNow,
+                TotalAmount = 0 // Khởi tạo tổng tiền bằng 0
             };
 
-            await _orderRepository.AddAsync(order);
-            await _orderRepository.SaveChangesAsync();   // ✅ để có Id
+            // 2. Lưu Order vào DB để lấy Id
+            await _orderRepository.AddAsync(newOrder);
+            await _orderRepository.SaveChangesAsync();
+            // Giờ newOrder.Id đã có giá trị
 
-            // 2) Nếu request có chi tiết (QuotationId + UnitPrice), thêm vào và recalc
+            // 3. Xử lý và tạo các OrderDetail
             if (request.Details != null && request.Details.Any())
             {
-                foreach (var d in request.Details)
+                var newDetailsList = new List<OrderDetail>();
+                foreach (var detailRequest in request.Details)
                 {
-                    // d.QuotationId là bắt buộc, d.UnitPrice có thể null -> service sẽ fallback QuotedPrice
-                    await _orderDetailService.AddAsync(order.Id, d.QuotationId, d.UnitPrice);
-                }
+                    decimal unitPrice;
 
-                order.TotalAmount = await _orderDetailService.RecalculateOrderTotalAsync(order.Id); // ✅
+                    // Kiểm tra xem UnitPrice có được cung cấp không
+                    if (detailRequest.UnitPrice.HasValue)
+                    {
+                        unitPrice = detailRequest.UnitPrice.Value;
+                    }
+                    else
+                    {
+                        // Nếu không, lấy giá từ Quotation
+                        var quotation = await _quotationRepository.GetByIdAsync(detailRequest.QuotationId);
+                        if (quotation == null)
+                        {
+                            // Nếu quotation không tìm thấy, bạn nên có cơ chế rollback
+                            // hoặc throw exception để dừng tiến trình
+                            throw new KeyNotFoundException($"Quotation with ID {detailRequest.QuotationId} not found.");
+                        }
+                        // Giả định model Quotation có thuộc tính QuotedPrice
+                        unitPrice = quotation.QuotedPrice;
+                    }
+
+                    // Tạo đối tượng OrderDetail
+                    var newDetail = new OrderDetail
+                    {
+                        OrderId = newOrder.Id, // Gán Id của Order vừa tạo
+                        QuotationId = detailRequest.QuotationId,
+                        UnitPrice = unitPrice
+                    };
+
+                    // Lưu OrderDetail vào DB
+                    newDetailsList.Add(newDetail);
+                }
+                if (newDetailsList.Any())
+                {
+                    await _orderDetailRepository.AddRangeAsync(newDetailsList);
+                    await _orderDetailRepository.SaveChangesAsync();
+                }
             }
 
+            // 4. Tính toán lại tổng giá của Order DỰA TRÊN repo
+            // (Đúng theo yêu cầu "sau đó tính toán lại")
+            decimal finalTotalAmount = await _orderDetailRepository.GetTotalAmountByOrderAsync(newOrder.Id);
+
+            // 5. Cập nhật lại Order với tổng giá trị đúng
+            newOrder.TotalAmount = finalTotalAmount;
+             _orderRepository.Update(newOrder);
+            await _orderRepository.SaveChangesAsync();
+
+            // 6. Lấy lại đầy đủ thông tin Order (bao gồm Customer và Details) để trả về
+            var completeOrder = await _orderRepository.GetWithDetailsAsync(newOrder.Id);
+
+            // 7. Map sang OrderResponse
+            return MapToResponse(completeOrder);
+        }
+        public async Task<OrderResponse> GetOrderByIdAsync(int orderId)
+        {
+            var order = await _orderRepository.GetWithDetailsAsync(orderId);
+            if (order == null)
+            {
+                throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+            }
             return MapToResponse(order);
         }
-
         public async Task<IEnumerable<OrderResponse>> GetAllOrdersAsync()
         {
-            var orders = await _orderRepository.GetAllAsync();
+            // Giả định bạn có hàm GetAllWithDetailsAsync hoặc tương tự
+            // Nếu không, bạn cần Get All rồi lặp qua để Get Details
+            var orders = await _orderRepository.GetAllWithDetailsAsync();
             return orders.Select(MapToResponse);
         }
 
-        public async Task<OrderResponse?> GetOrderByIdAsync(int id)
+        public async Task<OrderResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusRequest request)
         {
-            // Nếu muốn kèm details, có thể dùng _orderRepository.GetWithDetailsAsync(id)
-            var order = await _orderRepository.GetByIdAsync(id);
+            var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
-                throw new KeyNotFoundException($"Order with ID {id} not found.");
-            return MapToResponse(order);
+            {
+                throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+            }
+
+            order.Status = request.Status;
+            _orderRepository.Update(order);
+            await _orderRepository.SaveChangesAsync();
+
+            // Lấy lại thông tin đầy đủ để trả về
+            var updatedOrder = await _orderRepository.GetWithDetailsAsync(orderId);
+            return MapToResponse(updatedOrder);
         }
-
-        public async Task<OrderResponse> UpdateOrderAsync(int id, UpdateOrderRequest request)
+        public async Task DeleteOrderAsync(int orderId)
         {
-            var order = await _orderRepository.GetByIdAsync(id)
-                        ?? throw new KeyNotFoundException($"Order with ID {id} not found.");
-
-            // Không cho sửa nếu Completed/Cancelled (tuỳ chính sách)
-            if (string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Order is not editable.");
-
-            // Cho phép cập nhật trạng thái; TotalAmount sẽ tính lại từ chi tiết
-            if (!string.IsNullOrWhiteSpace(request.Status))
-                order.Status = request.Status;
-
-            // ❌ KHÔNG set order.TotalAmount từ request; ✅ tính lại từ chi tiết
-            order.TotalAmount = await _orderDetailService.RecalculateOrderTotalAsync(order.Id);
-
-            _orderRepository.Update(order);               // ✅ FIX: Update thay vì Remove
-            await _orderRepository.SaveChangesAsync();    // ✅ nhớ SaveChanges
-
-            return MapToResponse(order);
-        }
-
-        public async Task<bool> DeleteOrderAsync(int id)
-        {
-            var order = await _orderRepository.GetByIdAsync(id)
-                        ?? throw new KeyNotFoundException($"Order with ID {id} not found.");
-
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+            }
             _orderRepository.Remove(order);
             await _orderRepository.SaveChangesAsync();
-            return true;
         }
 
-        // Custom methods
-        public async Task<IEnumerable<OrderResponse>> GetOrdersByCustomerIdAsync(int customerId)
+        private static OrderResponse MapToResponse(Orders order) => new OrderResponse
         {
-            var orders = await _orderRepository.GetByCustomerIdAsync(customerId);
-            return orders.Select(MapToResponse);
-        }
-
-        public async Task<IEnumerable<OrderResponse>> GetOrdersByStatusAsync(string status)
-        {
-            var orders = await _orderRepository.GetByStatusAsync(status);
-            return orders.Select(MapToResponse);
-        }
-
-        public async Task<decimal> GetTotalRevenueAsync(DateTime startDate, DateTime endDate)
-        {
-            // Nếu muốn tính theo chi tiết: dùng GetTotalRevenueFromDetailsAsync
-            return await _orderRepository.GetTotalRevenueAsync(startDate, endDate);
-        }
-
-        private static OrderResponse MapToResponse(Orders order)
-        {
-            return new OrderResponse
+            Id = order.Id,
+            CustomerId = order.CustomerId,
+            OrderDate = order.OrderDate,
+            TotalAmount = order.TotalAmount, // Đây là tổng tiền đã được tính lại
+            Status = order.Status,
+            CreateBy = order.CreateBy,
+            // Map lại danh sách Details
+            Details = order.Details?.Select(d => new CreateOrderDetailItem
             {
-                Id = order.Id,
-                UserId = order.UserId,
-                CustomerId = order.CustomerId,
-                CustomerName = order.Customer?.FullName,
-                OrderDate = order.OrderDate,
-                TotalAmount = order.TotalAmount,
-                Status = order.Status
-            };
-        }
+                QuotationId = d.QuotationId,
+                UnitPrice = d.UnitPrice
+            }).ToList()
+        };
     }
 }
