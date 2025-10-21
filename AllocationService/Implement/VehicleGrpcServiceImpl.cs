@@ -10,10 +10,13 @@ namespace AllocationAPIService.Services
     public class VehicleInstanceGrpcServiceImpl : VehicleInstanceGrpcService.VehicleInstanceGrpcServiceBase
     {
         private readonly IVehicleInstanceRepository _instanceRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public VehicleInstanceGrpcServiceImpl(IVehicleInstanceRepository instanceRepository)
+        public VehicleInstanceGrpcServiceImpl(IVehicleInstanceRepository instanceRepository, IVehicleRepository vehicleRepository)
         {
             _instanceRepository = instanceRepository;
+            _vehicleRepository = vehicleRepository;
+
         }
 
         // Override lại method GetVehicleInstanceById
@@ -44,6 +47,26 @@ namespace AllocationAPIService.Services
                 // Từ Vehicle.VehicleOption
                 ModelName = instance.Vehicle.VehicleOption.ModelName ?? "",
                 Description = instance.Vehicle.VehicleOption.Description ?? ""
+            };
+        }
+        public override async Task<VehicleReply> GetVehicleById(GetVehicleByIdRequest request, ServerCallContext context)
+        {
+            var vehicle = await _vehicleRepository.GetVehicleWithDetailsAsync(request.Id);
+
+            if (vehicle == null || vehicle.VehicleOption == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Không tìm thấy Vehicle hoặc thông tin liên quan với ID {request.Id}"));
+            }
+
+            return new VehicleReply
+            {
+                Id = vehicle.Id,
+                VariantName = vehicle.VariantName ?? "",
+                Color = vehicle.Color ?? "",
+                BatteryCapacity = vehicle.BatteryCapacity ?? "",
+                RangeKM = vehicle.RangeKM,
+                ModelName = vehicle.VehicleOption.ModelName ?? "",
+                Description = vehicle.VehicleOption.Description ?? ""
             };
         }
     }

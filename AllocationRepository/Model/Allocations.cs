@@ -9,12 +9,9 @@ namespace AllocationRepository.Model
     public class Allocations
     {
         public int Id { get; set; }
-        public int AgencyId { get; set; }
-        public int EvInventoryId { get; set; }
+        public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
-        public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
-        public EVInventory EVInventory { get; set; }
         public VehicleInstance VehicleInstance { get; set; }
     }
 }

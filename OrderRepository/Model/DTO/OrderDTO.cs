@@ -35,14 +35,18 @@ namespace OrderRepository.Model.Request
     public class FeedbackRequest
     {
         public int CustomerId { get; set; }
-        public string Comment { get; set; }
+        public string Type { get; set; }
+        public string Content { get; set; }
+        public string? Reply { get; set; }
         public string? Status { get; set; }
     }
     public class FeedbackResponse
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
-        public string Comment { get; set; }
+        public string Type { get; set; }
+        public string Content { get; set; }
+        public string Reply { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -66,13 +70,17 @@ namespace OrderRepository.Model.Request
         public decimal QuotedPrice { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int? CreateBy { get; set; }
+        public DateTime? CreateAt { get; set; }
     }
     public class UpdateQuotationRequest
     {
         // Có thể cho phép cập nhật một số trường
+        public int? AgencyId { get; set; }
         public string? QuotationName { get; set; }
-
+        public int? CustomerId { get; set; }
         public decimal? QuotedPrice { get; set; }
+        public int? VehicleInstanceId { get; set; }
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -91,6 +99,7 @@ namespace OrderRepository.Model.Request
         public DateTime EndDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
+        public int CreateBy { get; set; }
 
         // Các thuộc tính được làm giàu từ gRPC
         public AgencyReply Agency { get; set; }

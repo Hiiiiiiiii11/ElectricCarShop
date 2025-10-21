@@ -1,4 +1,5 @@
 ﻿using AllocationService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrderAPIService.Services;
 using OrderRepository.Model.Request;
@@ -18,12 +19,12 @@ namespace OrderAPI.Controllers
         {
             _quotationService = quotationService;
         }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetQuotationById(int id)
         {
             try
             {
+
                 var quotation = await _quotationService.GetQuotationByIdAsync(id);
                 if (quotation == null)
                     return NotFound(new { message = $"Quotation with ID {id} not found." });
@@ -37,13 +38,15 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateQuotation([FromBody] CreateQuotationRequest request)
+        public async Task<IActionResult> CreateQuotation([FromForm] CreateQuotationRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { message = "Invalid request data." });
-
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if(userIdClaim!= null)
+                request.CreateBy = int.Parse(userIdClaim);
                 var newQuotation = await _quotationService.CreateQuotationAsync(request);
                 return Ok(newQuotation);
             }
@@ -54,7 +57,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateQuotation(int id, [FromBody] UpdateQuotationRequest request)
+        public async Task<IActionResult> UpdateQuotation(int id, [FromForm] UpdateQuotationRequest request)
         {
             try
             {

@@ -14,7 +14,21 @@ message AgencyReply {
   string email = 5;
   string status = 6;
 }
+message GetAgencyContractByIdRequest {
+  int32 id = 1;
+}
+
+message AgencyContractReply {
+  int32 id = 1;
+  int32 agencyId = 2;
+  string contractNumber = 3;
+  string status = 4;
+  string agencyName = 5;
+  string agencyEmail = 6;
+}
+
 
 service AgencyGrpcService {
   rpc GetAgencyById (GetAgencyByIdRequest) returns (AgencyReply);
+  rpc GetAgencyContractById (GetAgencyContractByIdRequest) returns (AgencyContractReply);
 }

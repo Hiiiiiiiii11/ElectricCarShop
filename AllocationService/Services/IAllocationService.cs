@@ -11,9 +11,11 @@ namespace AllocationService.Services
     public interface IAllocationService
     {
         Task<AllocationResponse> CreateAsync(AllocationRequestModel request);
-        Task<IEnumerable<AllocationResponse>> GetByAgencyIdAsync(int agencyId);
-        Task<AllocationResponse?> GetByAgencyAndVehicleAsync(int agencyId, int vehicleId);
-        Task<IEnumerable<AllocationResponse>> GetByVehicleIdAsync(int vehicleId);
-        Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId);
+        Task<IEnumerable<AllocationResponse>> GetByAgencyContractIdAsync(int agencyContractId);
+        Task<AllocationResponse?> GetByAgencyContractAndVehicleAsync(int agencyContractId, int vehicleInstanceId);
+        Task<IEnumerable<AllocationResponse>> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
+        Task<AllocationResponse> UpdateAsync(int id, AllocationRequestModel request);
+        Task<bool> DeleteAsync(int id);
+        //Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId);
     }
 }

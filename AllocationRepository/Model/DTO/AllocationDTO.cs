@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GrpcService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -71,43 +72,31 @@ namespace AllocationRepository.Model.DTO
     }
     public class AllocationRequestModel
     {
-        public int AgencyId { get; set; }
-        public int EvInventoryId { get; set; }
+        public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
-        public int AllocationQuantity { get; set; }
     }
 
     public class AllocationResponse
     {
         public int Id { get; set; }
-        public int AgencyId { get; set; }
-        public int EvInventoryId { get; set; }
+        public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
-        public int AllocationQuantity { get; set; }
         public DateTime AllocationDate { get; set; }
-
-        // Thông tin bổ sung từ Agency gRPC
-        public string? AgencyName { get; set; }
-        public string? AgencyEmail { get; set; }
+        public AgencyContractReply ContractReply { get; set; }
+        public VehicleInstanceResponse? VehicleInstance { get; set; }
     }
 
     //request create evinventory
     public class EVInventoryRequest
     {
         public int VehicleInstanceId { get; set; }
-        public int Quantity { get; set; }
     }
 
     public class EVInventoryResponse
     {
         public int Id { get; set; }
         public int VehicleInstanceId { get; set; }
-        public int Quantity { get; set; }
-
-        //// Thông tin chi tiết xe (nếu cần)
-        //public string? VehicleName { get; set; }
-        //public string? Color { get; set; }
-        //public string? BatteryCapacity { get; set; }
+        public VehicleInstanceResponse VehicleInstance { get; set; }
     }
 
     //request create vehicle price
@@ -200,5 +189,6 @@ namespace AllocationRepository.Model.DTO
         public int VehicleId { get; set; }
         public string Vin { get; set; }
         public string EngineNumber { get; set; }
+        public VehicleResponse Vehicle { get; set; }
     }
 }

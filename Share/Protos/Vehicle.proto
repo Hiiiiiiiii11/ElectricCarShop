@@ -6,10 +6,15 @@ option csharp_namespace = "GrpcService";
 service VehicleInstanceGrpcService {
   // RPC method để lấy thông tin vehicle instance bằng ID
   rpc GetVehicleInstanceById (GetVehicleInstanceByIdRequest) returns (VehicleInstanceReply);
+  // RPC method để lấy thông tin vehicle bằng ID
+  rpc GetVehicleById(GetVehicleByIdRequest) returns (VehicleReply);
 }
 
 // Message cho request
 message GetVehicleInstanceByIdRequest {
+  int32 id = 1;
+}
+message GetVehicleByIdRequest {
   int32 id = 1;
 }
 
@@ -29,4 +34,14 @@ message VehicleInstanceReply {
   // Thông tin từ VehicleOptions (dòng xe)
   string modelName = 9;
   string description = 10;
+}
+
+message VehicleReply {
+  int32 id = 1;
+  string variantName = 2;
+  string color = 3;
+  string batteryCapacity = 4;
+  int32 rangeKM = 5;
+  string modelName = 6;
+  string description =7;
 }

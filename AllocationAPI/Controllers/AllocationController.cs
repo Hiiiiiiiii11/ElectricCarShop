@@ -14,7 +14,7 @@ namespace AllocationAPI.Controllers
             _allocationService = allocationService;
         }
         [HttpPost]
-        public async Task<IActionResult> CreateAllocation([FromBody] AllocationRequestModel request)
+        public async Task<IActionResult> CreateAllocation([FromForm] AllocationRequestModel request)
         {
             try
             {
@@ -26,12 +26,12 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet("agency/{agencyId}")]
-        public async Task<IActionResult> GetByAgencyId(int agencyId)
+        [HttpGet("agency/{agencyContractId}")]
+        public async Task<IActionResult> GetByAgencyId(int agencyContractId)
         {
             try
             {
-                var allocations = await _allocationService.GetByAgencyIdAsync(agencyId);
+                var allocations = await _allocationService.GetByAgencyContractIdAsync(agencyContractId);
                 return Ok(allocations);
             }
             catch (KeyNotFoundException exception)
@@ -43,14 +43,14 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet("agency/{agencyId}/vehicle/{vehicleId}")]
-        public async Task<IActionResult> GetByAgencyAndVehicle(int agencyId, int vehicleId)
+        [HttpGet("agency/{agencyContractId}/vehicle/{vehicleInstanceId}")]
+        public async Task<IActionResult> GetByAgencyAndVehicle(int agencyContractId, int vehicleInstanceId)
         {
             try
             {
-                var allocation = await _allocationService.GetByAgencyAndVehicleAsync(agencyId, vehicleId);
+                var allocation = await _allocationService.GetByAgencyContractAndVehicleAsync(agencyContractId, vehicleInstanceId);
                 if (allocation == null)
-                    return NotFound(new { message = $"Không tìm thấy phân bổ cho đại lý {agencyId} và xe {vehicleId}" });
+                    return NotFound(new { message = $"Không tìm thấy phân bổ cho đại lý {agencyContractId} và xe {vehicleInstanceId}" });
                 return Ok(allocation);
             }
             catch (Exception ex)
@@ -58,12 +58,12 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet("vehicle/{vehicleId}")]
-        public async Task<IActionResult> GetByVehicleId(int vehicleId)
+        [HttpGet("vehicle/{vehicleInstanceId}")]
+        public async Task<IActionResult> GetByVehicleInstanceId(int vehicleInstanceId)
         {
             try
             {
-                var allocations = await _allocationService.GetByVehicleIdAsync(vehicleId);
+                var allocations = await _allocationService.GetByVehicleInstanceIdAsync(vehicleInstanceId);
                 return Ok(allocations);
             }
             catch (Exception ex)
@@ -71,24 +71,41 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet("inventory/{evInventoryId}")]
-        public async Task<IActionResult> GetByInventoryId(int evInventoryId)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAllocation(int id, [FromForm] AllocationRequestModel request)
         {
             try
             {
-                var allocation = await _allocationService.GetByInventoryIdAsync(evInventoryId);
-                if (allocation == null)
-                    return NotFound(new { message = $"Không tìm thấy phân bổ cho inventory ID {evInventoryId}" });
+                var allocation = await _allocationService.UpdateAsync(id, request);
                 return Ok(allocation);
+            }
+            catch (KeyNotFoundException exception)
+            {
+                return NotFound(new { message = exception.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
-
-
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAllocation(int id)
+        {
+            try
+            {
+                await _allocationService.DeleteAsync(id);
+                return Ok(new { message = "Xóa phân bổ thành công." });
+            }
+            catch (KeyNotFoundException exception)
+            {
+                return NotFound(new { message = exception.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
     }
+
 }
     

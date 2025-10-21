@@ -59,14 +59,6 @@ namespace AllocationRepository.Data
                 .WithMany(vi => vi.Allocations) // Thêm ICollection<Allocations> vào model VehicleInstance
                 .HasForeignKey(a => a.VehicleInstanceId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // 4. EVInventory -> Allocations
-            modelBuilder.Entity<Allocations>()
-                .HasOne(a => a.EVInventory)
-                .WithMany(e => e.Allocations)
-                .HasForeignKey(a => a.EvInventoryId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             // Bỏ AutoInclude không còn hợp lệ
             modelBuilder.Entity<Vehicles>()
                 .Navigation(v => v.VehicleOption)

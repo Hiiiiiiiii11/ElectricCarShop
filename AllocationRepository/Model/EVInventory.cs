@@ -12,6 +12,5 @@ namespace AllocationRepository.Model
         public int VehicleInstanceId { get; set; }
         //public int Quantity { get; set; }
         public VehicleInstance VehicleInstance { get; set; }
-        public ICollection<Allocations> Allocations { get; set; } = new List<Allocations>();
     }    
 }

@@ -21,5 +21,10 @@ namespace Share.ShareServices
             var request = new GetVehicleInstanceByIdRequest { Id = instanceId };
             return await _client.GetVehicleInstanceByIdAsync(request);
         }
+        public async Task<VehicleReply> GetVehicleByIdAsync(int vehicleId)
+        {
+            var request = new GetVehicleByIdRequest { Id = vehicleId };
+            return await _client.GetVehicleByIdAsync(request);
+        }
     }
 }

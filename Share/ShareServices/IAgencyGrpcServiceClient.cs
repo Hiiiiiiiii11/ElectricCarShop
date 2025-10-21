@@ -10,5 +10,6 @@ namespace Share.ShareServices
     public interface IAgencyGrpcServiceClient
     {
         Task<AgencyReply> GetAgencyByIdAsync(int agencyId);
+        Task<AgencyContractReply> GetContractByIdAsync(int contractId);
     }
 }

@@ -23,5 +23,9 @@ namespace Share.ShareServices
                 Id = agencyId
             });
         }
+        public async Task<AgencyContractReply> GetContractByIdAsync(int contractId)
+        {
+            return await _client.GetAgencyContractByIdAsync(new GetAgencyContractByIdRequest { Id = contractId });
+        }
     }
 }

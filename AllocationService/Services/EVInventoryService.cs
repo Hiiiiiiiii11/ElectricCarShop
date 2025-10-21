@@ -94,7 +94,15 @@ namespace AllocationService.Services
             return new EVInventoryResponse
             {
                 Id = inv.Id,
-                VehicleInstanceId = inv.VehicleInstanceId
+                VehicleInstanceId = inv.VehicleInstanceId,
+
+                 VehicleInstance = inv.VehicleInstance == null ? null : new VehicleInstanceResponse
+                 {
+                     Id = inv.VehicleInstance.Id,
+                     VehicleId = inv.VehicleInstance.VehicleId,
+                     Vin = inv.VehicleInstance.Vin,
+                     EngineNumber = inv.VehicleInstance.EngineNumber
+                 },
             };
         }
     }
