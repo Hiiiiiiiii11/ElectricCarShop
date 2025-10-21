@@ -72,5 +72,5 @@ namespace OrderRepository.Data
 
     }
 }
-//dotnet ef migrations add InitialCreate --project OrderRepository --startup-project OrderAPI --context OrderDbContext
+//dotnet ef migrations add InitialCreate1 --project OrderRepository --startup-project OrderAPI --context OrderDbContext
 //dotnet ef database update --project OrderRepository --startup-project OrderAPI --context OrderDbContext

@@ -10,5 +10,6 @@ namespace AllocationRepository.Repositories
 {
     public interface IQuotationRepository : IGenericRepository<Quotations>
     {
+
     }
 }

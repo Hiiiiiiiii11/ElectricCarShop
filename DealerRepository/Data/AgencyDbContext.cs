@@ -77,5 +77,5 @@ namespace AgencyRepository.Data
 
     }
 }
-//dotnet ef migrations add InitialCreate --project DealerRepository --startup-project DealerAPI --context AgencyDbContext
+//dotnet ef migrations add InitialCreate1 --project DealerRepository --startup-project DealerAPI --context AgencyDbContext
 //dotnet ef database update --project DealerRepository --startup-project DealerAPI --context AgencyDbContext

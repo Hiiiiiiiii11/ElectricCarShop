@@ -75,5 +75,5 @@ namespace AllocationRepository.Data
     }
 }
 
-//dotnet ef migrations add InitialCreate --project AllocationRepository --startup-project AllocationAPI --context AllocationDbContext
+//dotnet ef migrations add InitialCreate1 --project AllocationRepository --startup-project AllocationAPI --context AllocationDbContext
 //dotnet ef database update --project AllocationRepository --startup-project AllocationAPI --context AllocationDbContext
