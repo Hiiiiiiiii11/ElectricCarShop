@@ -29,5 +29,12 @@ namespace OrderRepository.Repositories
             return await _context.Contracts
                 .FirstOrDefaultAsync(c => c.ContractNumber == contractNumber);
         }
+        public async Task<IEnumerable<Contracts>> GetContractsByAgencyIdAsync(int agencyId)
+        {
+            return await _context.Contracts
+                .Include(c => c.Quotation)
+                .Where(c => c.Quotation.AgencyId == agencyId)
+                .ToListAsync();
+        }
     }
 }

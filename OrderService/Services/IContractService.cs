@@ -15,5 +15,6 @@ namespace OrderService.Services
         Task<ContractResponse?> GetByContractNumberAsync(string contractNumber);
         Task<ContractResponse> UpdateContractAsync(int id, UpdateContractRequest request);
         Task<bool> DeleteContractAsync(int id);
+        Task<IEnumerable<ContractResponse>> GetAllContractByAgencyId(int agencyId);
     }
 }

@@ -12,5 +12,6 @@ namespace OrderRepository.Repositories
     {
         Task<IEnumerable<Contracts>> GetByQuotationIdAsync(int quotationId);
         Task<Contracts?> GetByContractNumberAsync(string contractNumber);
+        Task<IEnumerable<Contracts>> GetContractsByAgencyIdAsync(int agencyId);
     }
 }

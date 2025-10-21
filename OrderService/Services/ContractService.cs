@@ -2,6 +2,7 @@
 using OrderRepository.Model.Request;
 using OrderRepository.Repositories;
 using OrderService.Services;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace OrderAPIService.Services
     public class ContractService : IContractService
     {
         private readonly IContractRepository _contractRepository;
+        private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
 
-        public ContractService(IContractRepository contractRepository)
+        public ContractService(IContractRepository contractRepository , IAgencyGrpcServiceClient agencyGrpcServiceClient)
         {
             _contractRepository = contractRepository;
+            _agencyGrpcServiceClient = agencyGrpcServiceClient;
         }
 
         public async Task<ContractResponse> CreateContractAsync(CreateContractRequest request)
@@ -26,10 +29,12 @@ namespace OrderAPIService.Services
                 ContractName = request.ContractName,
                 ContractNumber = request.ContractNumber,
                 ContractDate = request.ContractDate,
+                Status = "Pending",
                 Terms = request.Terms
             };
 
             await _contractRepository.AddAsync(newContract);
+            await _contractRepository.SaveChangesAsync();
 
             return MapToResponse(newContract);
         }
@@ -100,7 +105,17 @@ namespace OrderAPIService.Services
             ContractName = c.ContractName,
             ContractNumber = c.ContractNumber,
             ContractDate = c.ContractDate,
+            Status = c.Status,
             Terms = c.Terms
         };
+
+        public async Task<IEnumerable<ContractResponse>> GetAllContractByAgencyId(int agencyId)
+        {
+            var agency = await _agencyGrpcServiceClient.GetAgencyByIdAsync(agencyId);
+            if (agency == null)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+            var contract = await _contractRepository.GetContractsByAgencyIdAsync(agencyId);
+            return contract.Select(MapToResponse);
+        }
     }
 }

@@ -166,6 +166,7 @@ namespace OrderRepository.Model.Request
     {
         public string? ContractName { get; set; }
         public DateTime? ContractDate { get; set; }
+        public string? Status { get; set; }
         public string? Terms { get; set; }
     }
 
@@ -176,6 +177,7 @@ namespace OrderRepository.Model.Request
         public string ContractName { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
+        public string Status { get; set; }
         public string Terms { get; set; }
     }
     public class CreatePaymentRequest

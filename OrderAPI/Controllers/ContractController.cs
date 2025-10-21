@@ -61,6 +61,22 @@ namespace OrderAPI.Controllers
             }
         }
 
+        [HttpGet("getall/{agencyId}")]
+        public async Task<IActionResult> GetAllContractByAgencyId(int agencyId)
+        {
+            try
+            {
+                var contract = await _contractService.GetAllContractByAgencyId(agencyId);
+                if (contract == null)
+                    return NotFound("Contract not found");
+                return Ok(contract);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateContract([FromBody] CreateContractRequest request)
         {
