@@ -113,14 +113,28 @@ namespace OrderRepository.Model.Request
         public int QuotationId { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
+        public List<CreateOrderDetailItem>? Details { get; set; }
     }
-
+    public class CreateOrderDetailItem
+    {
+        public int QuotationId { get; set; }
+        public decimal? UnitPrice { get; set; } // null => lấy QuotedPrice từ Quotation
+    }
     public class UpdateOrderRequest
     {
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
     }
-
+    public class CreateOrderDetailRequest
+    {
+        public int OrderId { get; set; }
+        public int QuotationId { get; set; }
+        public decimal? UnitPrice { get; set; } // null => lấy QuotedPrice từ Quotation
+    }
+    public class UpdateOrderDetailPriceRequest
+    {
+        public decimal NewUnitPrice { get; set; }
+    }
     public class OrderResponse
     {
         public int Id { get; set; }

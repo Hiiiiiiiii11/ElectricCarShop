@@ -69,6 +69,7 @@ namespace OrderAPI
             builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository.Repositories.OrderRepository>();
+            builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
             builder.Services.AddScoped<IContractRepository, ContractRepository>();
             builder.Services.AddScoped<IEmailVerificationGrpcServiceClient, EmailVerificationGrpcServiceClient>();
 
@@ -77,6 +78,8 @@ namespace OrderAPI
             builder.Services.AddScoped<IQuotationService, QuotationService>();
             builder.Services.AddScoped<ITransactionService, TransactionService>();
             builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
+            builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IContractService, ContractService>();
 

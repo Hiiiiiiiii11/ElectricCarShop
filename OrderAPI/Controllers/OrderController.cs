@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.Request;
 using OrderService.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OrderAPI.Controllers
 {
@@ -29,16 +32,17 @@ namespace OrderAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             try
             {
                 var order = await _orderService.GetOrderByIdAsync(id);
-                if (order == null)
-                    return NotFound(new { message = $"Order with ID {id} not found." });
-
                 return Ok(order);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(new { message = knfEx.Message });
             }
             catch (Exception ex)
             {
@@ -58,6 +62,8 @@ namespace OrderAPI.Controllers
                     return BadRequest(ModelState);
 
                 var createdOrder = await _orderService.CreateOrderAsync(request);
+                // Có thể dùng CreatedAtAction nếu bạn muốn trả Location header:
+                // return CreatedAtAction(nameof(GetOrderById), new { id = createdOrder.Id }, createdOrder);
                 return Ok(createdOrder);
             }
             catch (Exception ex)
@@ -66,7 +72,7 @@ namespace OrderAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderRequest request)
         {
             try
@@ -84,13 +90,17 @@ namespace OrderAPI.Controllers
             {
                 return NotFound(new { message = knfEx.Message });
             }
+            catch (InvalidOperationException invEx)
+            {
+                return BadRequest(new { message = invEx.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try
@@ -101,13 +111,17 @@ namespace OrderAPI.Controllers
 
                 return Ok(new { message = $"Order with ID {id} deleted successfully." });
             }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(new { message = knfEx.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
 
-        [HttpGet("customer/{customerId}")]
+        [HttpGet("customer/{customerId:int}")]
         public async Task<IActionResult> GetOrdersByCustomerId(int customerId)
         {
             try
