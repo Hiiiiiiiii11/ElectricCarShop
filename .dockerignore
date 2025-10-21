@@ -27,3 +27,5 @@ README.md
 Bỏ qua các thư mục được tạo bởi certbot và nginx
 certs/
 www/
+UserService/Services/GreeterService.cs
+Greet/
