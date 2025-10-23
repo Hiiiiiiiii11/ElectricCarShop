@@ -92,45 +92,45 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        //// 3 hàm mở rộng
-        //[HttpGet("vehicle/{vehicleId}")]
-        //public async Task<IActionResult> GetPricesByVehicleId(int vehicleId)
-        //{
-        //    try
-        //    {
-        //        var prices = await _vehiclePriceService.GetPricesByVehicleIdAsync(vehicleId);
-        //        return Ok(prices);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
-        //[HttpGet("vehicle/{vehicleId}/history")]
-        //public async Task<IActionResult> GetPriceHistory(int vehicleId)
-        //{
-        //    try
-        //    {
-        //        var prices = await _vehiclePriceService.GetPriceHistoryAsync(vehicleId);
-        //        return Ok(prices);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
-        //[HttpGet("agency/{agencyId}")]
-        //public async Task<IActionResult> GetPricesByAgency(int agencyId)
-        //{
-        //    try
-        //    {
-        //        var prices = await _vehiclePriceService.GetPricesByAgencyAsync(agencyId);
-        //        return Ok(prices);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
+        // 3 hàm mở rộng
+        [HttpGet("vehicle/{vehicleId}")]
+        public async Task<IActionResult> GetPricesByVehicleId(int vehicleId)
+        {
+            try
+            {
+                var prices = await _vehiclePriceService.GetPricesByVehicleIdAsync(vehicleId);
+                return Ok(prices);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("vehicle/{vehicleId}/history")]
+        public async Task<IActionResult> GetPriceHistory(int vehicleId)
+        {
+            try
+            {
+                var prices = await _vehiclePriceService.GetPriceHistoryAsync(vehicleId);
+                return Ok(prices);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("agency/{agencyId}")]
+        public async Task<IActionResult> GetPricesByAgency(int agencyId)
+        {
+            try
+            {
+                var prices = await _vehiclePriceService.GetPricesByAgencyAsync(agencyId);
+                return Ok(prices);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

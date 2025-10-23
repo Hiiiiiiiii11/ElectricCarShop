@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AllocationRepository.Migrations
 {
     [DbContext(typeof(AllocationDbContext))]
-    [Migration("20251016042244_fixdb2")]
-    partial class fixdb2
+    [Migration("20251023153324_fixdbx")]
+    partial class fixdbx
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,24 +33,16 @@ namespace AllocationRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AgencyId")
+                    b.Property<int>("AgencyContractId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AllocationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("AllocationQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EvInventoryId")
-                        .HasColumnType("int");
-
                     b.Property<int>("VehicleInstanceId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EvInventoryId");
 
                     b.HasIndex("VehicleInstanceId");
 
@@ -236,19 +228,11 @@ namespace AllocationRepository.Migrations
 
             modelBuilder.Entity("AllocationRepository.Model.Allocations", b =>
                 {
-                    b.HasOne("AllocationRepository.Model.EVInventory", "EVInventory")
-                        .WithMany("Allocations")
-                        .HasForeignKey("EvInventoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AllocationRepository.Model.VehicleInstance", "VehicleInstance")
                         .WithMany("Allocations")
                         .HasForeignKey("VehicleInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("EVInventory");
 
                     b.Navigation("VehicleInstance");
                 });
@@ -306,11 +290,6 @@ namespace AllocationRepository.Migrations
                         .IsRequired();
 
                     b.Navigation("VehicleOption");
-                });
-
-            modelBuilder.Entity("AllocationRepository.Model.EVInventory", b =>
-                {
-                    b.Navigation("Allocations");
                 });
 
             modelBuilder.Entity("AllocationRepository.Model.VehicleInstance", b =>

@@ -5,7 +5,7 @@
 namespace AllocationRepository.Migrations
 {
     /// <inheritdoc />
-    public partial class updatedbz : Migration
+    public partial class fixdbx : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

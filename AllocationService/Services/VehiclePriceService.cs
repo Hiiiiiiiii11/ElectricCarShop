@@ -78,23 +78,23 @@ namespace AllocationService.Services
 
         }
 
-        //public async Task<IEnumerable<VehiclePriceResponse>> GetPriceHistoryAsync(int vehicleId)
-        //{
-        //   var entities = await _vehiclePriceRepository.GetPriceHistoryAsync(vehicleId);
-        //    return entities.Select(MapToResponse);
-        //}
+        public async Task<IEnumerable<VehiclePriceResponse>> GetPriceHistoryAsync(int vehicleId)
+        {
+            var entities = await _vehiclePriceRepository.GetPriceHistoryAsync(vehicleId);
+            return entities.Select(MapToResponse);
+        }
 
-        //public async Task<IEnumerable<VehiclePriceResponse>> GetPricesByAgencyAsync(int agencyId)
-        //{
-        //    var entities = await _vehiclePriceRepository.GetPricesByAgencyAsync(agencyId);
-        //    return entities.Select(MapToResponse);
-        //}
+        public async Task<IEnumerable<VehiclePriceResponse>> GetPricesByAgencyAsync(int agencyId)
+        {
+            var entities = await _vehiclePriceRepository.GetPricesByAgencyAsync(agencyId);
+            return entities.Select(MapToResponse);
+        }
 
-        //public async Task<IEnumerable<VehiclePriceResponse>> GetPricesByVehicleIdAsync(int vehicleId)
-        //{
-        //    var entities = await _vehiclePriceRepository.GetPricesByVehicleIdAsync(vehicleId);
-        //    return entities.Select(MapToResponse);
-        //}
+        public async Task<IEnumerable<VehiclePriceResponse>> GetPricesByVehicleIdAsync(int vehicleId)
+        {
+            var entities = await _vehiclePriceRepository.GetPricesByVehicleIdAsync(vehicleId);
+            return entities.Select(MapToResponse);
+        }
 
         public VehiclePriceResponse MapToResponse(VehiclePrices prices)
         {

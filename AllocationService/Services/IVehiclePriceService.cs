@@ -16,8 +16,8 @@ namespace AllocationService.Services
         Task<IEnumerable<VehiclePriceResponse>> GetAllAsync();
 
         // 3 hàm mở rộng
-        //Task<IEnumerable<VehiclePriceResponse>> GetPricesByVehicleIdAsync(int vehicleId);
-        //Task<IEnumerable<VehiclePriceResponse>> GetPriceHistoryAsync(int vehicleId);
-        //Task<IEnumerable<VehiclePriceResponse>> GetPricesByAgencyAsync(int agencyId);
+        Task<IEnumerable<VehiclePriceResponse>> GetPricesByVehicleIdAsync(int vehicleId);
+        Task<IEnumerable<VehiclePriceResponse>> GetPriceHistoryAsync(int vehicleId);
+        Task<IEnumerable<VehiclePriceResponse>> GetPricesByAgencyAsync(int agencyId);
     }
 }
