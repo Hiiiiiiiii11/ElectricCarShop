@@ -10,8 +10,8 @@ namespace AllocationRepository.Repositories
 {
     public interface IVehiclePriceRepository : IGenericRepository<VehiclePrices>
     {
-        Task<IEnumerable<VehiclePrices>> GetPricesByVehicleIdAsync(int vehicleId);
-        Task<IEnumerable<VehiclePrices>> GetPriceHistoryAsync(int vehicleId);
-        Task<IEnumerable<VehiclePrices>> GetPricesByAgencyAsync(int agencyId);
+        //Task<IEnumerable<VehiclePrices>> GetPricesByVehicleIdAsync(int vehicleId);
+        //Task<IEnumerable<VehiclePrices>> GetPriceHistoryAsync(int vehicleId);
+        //Task<IEnumerable<VehiclePrices>> GetPricesByAgencyAsync(int agencyId);
     }
 }
