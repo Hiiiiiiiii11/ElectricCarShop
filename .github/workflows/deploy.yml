@@ -38,6 +38,13 @@ jobs:
               echo "❌ Project directory $PROJECT_DIR not found. Please clone it manually first."
               exit 1
             fi
+
+            echo "🔑 Adding GitHub.com's SSH key to known_hosts..."
+            # Tạo thư mục .ssh nếu nó chưa tồn tại
+            mkdir -p $HOME/.ssh
+            # Lấy key của github.com và thêm vào known_hosts
+            # Lệnh này sẽ ngăn lỗi "Host key verification failed"
+            ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
             
             echo "🔄 Ensuring remote URL is set to SSH..."
             # Lệnh này đảm bảo 'origin' dùng SSH, đề phòng bạn đã clone bằng HTTPS
@@ -49,12 +56,24 @@ jobs:
             echo "Resetting local 'main' branch to 'origin/main'..."
             # Lệnh này HỦY mọi thay đổi local và lấy 100% code từ 'main'
             git reset --hard origin/main
+
+            echo "🔥 Deleting old 'bin' and 'obj' build folders..."
+            find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
             
             # ---------------------------------------------------
             # PHẦN 2: DEPLOY DOCKER (Đã sửa cú pháp)
             # ---------------------------------------------------
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
+
+            echo "🔥🔥🔥 Forcibly removing old images (to fix corrupted cache)..."
+            # Lệnh này tìm ID image của service và XÓA NÓ
+            # '|| true' để script không bị lỗi nếu image không tồn tại
+            docker rmi $(docker-compose images -q userapi) || true
+            docker rmi $(docker-compose images -q agencyapi) || true
+            docker rmi $(docker-compose images -q allocationapi) || true
+            docker rmi $(docker-compose images -q orderapi) || true
+            docker rmi $(docker-compose images -q nginx) || true
             
             echo "🚀 Forcing REBUILD of all services (no-cache) and RECREATING containers..."
             
