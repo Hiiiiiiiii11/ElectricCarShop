@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Bước 2 (MỚI): Đồng bộ file từ runner sang EC2
+      # Bước 2: Đồng bộ file từ runner sang EC2
       - name: Sync repository files to EC2
         uses: appleboy/scp-action@master
         with:
@@ -28,7 +28,7 @@ jobs:
           source: "./" # Sao chép toàn bộ thư mục hiện tại
           target: "~/ElectricCarShop" # Đến thư mục dự án trên EC2
 
-      # Bước 3 (SỬA LẠI): Chạy các lệnh Docker trên EC2
+      # Bước 3: Chạy các lệnh Docker trên EC2
       - name: Run deployment commands on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -39,8 +39,6 @@ jobs:
             # Đi vào thư mục dự án
             cd ~/ElectricCarShop
             
-            # ĐÃ BỎ LỆNH 'git pull' GÂY LỖI
-            
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
             
@@ -49,19 +47,30 @@ jobs:
             echo "--- Starting Database ---"
             docker-compose up -d sqlserver
             
-            echo "--- Building User API ---"
-            docker-compose up --build -d userapi
+            # ---------------------------------------------------
+            # SỬA LỖI: Buộc build lại tất cả API (no-cache)
+            # ---------------------------------------------------
+            echo "--- Forcing rebuild of User API (no-cache) ---"
+            docker-compose build --no-cache userapi
+            docker-compose up -d userapi
             
-            echo "--- Building Agency API ---"
-            docker-compose up --build -d agencyapi
+            echo "--- Forcing rebuild of Agency API (no-cache) ---"
+            docker-compose build --no-cache agencyapi
+            docker-compose up -d agencyapi
             
-            echo "--- Building Allocation API ---"
-            docker-compose up --build -d allocationapi
+            echo "--- Forcing rebuild of Allocation API (no-cache) ---"
+            docker-compose build --no-cache allocationapi
+            docker-compose up -d allocationapi
             
-            echo "--- Building Order API ---"
-            docker-compose up --build -d orderapi
-            
+            echo "--- Forcing rebuild of Order API (no-cache) ---"
+            docker-compose build --no-cache orderapi
+            docker-compose up -d orderapi
+            # ---------------------------------------------------
+
             echo "--- Restarting NGINX with latest config ---"
             docker-compose up -d nginx
+            
+            echo "🧹 Cleaning up old Docker images..."
+            docker system prune -f
             
             echo "✅ Deployment successful!"
