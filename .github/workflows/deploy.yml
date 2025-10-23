@@ -1,5 +1,5 @@
 ﻿# Tên của workflow
-name: Deploy to EC2
+name: Deploy to EC2 (via Git Reset)
 
 # Điều kiện kích hoạt
 on:
@@ -14,31 +14,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Lấy mã nguồn về máy ảo runner
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Bước 2: Đồng bộ file từ runner sang EC2
-      - name: Sync repository files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "./" # Sao chép toàn bộ thư mục hiện tại
-          target: "~/ElectricCarShop" # Đến thư mục dự án trên EC2
-
-      # Bước 3: Chạy các lệnh Docker trên EC2 (Đã sửa cú pháp)
-      - name: Run deployment commands on EC2
+      # Bước 1 và 2 (Checkout & SCP) đã bị loại bỏ
+      
+      - name: Pull code and Deploy on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Đi vào thư mục dự án
-            cd ~/ElectricCarShop
+            # --- CÀI ĐẶT BIẾN ---
+            # Đường dẫn SSH của repo bạn (lấy từ HTTPS bạn cung cấp)
+            REPO_URL_SSH="git@github.com:Hiiiiiiiii11/ElectricCarShop.git"
+            PROJECT_DIR="~/ElectricCarShop"
             
+            # ---------------------------------------------------
+            # PHẦN 1: LẤY CODE MỚI NHẤT
+            # ---------------------------------------------------
+            echo "Navigating to project directory..."
+            
+            # Đi vào thư mục dự án. Nếu không tồn tại, báo lỗi.
+            if ! cd $PROJECT_DIR; then
+              echo "❌ Project directory $PROJECT_DIR not found. Please clone it manually first."
+              exit 1
+            fi
+            
+            echo "🔄 Ensuring remote URL is set to SSH..."
+            # Lệnh này đảm bảo 'origin' dùng SSH, đề phòng bạn đã clone bằng HTTPS
+            git remote set-url origin $REPO_URL_SSH
+            
+            echo "Fetching latest code from 'origin'..."
+            git fetch origin
+            
+            echo "Resetting local 'main' branch to 'origin/main'..."
+            # Lệnh này HỦY mọi thay đổi local và lấy 100% code từ 'main'
+            git reset --hard origin/main
+            
+            # ---------------------------------------------------
+            # PHẦN 2: DEPLOY DOCKER (Đã sửa cú pháp)
+            # ---------------------------------------------------
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
             
@@ -47,9 +61,6 @@ jobs:
             echo "--- 1. Starting Database (build if needed) ---"
             docker-compose up --build -d sqlserver 
             
-            # ---------------------------------------------------
-            # SỬA LỖI: Tách 'build' và 'up' thành 2 lệnh
-            # ---------------------------------------------------
             echo "--- 2. Rebuilding User API ---"
             docker-compose build --no-cache userapi
             docker-compose up --force-recreate -d userapi
@@ -69,7 +80,6 @@ jobs:
             echo "--- 6. Rebuilding NGINX ---"
             docker-compose build --no-cache nginx
             docker-compose up --force-recreate -d nginx
-            # ---------------------------------------------------
             
             echo "🧹 Cleaning up old dangling images..."
             docker system prune -f
