@@ -15,15 +15,19 @@ namespace AgencyService.Services
         private readonly ITestDriveRepository _testDriveRepository;
         private readonly IVehicleInstanceGrpcServiceClient _vehicleGrpcServiceClient;
         private readonly ICustomerGrpcServiceClient _customerGrpcServiceClient;
+        private readonly IAgencyRepository _agencyRepository;
 
         public TestDriveService(
             ITestDriveRepository testDriveRepository,
             IVehicleInstanceGrpcServiceClient vehicleGrpcServiceClient,
-            ICustomerGrpcServiceClient customerGrpcServiceClient)
+            ICustomerGrpcServiceClient customerGrpcServiceClient,
+            IAgencyRepository agencyRepository
+            )
         {
             _testDriveRepository = testDriveRepository;
             _vehicleGrpcServiceClient = vehicleGrpcServiceClient;
             _customerGrpcServiceClient = customerGrpcServiceClient;
+            _agencyRepository = agencyRepository;
         }
 
         // ===== CREATE =====
@@ -137,6 +141,27 @@ namespace AgencyService.Services
             response.Customer = customer;
 
             return response;
+        }
+        // ===== GET BY AGENCY ID =====
+        public async Task<IEnumerable<TestDriveResponse>> GetTestDrivesByAgencyIdAsync(int agencyId)
+        {
+            var agency = await _agencyRepository.GetByIdAsync(agencyId);
+            if (agency == null)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+            var testDrives = await _testDriveRepository.GetTestDrivesByAgencyIdAsync(agencyId);
+            
+            var result = new List<TestDriveResponse>();
+            foreach (var td in testDrives)
+            {
+                var response = MapToResponse(td);
+                // Gọi gRPC
+                var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(td.VehicleInstanceId);
+                var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(td.CustomerId);
+                response.Vehicle = vehicle;
+                response.Customer = customer;
+                result.Add(response);
+            }
+            return result;
         }
 
         // ===== MAP =====

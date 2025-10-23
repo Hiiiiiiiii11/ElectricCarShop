@@ -110,6 +110,7 @@ namespace AgencyService.Services
             var debts = await _agencyDebtRepository.SearchDebtsAsync(fromDate, toDate);
             return debts.Select(MapToResponse);
         }
+       
 
         // 🧭 Mapper DTO
         private AgencyDebtResponse MapToResponse(AgencyDebts debt)
@@ -161,6 +162,17 @@ namespace AgencyService.Services
         {
             var debts = await _agencyDebtRepository.GetAgencysWithRemainingDebtByAgencyIdAsync(agencyId);
             return debts.Select(MapToResponse);
+        }
+
+        public async Task DeleteDebtAsync(int id)
+        {
+            var debt = await _agencyDebtRepository.GetByIdAsync(id);
+            if(debt == null)
+            {
+                throw new KeyNotFoundException($"Debt record with Id {id} not found.");
+            }
+            _agencyDebtRepository.Remove(debt);
+            await _agencyDebtRepository.SaveChangesAsync();
         }
     }
 }

@@ -95,19 +95,19 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet]
-        public async Task<IActionResult> GetTargetsReport([FromForm] GetTargetReportRequest request)
-        {
-            try
-            {
-                var results = await _AgencyTargetService.GetTargetsReportAsync(request);
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetTargetsReport([FromForm] GetTargetReportRequest request)
+        //{
+        //    try
+        //    {
+        //        var results = await _AgencyTargetService.GetTargetsReportAsync(request);
+        //        return Ok(results);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
         [HttpDelete("Agency/{AgencyId}")]
         public async Task<IActionResult> DeleteTarget(int AgencyId ,int targetId)
         {

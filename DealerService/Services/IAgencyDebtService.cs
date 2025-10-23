@@ -19,5 +19,6 @@ namespace AgencyService.Services
             Task<IEnumerable<AgencyDebtResponse>> GetAllDebtsByAgencyIdAsync(int agencyId);
             Task<IEnumerable<AgencyDebtResponse>> GetAgencysWithRemainingDebtByAgencyIdAsync(int agencyId);
             Task<IEnumerable<AgencyDebtResponse>> SearchDebtsAsync(DateTime? fromDate, DateTime? toDate);
+            Task DeleteDebtAsync(int id);
         }
 }

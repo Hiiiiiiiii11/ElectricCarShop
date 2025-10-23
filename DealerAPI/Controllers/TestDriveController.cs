@@ -112,5 +112,23 @@ namespace AllocationAPI.Controllers
                 return BadRequest(new { message = $"Error deleting test drive: {ex.Message}" });
             }
         }
+
+        [HttpGet("agency/{agencyId}")]
+        public async Task<IActionResult> GetTestDrivesByAgencyId(int agencyId)
+        {
+            try
+            {
+                var testDrives = await _testDriveService.GetTestDrivesByAgencyIdAsync(agencyId);
+                return Ok(testDrives);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
     }
 }

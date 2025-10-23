@@ -18,6 +18,7 @@ namespace AgencyService.Services
 
         // Lấy hợp đồng đã hết hạn
         Task<IEnumerable<AgencyContractResponse>> GetExpiredByAgencyIdAsync(int AgencyId);
+        Task DeleteAgencyAsync(int contractId);
 
         // Cập nhật trạng thái hợp đồng
         Task<AgencyContractResponse> UpdateStatusAsync(int contractId, UpdateStatusAgencyContractRequest request);

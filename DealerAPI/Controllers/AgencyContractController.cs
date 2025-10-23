@@ -153,6 +153,23 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpDelete("{contractId}")]
+        public async Task<IActionResult> DeleteContract(int contractId)
+        {
+            try
+            {
+                await _AgencyContractService.DeleteAgencyAsync(contractId);
+                return Ok(new { message = "Delete Contract successful" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
 
     }
 }

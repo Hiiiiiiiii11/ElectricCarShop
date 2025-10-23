@@ -11,6 +11,7 @@ namespace AgencyService.Services
     {
         Task<TestDriveResponse?> GetTestDriveByIdAsync(int id);
         Task<IEnumerable<TestDriveResponse>> GetAllTestDrivesAsync();
+        Task<IEnumerable<TestDriveResponse>> GetTestDrivesByAgencyIdAsync(int agencyId);
         Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request);
         Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request);
         Task<bool> DeleteTestDriveAsync(int id);

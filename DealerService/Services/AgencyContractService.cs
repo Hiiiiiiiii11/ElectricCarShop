@@ -102,6 +102,14 @@ namespace AgencyService.Services
             await _AgencyContractRepository.SaveChangesAsync();
             return MapToResponse(contract);
         }
+        public async Task DeleteAgencyAsync(int contractId)
+        {
+            var contract = await _AgencyContractRepository.GetByIdAsync(contractId);
+            if (contract == null)
+                throw new KeyNotFoundException($"Contract with Id {contractId} not found.");
+            _AgencyContractRepository.Remove(contract);
+            await _AgencyContractRepository.SaveChangesAsync();
+        }
 
         //mapping
         public AgencyContractResponse MapToResponse(AgencyContracts contract)
