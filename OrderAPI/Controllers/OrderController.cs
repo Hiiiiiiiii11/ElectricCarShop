@@ -112,6 +112,19 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpGet("agency/{agencyId}")]
+        public async Task<IActionResult> GetOrdersByAgencyId([FromRoute] int agencyId)
+        {
+            try
+            {
+                var result = await _orderService.GetOrdersByAgencyIdAsync(agencyId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
 
     }
 }

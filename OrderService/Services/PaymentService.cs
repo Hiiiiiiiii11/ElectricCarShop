@@ -101,5 +101,11 @@ namespace OrderAPIService.Services
             PaymentMethod = p.PaymentMethod,
             Status = p.Status
         };
+
+        public async Task<IEnumerable<PaymentResponse?>> GetAllPayment()
+        {
+            var payments = await _paymentRepository.GetAllAsync();
+            return payments.Select(MapToResponse);
+        }
     }
 }

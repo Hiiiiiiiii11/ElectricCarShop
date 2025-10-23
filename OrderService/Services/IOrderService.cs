@@ -14,5 +14,6 @@ namespace OrderService.Services
         Task<IEnumerable<OrderResponse>> GetAllOrdersAsync();
         Task<OrderResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusRequest request);
         Task DeleteOrderAsync(int orderId);
+        Task<IEnumerable<OrderResponse>> GetOrdersByAgencyIdAsync(int agencyId);
     }
 }

@@ -10,6 +10,7 @@ namespace OrderService.Services
     public interface IPaymentService
     {
         Task<PaymentResponse> CreatePaymentAsync(CreatePaymentRequest request);
+        Task<IEnumerable<PaymentResponse?>> GetAllPayment();
         Task<PaymentResponse?> GetPaymentByIdAsync(int id);
         Task<IEnumerable<PaymentResponse>> GetPaymentsByOrderIdAsync(int orderId);
         Task<IEnumerable<PaymentResponse>> GetPaymentsByStatusAsync(string status);

@@ -23,5 +23,6 @@ namespace OrderRepository.Repositories
 
         // ✅ (Tùy chọn) doanh thu tính từ OrderDetails thay vì Orders.TotalAmount
         Task<decimal> GetTotalRevenueFromDetailsAsync(DateTime startDate, DateTime endDate);
+        Task<IEnumerable<Orders>> GetByAgencyIdAsync(int agencyId);
     }
 }

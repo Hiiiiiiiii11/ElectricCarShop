@@ -30,7 +30,6 @@ namespace OrderRepository.Repositories
                 .Where(p => p.Status == status)
                 .ToListAsync();
         }
-
         public async Task<decimal> GetTotalPaidByOrderAsync(int orderId)
         {
             return await _context.Payments

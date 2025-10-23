@@ -2,6 +2,7 @@
 using AllocationRepository.Repositories;
 using AllocationService.Services;
 using Azure.Core;
+using GrpcService;
 using OrderRepository.Model.Request;
 using Share.ShareServices;
 using System;
@@ -14,44 +15,47 @@ namespace OrderAPIService.Services
         private readonly IQuotationRepository _quotationRepository;
         private readonly IAgencyGrpcServiceClient _agencyClient;
         private readonly IVehicleInstanceGrpcServiceClient _vehicleClient;
+        private readonly IUserGrpcServiceClient _userGrpcServiceClient;
 
         // Đã loại bỏ IMapper khỏi constructor
         public QuotationService(
             IQuotationRepository quotationRepository,
             IAgencyGrpcServiceClient agencyClient,
-            IVehicleInstanceGrpcServiceClient vehicleClient)
+            IVehicleInstanceGrpcServiceClient vehicleClient,
+            IUserGrpcServiceClient userGrpcServiceClient
+            )
         {
             _quotationRepository = quotationRepository;
             _agencyClient = agencyClient;
             _vehicleClient = vehicleClient;
+            _userGrpcServiceClient = userGrpcServiceClient;
         }
 
         public async Task<QuotationResponse> GetQuotationByIdAsync(int id)
         {
             var quotation = await _quotationRepository.GetByIdAsync(id);
             if (quotation == null)
-            {
                 throw new KeyNotFoundException($"Quotation with ID {id} not found.");
-            }
 
-            // Gọi gRPC song song để tối ưu hiệu năng
+            // Gọi song song các dịch vụ gRPC
             var agencyTask = _agencyClient.GetAgencyByIdAsync(quotation.AgencyId);
             var vehicleTask = _vehicleClient.GetVehicleInstanceByIdAsync(quotation.VehicleInstanceId);
+            var userTask = _userGrpcServiceClient.GetUserByIdAsync(quotation.CreateBy);
 
-            // Chờ cả hai lời gọi hoàn tất
-            await Task.WhenAll(agencyTask, vehicleTask);
+            await Task.WhenAll(agencyTask, vehicleTask, userTask);
 
-            // Sử dụng phương thức mapping thủ công
             var response = MapToResponse(quotation);
             response.Agency = await agencyTask;
             response.Vehicle = await vehicleTask;
+            response.User = await userTask;
 
             return response;
         }
 
+
+
         public async Task<QuotationResponse> CreateQuotationAsync(CreateQuotationRequest request)
         {
-            // Mapping thủ công từ request sang entity
             var quotation = new Quotations
             {
                 AgencyId = request.AgencyId,
@@ -63,13 +67,12 @@ namespace OrderAPIService.Services
                 EndDate = request.EndDate,
                 CreatedAt = DateTime.UtcNow,
                 CreateBy = request.CreateBy ?? 0,
-                Status = "Pending" // Gán trạng thái mặc định khi tạo mới
+                Status = "Pending"
             };
 
             await _quotationRepository.AddAsync(quotation);
             await _quotationRepository.SaveChangesAsync();
 
-            // Gọi lại hàm Get để trả về dữ liệu đã được làm giàu thông tin
             return await GetQuotationByIdAsync(quotation.Id);
         }
 
@@ -77,14 +80,11 @@ namespace OrderAPIService.Services
         {
             var quotation = await _quotationRepository.GetByIdAsync(id);
             if (quotation == null)
-            {
                 throw new KeyNotFoundException($"Quotation with ID {id} not found.");
-            }
 
-            // Cập nhật thủ công các thuộc tính
             if (request.AgencyId.HasValue)
                 quotation.AgencyId = request.AgencyId.Value;
-            if(request.CustomerId.HasValue)
+            if (request.CustomerId.HasValue)
                 quotation.CustomerId = request.CustomerId.Value;
             if (request.VehicleInstanceId.HasValue)
                 quotation.VehicleInstanceId = request.VehicleInstanceId.Value;
@@ -99,11 +99,11 @@ namespace OrderAPIService.Services
             if (!string.IsNullOrWhiteSpace(request.Status))
                 quotation.Status = request.Status;
 
-
             _quotationRepository.Update(quotation);
             await _quotationRepository.SaveChangesAsync();
             return await GetQuotationByIdAsync(id);
         }
+
 
         public async Task<bool> DeleteQuotationAsync(int id)
         {
@@ -132,10 +132,104 @@ namespace OrderAPIService.Services
                 CreatedAt = q.CreatedAt,
                 Status = q.Status,
                 CreateBy = q.CreateBy,
-                // Agency và Vehicle sẽ được gán sau khi gọi gRPC
                 Agency = null,
-                Vehicle = null
+                Vehicle = null,
+                User = null
             };
+        }
+
+        public async Task<IEnumerable<QuotationResponse>> GetQuotationByUserCreateId(int userId)
+        {
+            // Gọi gRPC để lấy thông tin user
+            var user = await _userGrpcServiceClient.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            // Lấy danh sách quotation từ DB
+            var quotations = await _quotationRepository.GetQuotationByUserCreateId(userId);
+            if (quotations == null || !quotations.Any())
+            {
+                return Enumerable.Empty<QuotationResponse>();
+            }
+
+            // Duyệt từng quotation và enrich dữ liệu bằng gRPC
+            var responses = new List<QuotationResponse>();
+            foreach (var q in quotations)
+            {
+                var agencyTask = _agencyClient.GetAgencyByIdAsync(q.AgencyId);
+                var vehicleTask = _vehicleClient.GetVehicleInstanceByIdAsync(q.VehicleInstanceId);
+
+                await Task.WhenAll(agencyTask, vehicleTask);
+
+                var response = MapToResponse(q);
+                response.Agency = await agencyTask;
+                response.Vehicle = await vehicleTask;
+                response.User = user;
+
+                responses.Add(response);
+            }
+
+            return responses;
+        }
+
+
+
+        public async Task<IEnumerable<QuotationResponse>> GetAllQuotationsAsync()
+        {
+            var quotations = await _quotationRepository.GetAllAsync();
+            if (quotations == null || !quotations.Any())
+                return Enumerable.Empty<QuotationResponse>();
+
+            var tasks = quotations.Select(async q =>
+            {
+                var agencyTask = _agencyClient.GetAgencyByIdAsync(q.AgencyId);
+                var vehicleTask = _vehicleClient.GetVehicleInstanceByIdAsync(q.VehicleInstanceId);
+                var userTask = _userGrpcServiceClient.GetUserByIdAsync(q.CreateBy);
+
+                await Task.WhenAll(agencyTask, vehicleTask, userTask);
+
+                var response = MapToResponse(q);
+                response.Agency = await agencyTask;
+                response.Vehicle = await vehicleTask;
+                response.User = await userTask;
+                return response;
+            });
+
+            return await Task.WhenAll(tasks);
+        }
+
+        public async Task<IEnumerable<QuotationResponse>> GetQuotationByAgencyId(int agencyId)
+        {
+            var agency = await _agencyClient.GetAgencyByIdAsync(agencyId);
+            if (agency == null)
+            {
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+            }
+            var quotations = await _quotationRepository.GetQuotationByAgencyId(agencyId);
+            if (quotations == null || !quotations.Any())
+            {
+                return Enumerable.Empty<QuotationResponse>();
+            }
+            var responses = new List<QuotationResponse>();
+            foreach (var q in quotations)
+            {
+                var agencyTask = _agencyClient.GetAgencyByIdAsync(q.AgencyId);
+                var vehicleTask = _vehicleClient.GetVehicleInstanceByIdAsync(q.VehicleInstanceId);
+
+
+                await Task.WhenAll(agencyTask, vehicleTask);
+
+                var response = MapToResponse(q);
+                response.Agency = await agencyTask;
+                response.Vehicle = await vehicleTask;
+
+
+                responses.Add(response);
+            }
+
+            return responses;
         }
     }
 }

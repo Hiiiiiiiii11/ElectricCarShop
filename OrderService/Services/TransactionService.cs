@@ -93,5 +93,12 @@ namespace OrderAPIService.Services
                 Status = t.Status
             };
         }
+
+        public async Task<IEnumerable<TransactionResponse>> GetAllTransactionAsync()
+        {
+            var transactions = await _transactionRepository.GetAllAsync();
+            return transactions.Select(MapToResponse);
+
+        }
     }
 }

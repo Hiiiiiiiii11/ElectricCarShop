@@ -10,6 +10,7 @@ namespace AllocationRepository.Repositories
 {
     public interface IQuotationRepository : IGenericRepository<Quotations>
     {
-
+        Task<IEnumerable<Quotations>> GetQuotationByUserCreateId(int userId);
+        Task<IEnumerable<Quotations>> GetQuotationByAgencyId(int agencyId);
     }
 }

@@ -14,7 +14,19 @@ namespace OrderAPI.Controllers
         {
             _transactionService = transactionService;
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetAllTransactions()
+        {
+            try
+            {
+                var transactions = await _transactionService.GetAllTransactionAsync();
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
         [HttpGet("payment/{paymentId}")]
         public async Task<IActionResult> GetByPaymentId(int paymentId)
         {

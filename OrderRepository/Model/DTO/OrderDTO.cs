@@ -104,6 +104,7 @@ namespace OrderRepository.Model.Request
         // Các thuộc tính được làm giàu từ gRPC
         public AgencyReply Agency { get; set; }
         public VehicleInstanceReply Vehicle { get; set; }
+        public UserReply User { get; set; }
     }
 
     public class CreateOrderRequest
@@ -142,6 +143,7 @@ namespace OrderRepository.Model.Request
         public string Status { get; set; }
         public int CreateBy { get; set; }
         public List<CreateOrderDetailItem>? Details { get; set; }
+        public AgencyReply AgencyReply { get; set; }
     }
 
     //orderdetail response

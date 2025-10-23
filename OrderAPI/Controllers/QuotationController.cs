@@ -19,6 +19,19 @@ namespace OrderAPI.Controllers
         {
             _quotationService = quotationService;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAllQuotations()
+        {
+            try
+            {
+                var quotations = await _quotationService.GetAllQuotationsAsync();
+                return Ok(quotations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetQuotationById(int id)
         {
@@ -45,8 +58,8 @@ namespace OrderAPI.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { message = "Invalid request data." });
                 var userIdClaim = User.FindFirst("id")?.Value;
-                if(userIdClaim!= null)
-                request.CreateBy = int.Parse(userIdClaim);
+                if (userIdClaim != null)
+                    request.CreateBy = int.Parse(userIdClaim);
                 var newQuotation = await _quotationService.CreateQuotationAsync(request);
                 return Ok(newQuotation);
             }
@@ -87,6 +100,33 @@ namespace OrderAPI.Controllers
                     return NotFound(new { message = $"Quotation with ID {id} not found." });
 
                 return Ok(new { message = "Quotation deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
+        [HttpGet("createby/{userId}")]
+        public async Task<IActionResult> GetQuotationCreateByUser(int userId)
+        {
+            try
+            {
+                var quotations = await _quotationService.GetQuotationByUserCreateId(userId);
+                return Ok(quotations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+
+        }
+        [HttpGet("agency/{agencyId}")]
+        public async Task<IActionResult> GetQuotationByAgencyId(int agencyId)
+        {
+            try
+            {
+                var quotations = await _quotationService.GetQuotationByAgencyId(agencyId);
+                return Ok(quotations);
             }
             catch (Exception ex)
             {

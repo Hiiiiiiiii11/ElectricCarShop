@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AllocationRepository.Repositories;
+using Share.ShareServices;
 
 namespace OrderService.Services
 {
@@ -14,12 +15,14 @@ namespace OrderService.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IQuotationRepository _quotationRepository;
+        private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
 
-        public OrderService(IOrderRepository orderRepository , IOrderDetailRepository orderDetailRepository, IQuotationRepository quotationRepository)
+        public OrderService(IOrderRepository orderRepository , IOrderDetailRepository orderDetailRepository, IQuotationRepository quotationRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient)
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _quotationRepository = quotationRepository;
+            _agencyGrpcServiceClient = agencyGrpcServiceClient;
 
         }
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request)
@@ -142,6 +145,32 @@ namespace OrderService.Services
             _orderRepository.Remove(order);
             await _orderRepository.SaveChangesAsync();
         }
+        public async Task<IEnumerable<OrderResponse>> GetOrdersByAgencyIdAsync(int agencyId)
+        {
+            var orders = await _orderRepository.GetByAgencyIdAsync(agencyId);
+            if (!orders.Any())
+                return new List<OrderResponse>();
+
+            var agencyInfo = await _agencyGrpcServiceClient.GetAgencyByIdAsync(agencyId)
+                ?? throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
+            return orders.Select(o => new OrderResponse
+            {
+                Id = o.Id,
+                CustomerId = o.CustomerId,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount,
+                Status = o.Status,
+                CreateBy = o.CreateBy,
+                AgencyReply = agencyInfo,
+                Details = o.Details.Select(d => new CreateOrderDetailItem
+                {
+                    QuotationId = d.QuotationId,
+                    UnitPrice = d.UnitPrice
+                }).ToList()
+            });
+        }
+
 
         private static OrderResponse MapToResponse(Orders order) => new OrderResponse
         {

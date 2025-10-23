@@ -10,6 +10,7 @@ namespace OrderService.Services
     public interface ITransactionService
     {
         Task<IEnumerable<TransactionResponse>> GetByPaymentIdAsync(int paymentId);
+        Task<IEnumerable<TransactionResponse>> GetAllTransactionAsync();
         Task<TransactionResponse?> GetByIdAsync(int id);
         Task<TransactionResponse?> GetByTransactionCodeAsync(string code);
         Task<TransactionResponse> CreateTransactionAsync(CreateTransactionRequest request);

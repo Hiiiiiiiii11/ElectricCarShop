@@ -28,7 +28,19 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            try
+            {
+                var payments = await _paymentService.GetAllPayment();
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
         [HttpGet("GetPaymentById/{id}")]
         public async Task<IActionResult> GetPaymentById(int id)
         {

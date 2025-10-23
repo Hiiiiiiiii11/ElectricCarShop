@@ -71,7 +71,12 @@ namespace OrderAPI
             builder.Services.AddScoped<IOrderRepository, OrderRepository.Repositories.OrderRepository>();
             builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
             builder.Services.AddScoped<IContractRepository, ContractRepository>();
+
+
             builder.Services.AddScoped<IEmailVerificationGrpcServiceClient, EmailVerificationGrpcServiceClient>();
+            builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
+            builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
+            builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
 
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
@@ -152,8 +157,7 @@ namespace OrderAPI
                      };
                  });
 
-            builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
-            builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
+
             builder.Services.AddGrpc();
 
             // 1. Khai báo các URL (phần này bạn đã làm đúng)
@@ -185,7 +189,9 @@ namespace OrderAPI
                     customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                     return customChain.Build(serverCert);
                 };
-
+                builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
+                    o.Address = new Uri(emailServiceUrl))
+                    .ConfigurePrimaryHttpMessageHandler(() => handler);
                 // Đăng ký các client và dùng chung handler
                 builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
                     o.Address = new Uri(emailServiceUrl))
@@ -203,6 +209,8 @@ namespace OrderAPI
             {
                 // --- Cấu hình cho LOCAL DEVELOPMENT ---
                 // Đăng ký các client một cách bình thường
+                builder.Services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
+                    o.Address = new Uri(emailServiceUrl));
                 builder.Services.AddGrpcClient<EmailVerificationGrpcService.EmailVerificationGrpcServiceClient>(o =>
                     o.Address = new Uri(emailServiceUrl));
 

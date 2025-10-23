@@ -84,5 +84,15 @@ namespace OrderRepository.Repositories
                              && od.Orders.OrderDate <= endDate)
                 .SumAsync(od => od.UnitPrice);
         }
+        public async Task<IEnumerable<Orders>> GetByAgencyIdAsync(int agencyId)
+        {
+            return await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Details)
+                    .ThenInclude(d => d.Quotation)
+                .Where(o => o.Details.Any(d => d.Quotation.AgencyId == agencyId))
+                .ToListAsync();
+        }
+
     }
 }
