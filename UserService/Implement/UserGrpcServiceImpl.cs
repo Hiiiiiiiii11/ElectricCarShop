@@ -24,9 +24,9 @@ namespace UserService.Implement
             return new UserReply
             {
                 Id = user.Id,
-                UserName = user.UserName,
-                FullName = user.FullName,
-                Email = user.Email,
+                UserName = user.UserName ?? "",
+                FullName = user.FullName ?? "",
+                Email = user.Email ?? "",
                 AvartarUrl = user.AvartarUrl ?? "",
                 Phone = user.Phone ?? "",
                 Role = user.Role?.RoleName ?? ""

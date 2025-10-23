@@ -28,13 +28,8 @@ namespace UserAPI.Controllers
             {
                 // ✅ Lấy userId từ token
                 var userIdClaim = User.FindFirst("id")?.Value;
-                if (userIdClaim == null)
-                {
-                    return Unauthorized(new { message = "Invalid token. No user id found." });
-                }
-
-                request.CreateBy = int.Parse(userIdClaim);
-
+                if (userIdClaim != null)
+                    request.CreateBy = int.Parse(userIdClaim);
                 var result = await _userService.CreateUserAsync(request);
                 return Ok(result);
             }
