@@ -4,7 +4,7 @@ using Grpc.Core;
 using GrpcService;
 using AllocationRepository.Repositories; // Your repository namespace
 
-namespace AllocationAPIService.Services
+namespace AllocationAPIService.Implement
 {
     // Kế thừa từ class base mới được sinh ra từ file .proto
     public class VehicleInstanceGrpcServiceImpl : VehicleInstanceGrpcService.VehicleInstanceGrpcServiceBase
