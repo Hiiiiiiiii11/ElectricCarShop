@@ -15,7 +15,7 @@ namespace AllocationRepository.Repositories
         private readonly AllocationDbContext _context;
         public VehiclePriceRepository(AllocationDbContext context) : base(context)
         {
-            _context = context;
+            _context = context;   
         }
 
         //public async Task<IEnumerable<VehiclePrices>> GetPriceHistoryAsync(int vehicleId)
