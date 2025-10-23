@@ -28,7 +28,7 @@ jobs:
           source: "./" # Sao chép toàn bộ thư mục hiện tại
           target: "~/ElectricCarShop" # Đến thư mục dự án trên EC2
 
-      # Bước 3: Chạy các lệnh Docker trên EC2 (Bản hoàn chỉnh)
+      # Bước 3: Chạy các lệnh Docker trên EC2 (Đã sửa cú pháp)
       - name: Run deployment commands on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -45,30 +45,33 @@ jobs:
             echo "🚀 Forcing REBUILD of all services (no-cache) and RECREATING containers..."
             
             echo "--- 1. Starting Database (build if needed) ---"
-            # DB thường không cần build, nhưng lệnh này sẽ tạo nó nếu chưa có
             docker-compose up --build -d sqlserver 
             
+            # ---------------------------------------------------
+            # SỬA LỖI: Tách 'build' và 'up' thành 2 lệnh
+            # ---------------------------------------------------
             echo "--- 2. Rebuilding User API ---"
-            # --build: Luôn build
-            # --no-cache: Build lại từ đầu
-            # --force-recreate: Bắt buộc tạo container mới
-            docker-compose up --build --no-cache --force-recreate -d userapi
+            docker-compose build --no-cache userapi
+            docker-compose up --force-recreate -d userapi
             
             echo "--- 3. Rebuilding Agency API ---"
-            docker-compose up --build --no-cache --force-recreate -d agencyapi
+            docker-compose build --no-cache agencyapi
+            docker-compose up --force-recreate -d agencyapi
             
             echo "--- 4. Rebuilding Allocation API ---"
-            docker-compose up --build --no-cache --force-recreate -d allocationapi
+            docker-compose build --no-cache allocationapi
+            docker-compose up --force-recreate -d allocationapi
             
             echo "--- 5. Rebuilding Order API ---"
-            docker-compose up --build --no-cache --force-recreate -d orderapi
+            docker-compose build --no-cache orderapi
+            docker-compose up --force-recreate -d orderapi
             
             echo "--- 6. Rebuilding NGINX ---"
-            # Build lại NGINX để nhận config mới (nếu có)
-            docker-compose up --build --no-cache --force-recreate -d nginx
+            docker-compose build --no-cache nginx
+            docker-compose up --force-recreate -d nginx
+            # ---------------------------------------------------
             
             echo "🧹 Cleaning up old dangling images..."
-            # Dọn dẹp các image cũ (không còn được tag)
             docker system prune -f
             
             echo "✅ Deployment successful!"
