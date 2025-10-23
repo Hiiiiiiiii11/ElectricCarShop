@@ -52,19 +52,19 @@ jobs:
             # ---------------------------------------------------
             echo "--- Forcing rebuild of User API (no-cache) ---"
             docker-compose build --no-cache userapi
-            docker-compose up -d userapi
+            docker-compose up --force-recreate -d userapi
             
             echo "--- Forcing rebuild of Agency API (no-cache) ---"
             docker-compose build --no-cache agencyapi
-            docker-compose up -d agencyapi
+            docker-compose up --force-recreate -d agencyapi
             
             echo "--- Forcing rebuild of Allocation API (no-cache) ---"
             docker-compose build --no-cache allocationapi
-            docker-compose up -d allocationapi
+            docker-compose up --force-recreate -d allocationapi
             
             echo "--- Forcing rebuild of Order API (no-cache) ---"
             docker-compose build --no-cache orderapi
-            docker-compose up -d orderapi
+            docker-compose up --force-recreate -d orderapi
             # ---------------------------------------------------
 
             echo "--- Restarting NGINX with latest config ---"
