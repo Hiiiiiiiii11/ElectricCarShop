@@ -41,9 +41,20 @@ jobs:
             
             echo "🛑 Stopping and removing old containers..."
             docker-compose down
-            
+
+            echo "🔥🔥🔥 (NEW) Forcibly removing old images..."
+            # Lệnh này tìm ID image của service và XÓA NÓ
+            # '|| true' để script không bị lỗi nếu image không tồn tại
+            docker rmi $(docker-compose images -q userapi) || true
+            docker rmi $(docker-compose images -q agencyapi) || true
+            docker rmi $(docker-compose images -q allocationapi) || true
+            docker rmi $(docker-compose images -q orderapi) || true
             echo "🚀 Starting sequential build and deployment..."
-            
+
+
+            echo "🚀 Building fresh images (no-cache)..."
+            # Build lại tất cả service (đã bị xóa image)
+            docker-compose build --no-cache
             echo "--- Starting Database ---"
             docker-compose up -d sqlserver
             
