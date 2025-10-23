@@ -10,7 +10,7 @@ using Microsoft.OpenApi.Models;
 using Share.Setting;
 using Share.ShareServices;
 using System.Text;
-using UserAPIService.Services;
+using UserAPIService.Implement;
 using UserRepository.Data;
 using UserRepository.Model;
 using UserRepository.Repositories;

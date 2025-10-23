@@ -3,7 +3,7 @@ using GrpcService;
 using System.Threading.Tasks;
 using UserRepository.Repositories;
 
-namespace UserAPIService.Services
+namespace UserAPIService.Implement
 {
     public class EmailVerificationGrpcServiceImpl : EmailVerificationGrpcService.EmailVerificationGrpcServiceBase
     {

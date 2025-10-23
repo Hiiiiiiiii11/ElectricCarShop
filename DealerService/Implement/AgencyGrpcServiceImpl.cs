@@ -2,7 +2,7 @@
 using Grpc.Core;
 using GrpcService;
 
-namespace AgencyService.Services
+namespace AgencyService.Implement
 {
     public class AgencyGrpcServiceImpl : AgencyGrpcService.AgencyGrpcServiceBase
     {
