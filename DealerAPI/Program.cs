@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Data;
 using AgencyRepository.Repositories;
+using AgencyService.Hosted;
 using AgencyService.Implement;
 using AgencyService.Services;
 using CloudinaryDotNet;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Setting;
@@ -107,7 +109,10 @@ namespace AgencyAPI
                          },
                      };
                  });
-
+            builder.Services.Configure<EmailSetting>(
+               builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddSingleton(resolver =>
+                resolver.GetRequiredService<IOptions<EmailSetting>>().Value);
             // =================== Services ===================
             builder.Services.AddScoped<IAgencyRepository, AgencyRepository.Repositories.AgencyRepository>();
             builder.Services.AddScoped<IAgencyContractRepository, AgencyContractRepository>();
@@ -116,6 +121,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
             builder.Services.AddScoped<IAgencyInventoryRepository, AgencyInventoryRepository>();
             builder.Services.AddScoped<IAgencyOrderRepository, AgencyOrderRepository>();
+            builder.Services.AddScoped<ITestDriveReminderService, TestDriveReminderService>();
 
 
             builder.Services.AddScoped<IAgencyService, AgencyService.Services.AgencyService>();
@@ -129,6 +135,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
             builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
+            builder.Services.AddHostedService<TestDriveReminderBackgroundService>();
 
             // =================== gRPC Client Configuration ===================
             builder.Services.AddGrpc();

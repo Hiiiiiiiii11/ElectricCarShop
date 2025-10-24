@@ -13,7 +13,7 @@ namespace AllocationService.Services
         Task<IEnumerable<VehicleResponse>> GetAllVehiclesAsync();
         Task<VehicleResponse?> GetVehicleByIdAsync(int id);
         Task<VehicleResponse>  AddVehicleAsync(CreateVehicleRequest request);
-        Task UpdateVehicleAsync(int vehicleId, UpdateVehicleRequest request);
+        Task<VehicleResponse> UpdateVehicleAsync(int vehicleId, UpdateVehicleRequest request);
         Task DeleteVehicleAsync(int id);
         Task<IEnumerable<VehicleResponse>> SearchVehiclesAsync(string? variantName, string? color, string? batteryCapacity);
         Task<IEnumerable<VehicleResponse>> GetVehiclesByStatusAsync(string status);

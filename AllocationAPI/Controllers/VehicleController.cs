@@ -45,7 +45,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> AddVehicle([FromBody] CreateVehicleRequest request)
+        public async Task<IActionResult> AddVehicle([FromForm] CreateVehicleRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicle(int id, [FromBody] UpdateVehicleRequest request)
+        public async Task<IActionResult> UpdateVehicle(int id, [FromForm] UpdateVehicleRequest request)
         {
             try
             {

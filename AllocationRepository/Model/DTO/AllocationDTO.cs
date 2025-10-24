@@ -1,4 +1,5 @@
 ﻿using GrpcService;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +16,7 @@ namespace AllocationRepository.Model.DTO
     {
         public int VehicleOptionId { get; set; }
         public string VariantName { get; set; }
+        public IFormFile? VehicleImage { get; set; }
         public string Color { get; set; }
         public string BatteryCapacity { get; set; }
         public int RangeKM { get; set; }
@@ -27,6 +29,7 @@ namespace AllocationRepository.Model.DTO
     {
         public int? VehicleOptionId { get; set; }
         public string? VariantName { get; set; }
+        public IFormFile? VehicleImage { get; set; }
         public string? Color { get; set; }
         public string? BatteryCapacity { get; set; }
         public int? RangeKM { get; set; }
@@ -40,6 +43,7 @@ namespace AllocationRepository.Model.DTO
         public int Id { get; set; }
         public int VehicleOptionId { get; set; }
         public string VariantName { get; set; }
+        public string VehicleImage { get; set; }
         public string Color { get; set; }
         public string BatteryCapacity { get; set; }
         public int RangeKM { get; set; }

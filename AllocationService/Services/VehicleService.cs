@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,21 @@ namespace AllocationService.Services
     public class VehicleService : IVehicleService
     {
         private readonly IVehicleRepository _vehicleRepository;
-        public VehicleService(IVehicleRepository vehicleRepository)
+        private readonly IUploadPhotoService _uploadPhotoService; 
+        public VehicleService(IVehicleRepository vehicleRepository, IUploadPhotoService uploadPhotoService)
         {
             _vehicleRepository = vehicleRepository;
+            _uploadPhotoService = uploadPhotoService;
         }
         public async Task<VehicleResponse> AddVehicleAsync(CreateVehicleRequest request)
         {
+            // Upload ảnh nếu có
+            string? imageUrl = null;
+            if (request.VehicleImage != null)
+            {
+                imageUrl = _uploadPhotoService.UploadPhoto(request.VehicleImage);
+            }
+
             var vehicle = new Vehicles
             {
                 VariantName = request.VariantName,
@@ -27,16 +37,19 @@ namespace AllocationService.Services
                 Features = request.Features,
                 RangeKM = request.RangeKM,
                 Status = request.Status,
+                VehicleImage = imageUrl // Lưu URL ảnh
             };
+
             await _vehicleRepository.AddAsync(vehicle);
             await _vehicleRepository.SaveChangesAsync();
             return MapToResponse(vehicle);
         }
-        public async Task UpdateVehicleAsync(int vehicleId, UpdateVehicleRequest request)
+        public async Task<VehicleResponse> UpdateVehicleAsync(int vehicleId, UpdateVehicleRequest request)
         {
             var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
             if (vehicle == null)
                 throw new KeyNotFoundException($"Vehicle {vehicleId} not found");
+
             if (!string.IsNullOrEmpty(request.VariantName))
                 vehicle.VariantName = request.VariantName;
 
@@ -58,8 +71,16 @@ namespace AllocationService.Services
             if (request.VehicleOptionId.HasValue)
                 vehicle.VehicleOptionId = request.VehicleOptionId.Value;
 
+            // Upload ảnh mới nếu có
+            if (request.VehicleImage != null)
+            {
+                string newImageUrl = _uploadPhotoService.UploadPhoto(request.VehicleImage);
+                vehicle.VehicleImage = newImageUrl;
+            }
+
             _vehicleRepository.Update(vehicle);
             await _vehicleRepository.SaveChangesAsync();
+            return MapToResponse(vehicle);
         }
 
 
@@ -117,6 +138,7 @@ namespace AllocationService.Services
                 Id = v.Id,
                 VehicleOptionId = v.VehicleOptionId,
                 VariantName = v.VariantName,
+                VehicleImage = v.VehicleImage,
                 Color = v.Color,
                 BatteryCapacity = v.BatteryCapacity,
                 RangeKM = v.RangeKM,
