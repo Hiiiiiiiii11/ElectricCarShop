@@ -25,7 +25,10 @@ namespace Share.ShareServices
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, file.OpenReadStream()),
-                Transformation = new Transformation().Quality("auto").FetchFormat("auto").Width(500).Height(500).Crop("fill").Gravity("face")
+                // ❌ Không thêm Transformation để giữ nguyên kích thước và chất lượng gốc
+                UseFilename = true,
+                UniqueFilename = false, // Giữ nguyên tên file nếu bạn muốn
+                Overwrite = true
             };
             var uploadResult = _cloudinary.Upload(uploadParams);
             if (uploadResult.Error != null)
