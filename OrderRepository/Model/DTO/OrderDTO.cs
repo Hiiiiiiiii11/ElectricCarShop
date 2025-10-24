@@ -233,4 +233,31 @@ namespace OrderRepository.Model.Request
         public decimal Amount { get; set; }
         public string Status { get; set; }
     }
+    public class DeliveryCreateRequest
+    {
+        public int OrderId { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string DeliveryStatus { get; set; } = null!; // bắt buộc nhập
+        public string? Notes { get; set; }
+        public string? ImgUrlBefore { get; set; }
+        public string? ImgUrlAfter { get; set; }
+    }
+    public class DeliveryUpdateRequest
+    {
+        public DateTime? DeliveryDate { get; set; }
+        public string? DeliveryStatus { get; set; } // optional update
+        public string? Notes { get; set; }
+        public string? ImgUrlBefore { get; set; }
+        public string? ImgUrlAfter { get; set; }
+    }
+    public class DeliveryDto
+    {
+        public int Id { get; set; }
+        public int OrderId { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string DeliveryStatus { get; set; } = default!;
+        public string? Notes { get; set; }
+        public string? ImgUrlBefore { get; set; }
+        public string? ImgUrlAfter { get; set; }
+    }
 }
