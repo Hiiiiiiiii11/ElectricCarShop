@@ -10,7 +10,7 @@ namespace AgencyService.Services
     public interface IAgencyOrderService
     {
         Task<AgencyOrderResponse> CreateAsync(CreateAgencyOrderRequest request);
-        Task<AgencyOrderResponse> UpdateAsync(UpdateAgencyOrderRequest request);
+        Task<AgencyOrderResponse> UpdateAsync(int id,UpdateAgencyOrderRequest request);
         Task<AgencyOrderResponse> GetByIdAsync(int id);
         Task<IEnumerable<AgencyOrderResponse>> GetAllAsync();
         Task<IEnumerable<AgencyOrderResponse>> GetByAgencyAsync(int agencyId);
