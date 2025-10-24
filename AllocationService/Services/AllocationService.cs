@@ -14,13 +14,16 @@ namespace AllocationService.Services
     {
         private readonly IAllocationRepository _allocationRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcClient;
+        private readonly IEVInventoryService _evInventoryService;
 
         public AllocationService(
             IAllocationRepository allocationRepository,
-            IAgencyGrpcServiceClient agencyGrpcClient)
+            IAgencyGrpcServiceClient agencyGrpcClient,
+            IEVInventoryService evInventoryService)
         {
             _allocationRepository = allocationRepository;
             _agencyGrpcClient = agencyGrpcClient;
+            _evInventoryService = evInventoryService;
         }
 
         public async Task<AllocationResponse> CreateAsync(AllocationRequestModel request)
@@ -29,7 +32,9 @@ namespace AllocationService.Services
             var contract = await _agencyGrpcClient.GetContractByIdAsync(request.AgencyContractId);
             if (contract == null)
                 throw new KeyNotFoundException($"Không tìm thấy hợp đồng với ID {request.AgencyContractId}");
-
+            var vehicleInInventory = await _evInventoryService.GetByIdAsync(request.VehicleInstanceId);
+            if (vehicleInInventory == null)
+                throw new KeyNotFoundException($"Không tìm thấy xe trong kho với ID {request.VehicleInstanceId}");
             var allocation = new Allocations
             {
                 AgencyContractId = request.AgencyContractId,
@@ -39,7 +44,7 @@ namespace AllocationService.Services
 
             await _allocationRepository.AddAsync(allocation);
             await _allocationRepository.SaveChangesAsync();
-
+            await _evInventoryService.DeleteInventoryAsync(request.VehicleInstanceId);
             var response = MapToResponse(allocation);
             response.ContractReply = contract;
 

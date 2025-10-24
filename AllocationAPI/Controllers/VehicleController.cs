@@ -70,8 +70,8 @@ namespace AllocationAPI.Controllers
         {
             try
             {
-                await _vehicleService.UpdateVehicleAsync(id, request);
-                return NoContent();
+               var content= await _vehicleService.UpdateVehicleAsync(id, request);
+                return Ok(content);
             }
             catch (KeyNotFoundException ex)
             {

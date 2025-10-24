@@ -49,11 +49,11 @@ namespace AgencyService.Services
         }
 
         // ===== UPDATE =====
-        public async Task<AgencyOrderResponse> UpdateAsync(UpdateAgencyOrderRequest request)
+        public async Task<AgencyOrderResponse> UpdateAsync(int id,UpdateAgencyOrderRequest request)
         {
-            var entity = await _agencyOrderRepository.GetByIdAsync(request.Id);
+            var entity = await _agencyOrderRepository.GetByIdAsync(id);
             if (entity == null)
-                throw new KeyNotFoundException($"Không tìm thấy đơn hàng với ID {request.Id}.");
+                throw new KeyNotFoundException($"Không tìm thấy đơn hàng với ID {id}.");
 
             if (request.VehicleId.HasValue)
                 entity.VehicleId = request.VehicleId.Value;

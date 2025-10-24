@@ -317,7 +317,6 @@ namespace AgencyRepository.Model.DTO
     }
     public class UpdateAgencyOrderRequest
     {
-        public int Id { get; set; }
         public int? VehicleId { get; set; }
         public int? Quantity { get; set; }
         public string? Status { get; set; }

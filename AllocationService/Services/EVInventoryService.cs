@@ -68,6 +68,16 @@ namespace AllocationService.Services
             return list.Select(MapToResponse);
         }
 
+        public async Task<EVInventoryResponse?> GetByIdAsync(int id)
+        {
+            var inv = await _evInventoryRepository.GetByIdAsync(id);
+            if (inv == null)
+            {
+                throw new KeyNotFoundException($"Inventory with Id = {id} not found");
+            }
+            return MapToResponse(inv);
+        }
+
         public async Task<EVInventoryResponse?> GetByVehicleIdAsync(int vehicleId)
         {
             var inv = await _evInventoryRepository.GetByVehicleInstanceIdAsync(vehicleId);

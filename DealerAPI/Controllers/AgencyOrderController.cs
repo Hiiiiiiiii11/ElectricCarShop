@@ -26,12 +26,12 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateAgencyOrder([FromBody] UpdateAgencyOrderRequest request)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateAgencyOrder([FromRoute] int id,[FromForm] UpdateAgencyOrderRequest request)
         {
             try
             {
-                var result = await _agencyOrderService.UpdateAsync(request);
+                var result = await _agencyOrderService.UpdateAsync(id,request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
