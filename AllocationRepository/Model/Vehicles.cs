@@ -13,6 +13,7 @@ namespace AllocationRepository.Model
         public int VehicleOptionId { get; set; }
         public VehicleOptions VehicleOption { get; set; }
         public string VariantName { get; set; }
+        public string VehicleImage { get; set; }
         public string Color { get; set; }
         public string BatteryCapacity { get; set; }
         public int RangeKM { get; set; }

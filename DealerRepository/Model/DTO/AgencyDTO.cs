@@ -272,7 +272,7 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
 
         [Required]
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         [Required]
         public int CustomerId { get; set; }
 
@@ -295,7 +295,7 @@ namespace AgencyRepository.Model.DTO
         public int Id { get; set; }
         public int AgencyId { get; set; }
         public string AgencyName { get; set; } // Populated from Agency relationship
-        public int VehicleId { get; set; }
+        public int VehicleInstanceId { get; set; }
         public int CustomerId { get; set; }
         public CustomerReply Customer { get; set; }
         public VehicleInstanceReply Vehicle { get; set; } 

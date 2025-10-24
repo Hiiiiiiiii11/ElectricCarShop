@@ -36,7 +36,7 @@ namespace AgencyService.Services
             var testDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
-                VehicleInstanceId = request.VehicleId,
+                VehicleInstanceId = request.VehicleInstanceId,
                 CustomerId = request.CustomerId,
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
@@ -172,7 +172,7 @@ namespace AgencyService.Services
                 Id = td.Id,
                 AgencyId = td.AgencyId,
                 AgencyName = td.Agency?.AgencyName,
-                VehicleId = td.VehicleInstanceId,
+                VehicleInstanceId = td.VehicleInstanceId,
                 CustomerId = td.CustomerId,
                 AppointmentDate = td.AppointmentDate,
                 Status = td.Status,

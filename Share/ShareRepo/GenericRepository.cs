@@ -53,6 +53,10 @@ namespace Share.ShareRepo
         {
             await _dbSet.AddRangeAsync(entities);
         }
+        public void UpdateRange(IEnumerable<T> entities)
+        {
+            _dbSet.UpdateRange(entities);
+        }
 
         public void Update(T entity)
         {

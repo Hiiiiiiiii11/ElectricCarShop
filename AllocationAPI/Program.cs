@@ -2,6 +2,7 @@
 using AllocationRepository.Data;
 using AllocationRepository.Repositories;
 using AllocationService.Services;
+using CloudinaryDotNet;
 using GrpcService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -54,7 +55,14 @@ namespace AllocationAPI
                         maxRetryDelay: TimeSpan.FromSeconds(30),
                         errorNumbersToAdd: null);
                 }));
-
+            builder.Services.Configure<CloudDinarySetting>(
+                builder.Configuration.GetSection("CloudDinarySetting"));
+            builder.Services.AddSingleton(provider =>
+            {
+                var config = builder.Configuration.GetSection("CloudinarySettings").Get<CloudDinarySetting>();
+                var account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
+                return new Cloudinary(account);
+            });
             builder.Services.AddScoped<IAllocationRepository, AllocationRepository.Repositories.AllocationRepository>();
             builder.Services.AddScoped<IEVInventoryRepository, EVInventoryRepository>();
             builder.Services.AddScoped<IVehicleOptionRepository, VehicleOptionRepository>();
@@ -70,6 +78,7 @@ namespace AllocationAPI
             builder.Services.AddScoped<IVehiclePromotionService, VehiclePromotionService>();
             builder.Services.AddScoped<IVehicleInstanceRepository, VehicleInstanceRepository>();
             builder.Services.AddScoped<IVehicleInstanceService, VehicleInstanceService>();
+            builder.Services.AddScoped<IUploadPhotoService, UpLoadPhotoService>();
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
