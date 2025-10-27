@@ -1,4 +1,5 @@
 ﻿using GrpcService;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -239,18 +240,18 @@ namespace OrderRepository.Model.Request
         public DateTime DeliveryDate { get; set; }
         public string DeliveryStatus { get; set; } = null!; // bắt buộc nhập
         public string? Notes { get; set; }
-        public string? ImgUrlBefore { get; set; }
-        public string? ImgUrlAfter { get; set; }
+        public IFormFile? ImgUrlBefore { get; set; }
+        public IFormFile? ImgUrlAfter { get; set; }
     }
     public class DeliveryUpdateRequest
     {
         public DateTime? DeliveryDate { get; set; }
         public string? DeliveryStatus { get; set; } // optional update
         public string? Notes { get; set; }
-        public string? ImgUrlBefore { get; set; }
-        public string? ImgUrlAfter { get; set; }
+        public IFormFile? ImgUrlBefore { get; set; }
+        public IFormFile? ImgUrlAfter { get; set; }
     }
-    public class DeliveryDto
+    public class DeliveryResponse
     {
         public int Id { get; set; }
         public int OrderId { get; set; }

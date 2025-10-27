@@ -4,13 +4,14 @@ namespace OrderService.Services
 {
     public interface IDeliveryService
     {
-        Task<DeliveryDto?> GetAsync(int id);
-        Task<IReadOnlyList<DeliveryDto>> GetByOrderAsync(int orderId);
-        Task<(IReadOnlyList<DeliveryDto> items, int total)> ListAsync(
+        Task<DeliveryResponse?> GetByIdAsync(int id);
+        Task<IEnumerable<DeliveryResponse>> GetByOrderIdAsync(int orderId);
+        Task<(IEnumerable<DeliveryResponse> items, int total)> ListAsync(
             string? status, DateTime? from, DateTime? to, int page, int pageSize);
+        Task<IEnumerable<DeliveryResponse>> GetByAgencyAsync(int agencyId);
 
-        Task<DeliveryDto> CreateAsync(DeliveryCreateRequest req);
-        Task<DeliveryDto> UpdateAsync(int id, DeliveryUpdateRequest req);
-        Task<bool> DeleteAsync(int id);
+        Task<DeliveryResponse> CreateAsync(DeliveryCreateRequest req);
+        Task<DeliveryResponse> UpdateAsync(int id, DeliveryUpdateRequest req);
+        Task DeleteAsync(int id);
     }
 }

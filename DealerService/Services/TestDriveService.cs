@@ -33,6 +33,41 @@ namespace AgencyService.Services
         // ===== CREATE =====
         public async Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request)
         {
+            // --- BƯỚC 1: KIỂM TRA BOOKING TRÙNG LẶP (USER + VEHICLE) (MỚI) ---
+            var existingUserBookingForVehicle = await _testDriveRepository.FindAsync(td =>
+                td.CustomerId == request.CustomerId &&
+                td.VehicleInstanceId == request.VehicleInstanceId &&
+                td.Status == "Scheduled" || td.Status== "Completed" // Chỉ kiểm tra các lịch hẹn đang hoạt động
+            );
+
+            if (existingUserBookingForVehicle.Any())
+            {
+                throw new InvalidOperationException($"Khách hàng (ID: {request.CustomerId}) đã có lịch hẹn lái thử (Status: Scheduled) cho xe này (ID: {request.VehicleInstanceId}).");
+            }
+            // --- KẾT THÚC KIỂM TRA BOOKING TRÙNG ---
+
+            // --- BƯỚC 2: KIỂM TRA TRÙNG NGÀY (Logic cũ) ---
+            if (!request.AppointmentDate.HasValue)
+            {
+                throw new InvalidOperationException("Ngày hẹn (AppointmentDate) là bắt buộc.");
+            }
+
+            var requestedDate = request.AppointmentDate.Value.Date;
+
+            var existingVehicleBookingOnDate = await _testDriveRepository.FindAsync(td =>
+                td.VehicleInstanceId == request.VehicleInstanceId &&
+                td.Status == "Scheduled" &&
+                td.AppointmentDate.HasValue &&
+                td.AppointmentDate.Value.Date == requestedDate
+            );
+
+            if (existingVehicleBookingOnDate.Any())
+            {
+                throw new InvalidOperationException($"Lịch trùng! Xe (ID: {request.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
+            }
+            // --- KẾT THÚC KIỂM TRA NGÀY ---
+
+            // --- BƯỚC 3: TẠO MỚI (Code cũ) ---
             var testDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
@@ -42,13 +77,15 @@ namespace AgencyService.Services
                 Notes = request.Notes,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Scheduled" : request.Status,
                 CreateAt = DateTime.UtcNow,
-                UpdateAt = DateTime.UtcNow
+                UpdateAt = DateTime.UtcNow,
+                IsOneDayReminderSent = false,
+                IsThreeDayReminderSent = false
             };
 
             await _testDriveRepository.AddAsync(testDrive);
             await _testDriveRepository.SaveChangesAsync();
 
-            // Lấy thông tin vehicle & customer từ gRPC
+            // --- BƯỚC 4: LẤY DỮ LIỆU GRPC (Code cũ) ---
             var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
 
@@ -59,15 +96,39 @@ namespace AgencyService.Services
             return response;
         }
 
-        // ===== UPDATE =====
+        // ===== UPDATE (ĐÃ THÊM KIỂM TRA TRÙNG NGÀY) =====
         public async Task<TestDriveResponse> UpdateTestDriveAsync(int id, UpdateTestDriveRequest request)
         {
             var testDrive = await _testDriveRepository.GetByIdAsync(id);
             if (testDrive == null)
                 throw new KeyNotFoundException($"Test drive with ID {id} not found.");
 
-            if (request.AppointmentDate.HasValue)
+            // --- KIỂM TRA TRÙNG NGÀY (MỚI) ---
+            // Chỉ kiểm tra nếu người dùng *thay đổi* ngày hẹn sang một ngày khác
+            if (request.AppointmentDate.HasValue && request.AppointmentDate.Value.Date != testDrive.AppointmentDate?.Date)
+            {
+                var requestedDate = request.AppointmentDate.Value.Date;
+
+                var existingBookingOnDate = await _testDriveRepository.FindAsync(td =>
+                    td.VehicleInstanceId == testDrive.VehicleInstanceId && // Cùng xe
+                    td.Id != id && // Loại trừ chính lịch hẹn đang update
+                    td.Status == "Scheduled" &&
+                    td.AppointmentDate.HasValue &&
+                    td.AppointmentDate.Value.Date == requestedDate
+                );
+
+                if (existingBookingOnDate.Any())
+                {
+                    // Nếu tìm thấy bất kỳ lịch nào trong ngày đó, ném lỗi
+                    throw new InvalidOperationException($"Lịch trùng! Xe (ID: {testDrive.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
+                }
+
+                // Nếu không trùng, gán ngày mới
                 testDrive.AppointmentDate = request.AppointmentDate.Value;
+            }
+            // --- KẾT THÚC KIỂM TRA ---
+
+            // Cập nhật các trường còn lại
             if (!string.IsNullOrWhiteSpace(request.Status))
                 testDrive.Status = request.Status;
             if (!string.IsNullOrWhiteSpace(request.Notes))

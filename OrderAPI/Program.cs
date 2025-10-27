@@ -90,8 +90,7 @@ namespace OrderAPI
             builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
             builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
             // IImageStorageService (ở OrderService) dùng Cloudinary đọc từ IConfiguration (env vars)
-            builder.Services.AddScoped<OrderService.Services.IImageStorageService,
-                                       OrderService.Services.CloudinaryImageStorageService>();
+            builder.Services.AddScoped<IUploadPhotoService,UpLoadPhotoService>();
 
             // =================== SERVICES ===================
             builder.Services.AddScoped<ICustomerService, CustomerService>();
