@@ -1,21 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderRepository.Data;
 using OrderRepository.Model;
+using Share.ShareRepo;
 
 namespace OrderRepository.Repositories
 {
-    public class DeliveryRepository : IDeliveryRepository
+    public class DeliveryRepository : GenericRepository<Delivery>, IDeliveryRepository
     {
-        private readonly OrderDbContext _db;
-        public DeliveryRepository(OrderDbContext db) => _db = db;
+        private readonly OrderDbContext _context;
+        public DeliveryRepository(OrderDbContext context) : base(context)
+        {
+            _context = context;
+        }
 
-        public Task<Delivery?> GetByIdAsync(int id) =>
-            _db.Deliveries
-               .AsNoTracking()
-               .FirstOrDefaultAsync(d => d.Id == id);
+
 
         public Task<List<Delivery>> GetByOrderAsync(int orderId) =>
-            _db.Deliveries
+            _context.Deliveries
                .AsNoTracking()
                .Where(d => d.OrderId == orderId)
                .OrderByDescending(d => d.DeliveryDate)
@@ -24,7 +25,7 @@ namespace OrderRepository.Repositories
         public async Task<(List<Delivery> items, int total)> FilterAsync(
             string? status, DateTime? from, DateTime? to, int skip, int take)
         {
-            var q = _db.Deliveries.AsNoTracking().AsQueryable();
+            var q = _context.Deliveries.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(status))
                 q = q.Where(d => d.DeliveryStatus == status);
@@ -45,32 +46,29 @@ namespace OrderRepository.Repositories
 
             return (items, total);
         }
-
-        public async Task<Delivery> AddAsync(Delivery entity)
-        {
-            _db.Deliveries.Add(entity);
-            await _db.SaveChangesAsync();
-            return entity;
-        }
-
-        public async Task UpdateAsync(Delivery entity)
-        {
-            // entity được service/upper layer nạp sẵn; cập nhật full
-            _db.Deliveries.Update(entity);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var existing = await _db.Deliveries.FirstOrDefaultAsync(d => d.Id == id);
-            if (existing == null) return false;
-
-            _db.Deliveries.Remove(existing);
-            await _db.SaveChangesAsync();
-            return true;
-        }
-
         public Task<bool> ExistsAsync(int id) =>
-            _db.Deliveries.AnyAsync(d => d.Id == id);
+            _context.Deliveries.AnyAsync(d => d.Id == id);
+        public async Task<List<Delivery>> GetByAgencyIdAsync(int agencyId)
+        {
+            return await _context.Deliveries
+                .Where(d => d.OrderId != null)
+                .Join(_context.Orders,
+                      d => d.OrderId,
+                      o => o.Id,
+                      (d, o) => new { d, o })
+                .Join(_context.OrderDetail,
+                      x => x.o.Id,
+                      od => od.OrderId,
+                      (x, od) => new { x.d, x.o, od })
+                .Join(_context.Quotations,
+                      x => x.od.QuotationId,
+                      q => q.Id,
+                      (x, q) => new { x.d, q })
+                .Where(x => x.q.AgencyId == agencyId)
+                .Select(x => x.d)
+                .Distinct()
+                .ToListAsync();
+        }
+
     }
 }
