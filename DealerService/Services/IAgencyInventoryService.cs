@@ -14,7 +14,7 @@ namespace AgencyService.Services
         Task<AgencyInventoryResponse> CreateAgencyInventoryAsync(int AgencyId, CreateAgencyInventoryRequest request);
         Task<AgencyInventoryResponse> UpdateInventoryAsync(int AgencyId, UpdateAgencyInventoryRequest request);
 
-        Task RemoveInventoryItemAsync(int AgencyId, int variantId);
+        Task RemoveInventoryItemAsync(int AgencyId, int vehicleInstanceId);
 
     }
 }

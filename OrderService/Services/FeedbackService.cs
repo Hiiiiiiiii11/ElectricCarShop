@@ -64,7 +64,7 @@ namespace OrderService.Service
             return MapToResponse(feedback);
         }
 
-        public async Task<FeedbackResponse> UpdateAsync(int id, FeedbackRequest request)
+        public async Task<FeedbackResponse> UpdateAsync(int id, FeedbackUpdateRequest request)
         {
             var feedback = await _feedbackRepository.GetByIdAsync(id);
             if (feedback == null)

@@ -185,6 +185,7 @@ namespace AllocationRepository.Model.DTO
         public int? VehicleId { get; set; }
         public string? Vin { get; set; }
         public string? EngineNumber { get; set; }
+        public string? Status { get; set; }
     }
 
     public class VehicleInstanceResponse
@@ -193,6 +194,7 @@ namespace AllocationRepository.Model.DTO
         public int VehicleId { get; set; }
         public string Vin { get; set; }
         public string EngineNumber { get; set; }
+        public string Status { get; set; }
         public VehicleResponse Vehicle { get; set; }
     }
 }

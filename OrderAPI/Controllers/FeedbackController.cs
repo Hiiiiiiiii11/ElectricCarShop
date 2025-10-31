@@ -91,7 +91,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFeedback(int id, [FromBody] FeedbackRequest request)
+        public async Task<IActionResult> UpdateFeedback(int id, [FromForm] FeedbackUpdateRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

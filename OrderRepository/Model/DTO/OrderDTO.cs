@@ -41,6 +41,14 @@ namespace OrderRepository.Model.Request
         public string? Reply { get; set; }
         public string? Status { get; set; }
     }
+    public class FeedbackUpdateRequest
+    {
+        public int? CustomerId { get; set; }
+        public string? Type { get; set; }
+        public string? Content { get; set; }
+        public string? Reply { get; set; }
+        public string? Status { get; set; }
+    }
     public class FeedbackResponse
     {
         public int Id { get; set; }
@@ -169,8 +177,9 @@ namespace OrderRepository.Model.Request
     {
         public string? ContractName { get; set; }
         public DateTime? ContractDate { get; set; }
-        public string? Status { get; set; }
         public string? Terms { get; set; }
+        public string? Status { get; set; }
+
     }
 
     public class ContractResponse

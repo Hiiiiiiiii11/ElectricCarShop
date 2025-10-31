@@ -12,7 +12,9 @@ namespace AllocationRepository.Model
         public int VehicleId { get; set; }
         public string Vin { get; set; }
         public string EngineNumber { get; set; }
+        public string Status { get; set; }
         public Vehicles Vehicle { get; set; }
+
         public ICollection<EVInventory> EVInventories { get; set; } = new List<EVInventory>();
 
         public ICollection<Allocations> Allocations { get; set; } = new List<Allocations>();

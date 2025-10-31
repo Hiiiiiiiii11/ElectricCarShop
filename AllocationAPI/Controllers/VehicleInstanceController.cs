@@ -29,7 +29,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateVehicleInstanceRequest request)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateVehicleInstanceRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

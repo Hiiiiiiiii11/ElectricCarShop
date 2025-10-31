@@ -14,7 +14,7 @@ namespace OrderService.Services
         Task<IEnumerable<FeedbackResponse>> GetByCustomerIdAsync(int customerId);
         Task<IEnumerable<FeedbackResponse>> GetByStatusAsync(string status);
         Task<FeedbackResponse> CreateAsync(FeedbackRequest request);
-        Task<FeedbackResponse> UpdateAsync(int id, FeedbackRequest request);
+        Task<FeedbackResponse> UpdateAsync(int id, FeedbackUpdateRequest request);
         Task<bool> DeleteAsync(int id);
     }
 }

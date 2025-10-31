@@ -1,4 +1,5 @@
-﻿using GrpcService;
+﻿using Grpc.Core;
+using GrpcService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,10 @@ namespace Share.ShareServices
     {
         Task<VehicleInstanceReply> GetVehicleInstanceByIdAsync(int instanceId);
         Task<VehicleReply> GetVehicleByIdAsync(int vehicleId);
+        AsyncServerStreamingCall<VehicleReply> GetAllVehicles(GetAllVehicleRequest request);
+        AsyncServerStreamingCall<VehiclePriceReply> GetAllVehiclePrices(GetAllVehiclePriceRequest request);
+        AsyncServerStreamingCall<VehiclePromotionReply> GetAllVehiclePromotions(GetAllVehiclePromotionRequest request);
+        AsyncServerStreamingCall<AllocationReply> GetAllocations(GetAllocationRequest request);
     }
 }
 

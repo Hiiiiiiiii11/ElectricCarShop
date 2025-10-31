@@ -1,4 +1,5 @@
-﻿using GrpcService;
+﻿using Grpc.Core;
+using GrpcService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,25 @@ namespace Share.ShareServices
         public async Task<AgencyContractReply> GetContractByIdAsync(int contractId)
         {
             return await _client.GetAgencyContractByIdAsync(new GetAgencyContractByIdRequest { Id = contractId });
+        }
+        public AsyncServerStreamingCall<AgencyReply> GetAllAgencies(GetAllAgencyRequest request)
+        {
+            return _client.GetAllAgencies(request);
+        }
+
+        public AsyncServerStreamingCall<AgencyTargetReply> GetAllAgencyTargets(GetAllAgencyTargetRequest request)
+        {
+            return _client.GetAllAgencyTargets(request);
+        }
+
+        public AsyncServerStreamingCall<TestDriveReply> GetAllTestDrives(GetAllTestDriveRequest request)
+        {
+            return _client.GetAllTestDrives(request);
+        }
+
+        public AsyncServerStreamingCall<AgencyOrderReply> GetAllAgencyOrders(GetAllAgencyOrderRequest request)
+        {
+            return _client.GetAllAgencyOrders(request);
         }
     }
 }

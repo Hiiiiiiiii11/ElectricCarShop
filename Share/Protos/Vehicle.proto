@@ -2,36 +2,62 @@
 
 option csharp_namespace = "GrpcService";
 
-// Định nghĩa service mới
-service VehicleInstanceGrpcService {
-  // RPC method để lấy thông tin vehicle instance bằng ID
-  rpc GetVehicleInstanceById (GetVehicleInstanceByIdRequest) returns (VehicleInstanceReply);
-  // RPC method để lấy thông tin vehicle bằng ID
-  rpc GetVehicleById(GetVehicleByIdRequest) returns (VehicleReply);
+// Tin nhắn trống cho các yêu cầu "GetAll"
+message GetAllVehicleRequest {
+}
+message GetAllVehiclePriceRequest {
+}
+message GetAllVehiclePromotionRequest {
 }
 
-// Message cho request
+service VehicleInstanceGrpcService {
+  rpc GetVehicleInstanceById (GetVehicleInstanceByIdRequest) returns (VehicleInstanceReply);
+  rpc GetVehicleById(GetVehicleByIdRequest) returns (VehicleReply);
+
+  // === CẬP NHẬT CHO ETL ===
+
+  // 1. Lấy tất cả các loại xe (Vehicle)
+  rpc GetAllVehicles (GetAllVehicleRequest) returns (stream VehicleReply);
+
+  // 2. Lấy tất cả giá xe (từ hãng và đại lý)
+  rpc GetAllVehiclePrices (GetAllVehiclePriceRequest) returns (stream VehiclePriceReply);
+
+  // 3. Lấy tất cả khuyến mãi
+  rpc GetAllVehiclePromotions (GetAllVehiclePromotionRequest) returns (stream VehiclePromotionReply);
+
+  rpc GetAllocations (GetAllocationRequest) returns (stream AllocationReply);
+}
+
+// === Định nghĩa các Message Request ===
+
 message GetVehicleInstanceByIdRequest {
   int32 id = 1;
 }
 message GetVehicleByIdRequest {
   int32 id = 1;
 }
+message GetAllocationRequest {
+  int32 id = 1;
 
-// Message cho response, chứa toàn bộ thông tin cần thiết
+}
+
+// === Định nghĩa các Message Reply ===
+
+message AllocationReply {
+  int32 id = 1;
+  int32 agencyContractId = 2;
+  int32 vehicleInstanceId = 3;
+  string allocationDate = 4;
+}
 message VehicleInstanceReply {
-  // Thông tin từ VehicleInstance
   int32 id = 1;
   string vin = 2;
   string engineNumber = 3;
-
-  // Thông tin từ Vehicles (thông số)
   string variantName = 5;
+  string status = 4;
   string color = 6;
   string batteryCapacity = 7;
   int32 rangeKM = 8;
-  
-  // Thông tin từ VehicleOptions (dòng xe)
   string modelName = 9;
   string description = 10;
 }
@@ -43,5 +69,30 @@ message VehicleReply {
   string batteryCapacity = 4;
   int32 rangeKM = 5;
   string modelName = 6;
-  string description =7;
+  string description = 7;
+  string features = 8; // Thêm features
+}
+
+// === Định nghĩa các Message Reply mới cho ETL ===
+
+message VehiclePriceReply {
+  int32 id = 1;
+  int32 vehicleId = 2;
+  // agencyId là optional, nếu không có là giá niêm yết của hãng
+  oneof optionalAgencyId {
+    int32 agencyId = 3;
+  }
+  string priceType = 4;
+  double priceAmount = 5; // Dùng double cho tiền tệ trong gRPC
+  string startDate = 6;
+  string endDate = 7;
+}
+
+message VehiclePromotionReply {
+  int32 id = 1;
+  int32 vehicleId = 2;
+  string promoName = 3;
+  double discountAmount = 4; // Dùng double
+  string startDate = 5;
+  string endDate = 6;
 }

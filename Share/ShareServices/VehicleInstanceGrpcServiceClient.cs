@@ -1,4 +1,5 @@
-﻿using GrpcService;
+﻿using Grpc.Core;
+using GrpcService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,24 @@ namespace Share.ShareServices
         {
             var request = new GetVehicleByIdRequest { Id = vehicleId };
             return await _client.GetVehicleByIdAsync(request);
+        }
+        public AsyncServerStreamingCall<VehicleReply> GetAllVehicles(GetAllVehicleRequest request)
+        {
+            return _client.GetAllVehicles(request);
+        }
+
+        public AsyncServerStreamingCall<VehiclePriceReply> GetAllVehiclePrices(GetAllVehiclePriceRequest request)
+        {
+            return _client.GetAllVehiclePrices(request);
+        }
+
+        public AsyncServerStreamingCall<VehiclePromotionReply> GetAllVehiclePromotions(GetAllVehiclePromotionRequest request)
+        {
+            return _client.GetAllVehiclePromotions(request);
+        }
+        public AsyncServerStreamingCall<AllocationReply> GetAllocations(GetAllocationRequest request)
+        {
+            return _client.GetAllocations(request);
         }
     }
 }

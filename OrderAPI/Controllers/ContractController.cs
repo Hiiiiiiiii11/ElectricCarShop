@@ -95,7 +95,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateContract(int id, [FromBody] UpdateContractRequest request)
+        public async Task<IActionResult> UpdateContract(int id, [FromForm] UpdateContractRequest request)
         {
             if (request == null)
                 return BadRequest("Request body is null.");
