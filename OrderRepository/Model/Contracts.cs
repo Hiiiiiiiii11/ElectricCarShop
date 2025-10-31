@@ -18,6 +18,7 @@ namespace OrderRepository.Model
         public DateTime ContractDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
+        public string? ContractImagageUrl { get; set; }
 
     }
 }

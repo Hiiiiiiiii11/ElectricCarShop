@@ -179,6 +179,7 @@ namespace OrderRepository.Model.Request
         public DateTime? ContractDate { get; set; }
         public string? Terms { get; set; }
         public string? Status { get; set; }
+        public IFormFile? ContractImagageUrl { get; set; }
 
     }
 
@@ -191,6 +192,7 @@ namespace OrderRepository.Model.Request
         public DateTime ContractDate { get; set; }
         public string Status { get; set; }
         public string Terms { get; set; }
+        public string ContractImagageUrl { get; set; }
     }
     public class CreatePaymentRequest
     {
