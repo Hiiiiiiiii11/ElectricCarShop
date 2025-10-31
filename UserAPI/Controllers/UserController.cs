@@ -38,7 +38,7 @@ namespace UserAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-
+        
 
         // PUT api/user/{id}
         [Authorize(Roles = "Admin,EVManager,AgencyManager")]
@@ -53,6 +53,28 @@ namespace UserAPI.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpPost]
+        [Route("change-password/{id}")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var result = await _userService.ChangePasswordAsync(id, request.CurrentPassword, request.NewPassword);
+                return Ok(new { message = "Password changed successfully." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {

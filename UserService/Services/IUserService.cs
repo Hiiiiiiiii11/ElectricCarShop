@@ -16,6 +16,7 @@ namespace UserService.Services
         Task<IEnumerable<UserResponse>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(int id);
         Task<IEnumerable<UserResponse>>GetUserCreateByUserId(int userId);
+        Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
 
     }
 }
