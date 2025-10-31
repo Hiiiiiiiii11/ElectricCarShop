@@ -123,6 +123,34 @@ namespace UserService.Services
            var users = await _userRepository.GetUserCreateByUserId(userId);
             return users.Select(MapToResponse);
         }
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            // 1️⃣ Tìm user theo ID
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            // 2️⃣ Kiểm tra mật khẩu cũ có đúng không
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                throw new InvalidOperationException("Current password is incorrect.");
+            }
+
+            // 3️⃣ Mã hóa mật khẩu mới
+            string newHashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            // 4️⃣ Cập nhật thông tin
+            user.PasswordHash = newHashedPassword;
+            user.Updated_At = DateTime.UtcNow;
+
+            _userRepository.Update(user);
+            await _userRepository.SaveChangesAsync();
+
+            return true;
+        }
 
         //mapping user to user response
         private UserResponse MapToResponse(Users user)

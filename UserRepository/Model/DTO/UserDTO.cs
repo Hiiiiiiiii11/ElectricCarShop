@@ -42,6 +42,14 @@ namespace UserRepository.Model.DTO
         public string? Status { get; set; }
         public int? RoleId { get; set; }
     }
+    //change password request
+    public class ChangePasswordRequest
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        public string CurrentPassword { get; set; }
+        [Required(ErrorMessage = "New password is required")]
+        public string NewPassword { get; set; }
+    }
 
     // Response model
     public class UserResponse
