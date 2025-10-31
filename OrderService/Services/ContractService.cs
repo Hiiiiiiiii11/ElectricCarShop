@@ -14,11 +14,13 @@ namespace OrderAPIService.Services
     {
         private readonly IContractRepository _contractRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
+        private readonly IUploadPhotoService _uploadPhotoService;
 
-        public ContractService(IContractRepository contractRepository , IAgencyGrpcServiceClient agencyGrpcServiceClient)
+        public ContractService(IContractRepository contractRepository , IAgencyGrpcServiceClient agencyGrpcServiceClient, IUploadPhotoService uploadPhotoService)
         {
             _contractRepository = contractRepository;
             _agencyGrpcServiceClient = agencyGrpcServiceClient;
+            _uploadPhotoService = uploadPhotoService;
         }
 
         public async Task<ContractResponse> CreateContractAsync(CreateContractRequest request)
@@ -67,7 +69,7 @@ namespace OrderAPIService.Services
             if (contract == null)
                 throw new KeyNotFoundException($"Contract with ID {id} not found.");
 
-            // Giữ giá trị cũ nếu không có dữ liệu mới
+            // 📝 Cập nhật các trường thông tin cơ bản
             if (!string.IsNullOrWhiteSpace(request.ContractName))
                 contract.ContractName = request.ContractName;
 
@@ -80,14 +82,24 @@ namespace OrderAPIService.Services
             if (!string.IsNullOrWhiteSpace(request.Status))
                 contract.Status = request.Status;
 
-            // Cập nhật thời gian sửa đổi nếu có
+            // 🖼️ Upload ảnh mới (nếu có)
+            if (request.ContractImagageUrl != null && request.ContractImagageUrl.Length > 0)
+            {
+                // Upload ảnh lên dịch vụ (ví dụ: Cloudinary, Firebase,...)
+                var uploadResult = _uploadPhotoService.UploadPhoto(request.ContractImagageUrl);
 
+                if (!string.IsNullOrEmpty(uploadResult))
+                {
+                    contract.ContractImagageUrl = uploadResult;
+                }
+            }
 
             _contractRepository.Update(contract);
             await _contractRepository.SaveChangesAsync();
 
             return MapToResponse(contract);
         }
+
 
 
         public async Task<bool> DeleteContractAsync(int id)
@@ -108,6 +120,7 @@ namespace OrderAPIService.Services
             ContractName = c.ContractName,
             ContractNumber = c.ContractNumber,
             ContractDate = c.ContractDate,
+            ContractImagageUrl = c.ContractImagageUrl,
             Status = c.Status,
             Terms = c.Terms
         };
