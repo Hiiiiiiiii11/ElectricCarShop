@@ -1,0 +1,44 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+// Tin nhắn trống cho các yêu cầu "GetAll"
+message GetAllOrderRequest {
+}
+message GetAllQuotationRequest {
+}
+
+// Service này host chung với CustomerGrpcService trong OrderAPI
+service OrderGrpcService {
+
+  // === CẬP NHẬT CHO ETL ===
+
+  // 1. Lấy tất cả đơn hàng (đã chốt)
+  rpc GetAllOrders (GetAllOrderRequest) returns (stream OrderReply);
+
+  // 2. Lấy tất cả báo giá (đã chấp nhận)
+  rpc GetAllQuotations (GetAllQuotationRequest) returns (stream QuotationReply);
+}
+
+// (Bạn cũng có thể thêm GetAllCustomers vào CustomerGrpcService nếu cần)
+
+// === Định nghĩa các Message Reply mới cho ETL ===
+
+message OrderReply {
+  int32 id = 1;
+  int32 customerId = 2;
+  string orderDate = 3; // Dùng string ISO 8601
+  string status = 4;
+  double totalAmount = 5;
+  // ... (Không cần OrderDetails, vì chúng ta chỉ cần COUNT đơn hàng)
+}
+
+message QuotationReply {
+  int32 id = 1;
+  int32 agencyId = 2;
+  int32 customerId = 3;
+  int32 vehicleInstanceId = 4;
+  double quotedPrice = 5;
+  string createdDate = 6; // Dùng string ISO 8601
+  string status = 7; // (Chỉ lấy 'Accepted')
+}

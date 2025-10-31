@@ -2,9 +2,50 @@
 
 option csharp_namespace = "GrpcService";
 
+// Tin nhắn trống cho các yêu cầu "GetAll"
+message GetAllAgencyRequest {
+    // Có thể thêm phân trang (page_number, page_size) sau này nếu cần
+}
+message GetAllAgencyTargetRequest {
+    // Có thể thêm phân trang (page_number, page_size) sau này nếu cần
+}
+message GetAllTestDriveRequest {
+    // Có thể thêm phân trang (page_number, page_size) sau này nếu cần
+}
+message GetAllAgencyOrderRequest {
+    // Có thể thêm phân trang (page_number, page_size) sau này nếu cần
+}
+
+service AgencyGrpcService {
+  rpc GetAgencyById (GetAgencyByIdRequest) returns (AgencyReply);
+  rpc GetAgencyContractById (GetAgencyContractByIdRequest) returns (AgencyContractReply);
+
+  // === CẬP NHẬT CHO ETL ===
+
+  // 1. Lấy tất cả đại lý
+  rpc GetAllAgencies (GetAllAgencyRequest) returns (stream AgencyReply);
+
+  // 2. Lấy tất cả chỉ tiêu
+  rpc GetAllAgencyTargets (GetAllAgencyTargetRequest) returns (stream AgencyTargetReply);
+  
+  // 3. Lấy tất cả lượt lái thử
+  rpc GetAllTestDrives (GetAllTestDriveRequest) returns (stream TestDriveReply);
+
+  // 4. Lấy tất cả đơn hàng của đại lý (đặt hàng từ hãng)
+  rpc GetAllAgencyOrders (GetAllAgencyOrderRequest) returns (stream AgencyOrderReply);
+}
+
+// === Định nghĩa các Message Request ===
+
 message GetAgencyByIdRequest {
   int32 id = 1;
 }
+
+message GetAgencyContractByIdRequest {
+  int32 id = 1;
+}
+
+// === Định nghĩa các Message Reply ===
 
 message AgencyReply {
   int32 id = 1;
@@ -13,9 +54,7 @@ message AgencyReply {
   string phone = 4;
   string email = 5;
   string status = 6;
-}
-message GetAgencyContractByIdRequest {
-  int32 id = 1;
+  string location = 7; // Thêm location cho AI
 }
 
 message AgencyContractReply {
@@ -27,8 +66,30 @@ message AgencyContractReply {
   string agencyEmail = 6;
 }
 
+// === Định nghĩa các Message Reply mới cho ETL ===
 
-service AgencyGrpcService {
-  rpc GetAgencyById (GetAgencyByIdRequest) returns (AgencyReply);
-  rpc GetAgencyContractById (GetAgencyContractByIdRequest) returns (AgencyContractReply);
+message AgencyTargetReply {
+  int32 id = 1;
+  int32 agencyId = 2;
+  int32 targetYear = 3;
+  int32 targetMonth = 4;
+  int32 targetSales = 5;
+  int32 achievedSales = 6;
+}
+
+message TestDriveReply {
+  int32 id = 1;
+  int32 agencyId = 2;
+  int32 vehicleInstanceId = 3;
+  int32 customerId = 4;
+  string appointmentDate = 5; // Dùng string ISO 8601 (hoặc google.protobuf.Timestamp)
+  string status = 6;
+}
+
+message AgencyOrderReply {
+  int32 id = 1;
+  int32 agencyId = 2;
+  int32 vehicleId = 3;
+  int32 quantity = 4;
+  string status = 5;
 }

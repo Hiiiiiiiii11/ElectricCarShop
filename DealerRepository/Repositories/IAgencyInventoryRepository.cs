@@ -11,7 +11,7 @@ namespace AgencyRepository.Repositories
     public interface IAgencyInventoryRepository : IGenericRepository<AgencyInventory>
     {
         Task<IEnumerable<AgencyInventory>> GetInventoriesByAgencyIdAsync(int AgencyId);
-        Task<AgencyInventory?> GetInventoryAsync(int AgencyId, int variantId);
-        Task RemoveInventoryItemAsync(int AgencyId, int variantId);
+        Task<AgencyInventory?> GetInventoryAsync(int AgencyId, int vehicleInstanceId);
+        Task RemoveInventoryItemAsync(int AgencyId, int vehicleInstanceId);
     }
 }

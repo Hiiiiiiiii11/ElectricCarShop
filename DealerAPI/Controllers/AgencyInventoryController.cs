@@ -60,13 +60,13 @@ namespace AgencyAPI.Controllers
             }
         }
 
-        [HttpDelete("Agency/{AgencyId}/inventory/{variantId}")]
-        public async Task<IActionResult> RemoveInventoryItem(int AgencyId, int variantId)
+        [HttpDelete("Agency/{AgencyId}/inventory/{vehicleInstanceId}")]
+        public async Task<IActionResult> RemoveInventoryItem(int AgencyId, int vehicleInstanceId)
         {
             try
             {
-                await _AgencyInventoryService.RemoveInventoryItemAsync(AgencyId, variantId);
-                return NoContent();
+                await _AgencyInventoryService.RemoveInventoryItemAsync(AgencyId, vehicleInstanceId);
+                return Ok(new {message = "Delete inventory successfull "});
             }
             catch (KeyNotFoundException ex)
             {

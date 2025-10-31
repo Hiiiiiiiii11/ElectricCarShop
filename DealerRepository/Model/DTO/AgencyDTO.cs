@@ -262,7 +262,7 @@ namespace AgencyRepository.Model.DTO
         public int Id { get; set; }
         public int AgencyId { get; set; }
         public int VehicleInstanceId { get; set; }
-        public AgencyResponseForTarget? Agency { get; set; }
+        public AgencyResponse? Agency { get; set; }
         public VehicleInstanceReply? VehicleDetails { get; set; }
     }
 

@@ -33,9 +33,9 @@ namespace AgencyRepository.Repositories
                 .FirstOrDefaultAsync(di => di.AgencyId == AgencyId && di.VehicleInstanceId == vehicleInstanceId);
         }
 
-        public async Task RemoveInventoryItemAsync(int AgencyId, int variantId)
+        public async Task RemoveInventoryItemAsync(int AgencyId, int vehicleInstanceId)
         {
-            var inventory = await GetInventoryAsync(AgencyId, variantId);
+            var inventory = await GetInventoryAsync(AgencyId, vehicleInstanceId);
             if (inventory != null)
             {
                 _context.AgencyInventories.Remove(inventory);

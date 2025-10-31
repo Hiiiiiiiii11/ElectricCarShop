@@ -19,6 +19,15 @@ namespace AllocationRepository.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<Vehicles>> GetAllVehicleWithDetailsAsync()
+        {
+            return await _context.Vehicles
+                .Include(v => v.VehicleOption)
+                .Include(v => v.VehiclePrices)
+                .Include(v => v.VehiclePromotions)
+                .ToListAsync();
+        }
+
         public async Task<decimal?> GetCurrentPriceAsync(int vehicleId, DateTime date)
         {
            var price = await _context.VehiclePrices

@@ -77,6 +77,9 @@ namespace OrderAPIService.Services
             if (!string.IsNullOrWhiteSpace(request.Terms))
                 contract.Terms = request.Terms;
 
+            if (!string.IsNullOrWhiteSpace(request.Status))
+                contract.Status = request.Status;
+
             // Cập nhật thời gian sửa đổi nếu có
 
 

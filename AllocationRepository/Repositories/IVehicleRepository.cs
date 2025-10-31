@@ -10,6 +10,7 @@ namespace AllocationRepository.Repositories
 {
     public interface IVehicleRepository : IGenericRepository<Vehicles>
     {
+        Task<IEnumerable<Vehicles>> GetAllVehicleWithDetailsAsync();
         Task<Vehicles?> GetVehicleWithDetailsAsync(int vehicleId);
         Task<IEnumerable<Vehicles>> GetVehiclesByStatusAsync(string status);
         Task<IEnumerable<Vehicles>> GetVehiclesWithPromotionsAsync();

@@ -35,7 +35,8 @@ namespace UserService.Services
             new Claim("username", user.UserName ?? string.Empty),
             new Claim("fullname",user.FullName ?? string.Empty),
             new Claim("role", user.Role?.RoleName ?? string.Empty),
-            new Claim("avartarUrl", user.AvartarUrl ?? string.Empty)
+            new Claim("avartarUrl", user.AvartarUrl ?? string.Empty),
+            new Claim("agencyId", user.AgencyId.ToString()),
 
         };
 
