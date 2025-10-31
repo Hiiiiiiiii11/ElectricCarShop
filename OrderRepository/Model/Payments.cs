@@ -9,7 +9,8 @@ namespace OrderRepository.Model
     public class Payments
     {
         public int Id { get; set; }
-        public int OrderId { get; set; }
+        public int? OrderId { get; set; }
+        public int? AgencyOrderId { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal Prepay { get; set; }
         public decimal Amount { get; set; }

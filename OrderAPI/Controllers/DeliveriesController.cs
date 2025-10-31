@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderAPI.Controllers.Binding;
 using OrderRepository.Model.Request;
 using OrderService.Services;
 

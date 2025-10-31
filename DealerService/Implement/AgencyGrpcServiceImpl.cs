@@ -132,5 +132,23 @@ namespace AgencyService.Implement
                 });
             }
         }
+        public override async Task<AgencyOrderReply> GetAgencyOrderById(GetAgencyOrderByIdRequest request,ServerCallContext context)
+        {
+            var order = await _agencyOrderRepo.GetByIdAsync(request.Id);
+
+            if (order == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Không tìm thấy đơn hàng đại lý với ID {request.Id}"));
+            }
+
+            return new AgencyOrderReply
+            {
+                Id = order.Id,
+                AgencyId = order.AgencyId,
+                VehicleId = order.VehicleId,
+                Quantity = order.Quantity,
+                Status = order.Status ?? ""
+            };
+        }
     }
 }
