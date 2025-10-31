@@ -35,6 +35,33 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpPut("{contractId}")]
+        public async Task<IActionResult> UpdateAgencyContract(int contractId, [FromForm] UpdateAgencyContractRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _AgencyContractService.UpdateAgencyContractAsync(contractId, request);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
+
         [HttpGet("active/{AgencyId}")]
         public async Task<IActionResult> GetActiveContractsByAgencyId(int AgencyId)
         {

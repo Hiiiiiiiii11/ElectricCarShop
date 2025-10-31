@@ -9,15 +9,18 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
+using Share.ShareServices;
 
 namespace AgencyService.Services
 {
     public class AgencyContractService : IAgencyContractService
     {
         private readonly IAgencyContractRepository _AgencyContractRepository;
-        public AgencyContractService(IAgencyContractRepository AgencyContractRepository)
+        private readonly IUploadPhotoService _uploadPhotoService;
+        public AgencyContractService(IAgencyContractRepository AgencyContractRepository, IUploadPhotoService uploadPhotoService)
         {
             _AgencyContractRepository = AgencyContractRepository;
+            _uploadPhotoService = uploadPhotoService;
         }
         public async Task<AgencyContractResponse> CreateAgencyContractAsync(int AgencyId, CreateAgencyContractRequest request)
         {
@@ -28,8 +31,8 @@ namespace AgencyService.Services
             {
                 AgencyId = AgencyId,
                 ContractNumber = request.ContractNumber,
-                ContractDate = DateTime.UtcNow,
-                ContractEndDate = DateTime.UtcNow.AddYears(1),
+                ContractDate = request.ContractDate,
+                ContractEndDate = request.ContractEndDate ?? DateTime.UtcNow.AddYears(1),
                 Terms = request.Terms,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status,
             };
@@ -37,6 +40,41 @@ namespace AgencyService.Services
             await _AgencyContractRepository.SaveChangesAsync();
 
             return MapToResponse(AgencyContract);
+        }
+        public async Task<AgencyContractResponse> UpdateAgencyContractAsync(int contractId, UpdateAgencyContractRequest request)
+        {
+            var agencyContract = await _AgencyContractRepository.GetByIdAsync(contractId);
+            if (agencyContract == null)
+                throw new KeyNotFoundException($"Không tìm thấy hợp đồng với ID {contractId}");
+
+            // ✅ Cập nhật thông tin text
+            if (!string.IsNullOrWhiteSpace(request.ContractNumber))
+                agencyContract.ContractNumber = request.ContractNumber;
+
+            if (request.ContractDate.HasValue)
+                agencyContract.ContractDate = request.ContractDate.Value;
+
+            if (request.ContractEndDate.HasValue)
+                agencyContract.ContractEndDate = request.ContractEndDate.Value;
+
+            if (!string.IsNullOrWhiteSpace(request.Terms))
+                agencyContract.Terms = request.Terms;
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+                agencyContract.Status = request.Status;
+
+            // 🖼️ Upload ảnh hợp đồng mới nếu có
+            if (request.ContractImageUrl != null && request.ContractImageUrl.Length > 0)
+            {
+                var uploadResult = _uploadPhotoService.UploadPhoto(request.ContractImageUrl);
+                if (!string.IsNullOrEmpty(uploadResult))
+                    agencyContract.ContractImageUrl = uploadResult;
+            }
+
+            _AgencyContractRepository.Update(agencyContract);
+            await _AgencyContractRepository.SaveChangesAsync();
+
+            return MapToResponse(agencyContract);
         }
 
         public async Task<IEnumerable<AgencyContractResponse>> GetActiveByAgencyIdAsync(int AgencyId)
@@ -122,7 +160,8 @@ namespace AgencyService.Services
                 ContractDate = contract.ContractDate,
                 ContractEndDate = contract.ContractEndDate,
                 Terms = contract.Terms,
-                Status = contract.Status,
+                Status =contract.Status,
+                ContractImageUrl = contract.ContractImageUrl,
                 Agency = contract.Agency == null ? null : new AgencyResponse
                 {
                     Id = contract.Agency.Id,
@@ -134,6 +173,8 @@ namespace AgencyService.Services
                 }
             };
         }
+
+
     }
 
 }

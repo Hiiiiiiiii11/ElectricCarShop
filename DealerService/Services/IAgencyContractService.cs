@@ -12,6 +12,7 @@ namespace AgencyService.Services
     {
         //tạo hợp đồng
         Task<AgencyContractResponse> CreateAgencyContractAsync(int AgencyId, CreateAgencyContractRequest requestt);
+        Task<AgencyContractResponse> UpdateAgencyContractAsync(int AgencyId, UpdateAgencyContractRequest requestt);
         Task<IEnumerable<AgencyContractResponse>> GetByAgencyIdAsync(int AgencyId);
         // Lấy hợp đồng còn hiệu lực
         Task<IEnumerable<AgencyContractResponse>> GetActiveByAgencyIdAsync(int AgencyId);

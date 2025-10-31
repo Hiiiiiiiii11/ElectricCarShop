@@ -122,9 +122,20 @@ namespace AgencyRepository.Model.DTO
     {
         [Required(ErrorMessage = "ContractNumber is required")]
         public string ContractNumber { get; set; }
-        [Required(ErrorMessage = "ContractDate is required")]
+        public DateTime ContractDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
+    }
+    public class UpdateAgencyContractRequest
+    {
+        
+        public string? ContractNumber { get; set; }
+        public DateTime? ContractDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
+        public string? Terms { get; set; }
+        public string? Status { get; set; }
+        public IFormFile? ContractImageUrl { get; set; }
     }
     //response model cho AgencyContract
     public class AgencyContractResponse
@@ -133,9 +144,10 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public DateTime ContractEndDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
+        public string ContractImageUrl { get; set; }
 
         // Navigation
         public AgencyResponse? Agency { get; set; }
@@ -146,7 +158,7 @@ namespace AgencyRepository.Model.DTO
         public int AgencyId { get; set; }
         public string ContractNumber { get; set; }
         public DateTime ContractDate { get; set; }
-        public DateTime ContractEndDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
         public string Terms { get; set; }
         public string Status { get; set; }
 
