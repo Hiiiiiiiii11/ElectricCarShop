@@ -27,6 +27,9 @@ namespace AgencyService.Services
         // =================== CREATE ===================
         public async Task<AgencyInventoryResponse> CreateAgencyInventoryAsync(int agencyId, CreateAgencyInventoryRequest request)
         {
+            var existingInventory = await _agencyInventoryRepository.GetInventoryAsync(agencyId, request.VehicleInstanceId);
+            if (existingInventory != null)
+                throw new Exception($"Xe (Instance ID={request.VehicleInstanceId}) đã có trong kho của Agency {agencyId}.");
             // 🧩 1. Gọi gRPC để lấy danh sách allocations của vehicleInstanceId
             var allocationStream = _vehicleGrpcClient.GetAllocations(new GetAllocationRequest { Id = request.VehicleInstanceId });
 
@@ -94,6 +97,8 @@ namespace AgencyService.Services
         // =================== GET BY ID ===================
         public async Task<AgencyInventoryResponse?> GetInventoryAsync(int agencyId, int vehicleInstanceId)
         {
+
+
             var inventory = await _agencyInventoryRepository.GetInventoryAsync(agencyId, vehicleInstanceId);
             if (inventory == null)
                 return null;
@@ -136,7 +141,14 @@ namespace AgencyService.Services
             if (inventory == null)
                 throw new Exception("Inventory item not found.");
 
-            inventory.VehicleInstanceId = request.VehicleInstanceId;
+            if (inventory.VehicleInstanceId != request.VehicleInstanceId)
+            {
+                var exists = await _agencyInventoryRepository.GetInventoryAsync(agencyId, request.VehicleInstanceId);
+                if (exists != null)
+                    throw new Exception($"Xe (Instance ID={request.VehicleInstanceId}) đã tồn tại trong kho của Agency {agencyId}.");
+
+                inventory.VehicleInstanceId = request.VehicleInstanceId;
+            }
 
             _agencyInventoryRepository.Update(inventory);
             await _agencyInventoryRepository.SaveChangesAsync();
