@@ -11,6 +11,7 @@ namespace OrderRepository.Repositories
     public interface IPaymentRepository : IGenericRepository<Payments>
     {
         Task<IEnumerable<Payments>> GetByOrderIdAsync(int orderId);
+        Task<IEnumerable<Payments>> GetByAgencyOrderIdAsync(int agencyOrderId);
         Task<IEnumerable<Payments>> GetByStatusAsync(string status);
         Task<decimal> GetTotalPaidByOrderAsync(int orderId);
     }

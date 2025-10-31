@@ -23,6 +23,12 @@ namespace OrderRepository.Repositories
                 .Where(p => p.OrderId == orderId)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Payments>> GetByAgencyOrderIdAsync(int agencyOrderId)
+        {
+            return await _context.Payments
+                .Where(p => p.AgencyOrderId == agencyOrderId)
+                .ToListAsync();
+        }
 
         public async Task<IEnumerable<Payments>> GetByStatusAsync(string status)
         {

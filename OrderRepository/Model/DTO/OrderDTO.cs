@@ -194,7 +194,8 @@ namespace OrderRepository.Model.Request
     }
     public class CreatePaymentRequest
     {
-        public int OrderId { get; set; }
+        public int? OrderId { get; set; }
+        public int? AgencyOrderId { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal Prepay { get; set; }
         public decimal Amount { get; set; }
@@ -213,6 +214,7 @@ namespace OrderRepository.Model.Request
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
+        public int AgencyOrderId { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal Prepay { get; set; }
         public decimal Amount { get; set; }

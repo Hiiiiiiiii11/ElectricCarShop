@@ -12,6 +12,7 @@ namespace Share.ShareServices
     {
         Task<AgencyReply> GetAgencyByIdAsync(int agencyId);
         Task<AgencyContractReply> GetContractByIdAsync(int contractId);
+        Task<AgencyOrderReply> GetAgencyOrderByIdAsync(int agencyOrderId);
         AsyncServerStreamingCall<AgencyReply> GetAllAgencies(GetAllAgencyRequest request);
         AsyncServerStreamingCall<AgencyTargetReply> GetAllAgencyTargets(GetAllAgencyTargetRequest request);
         AsyncServerStreamingCall<TestDriveReply> GetAllTestDrives(GetAllTestDriveRequest request);

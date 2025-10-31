@@ -2,6 +2,7 @@
 using GrpcService;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,10 @@ namespace Share.ShareServices
         public AsyncServerStreamingCall<AgencyOrderReply> GetAllAgencyOrders(GetAllAgencyOrderRequest request)
         {
             return _client.GetAllAgencyOrders(request);
+        }
+        public Task<AgencyOrderReply> GetAgencyOrderByIdAsync(int agencyOrderId)
+        {
+            return _client.GetAgencyOrderByIdAsync(new GetAgencyOrderByIdRequest { Id = agencyOrderId }).ResponseAsync;
         }
     }
 }

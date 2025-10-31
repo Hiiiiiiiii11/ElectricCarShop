@@ -1,4 +1,5 @@
-﻿using OrderRepository.Model.Request;
+﻿using OrderRepository.Model;
+using OrderRepository.Model.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace OrderService.Services
         Task<IEnumerable<PaymentResponse?>> GetAllPayment();
         Task<PaymentResponse?> GetPaymentByIdAsync(int id);
         Task<IEnumerable<PaymentResponse>> GetPaymentsByOrderIdAsync(int orderId);
+        Task<IEnumerable<Payments>> GetPaymentsByAgencyOrderIdAsync(int agencyOrderId);
         Task<IEnumerable<PaymentResponse>> GetPaymentsByStatusAsync(string status);
         Task<decimal> GetTotalPaidByOrderAsync(int orderId);
         Task<PaymentResponse> UpdatePaymentAsync(int id, UpdatePaymentRequest request);
