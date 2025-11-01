@@ -14,7 +14,9 @@ namespace AllocationService.Services
         Task<EVInventoryResponse?> GetByVehicleIdAsync(int vehicleId);
         Task<EVInventoryResponse> CreateInventoryAsync(EVInventoryRequest request);
         Task DeleteInventoryAsync(int id);
+        Task DeleteByVehicleInstanceIdAsync(int vehicleInstanceId);
         Task<EVInventoryResponse?>GetByIdAsync(int id);
+        Task<EVInventoryResponse?> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
         //Task IncreaseInventoryAsync(int vehicleId, int quantity);
         //Task DecreaseInventoryAsync(int vehicleId, int quantity);
         //Task<bool> HasEnoughStockAsync(int vehicleId, int requiredQuantity);

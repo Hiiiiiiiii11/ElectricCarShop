@@ -32,7 +32,7 @@ namespace AllocationService.Services
             var contract = await _agencyGrpcClient.GetContractByIdAsync(request.AgencyContractId);
             if (contract == null)
                 throw new KeyNotFoundException($"Không tìm thấy hợp đồng với ID {request.AgencyContractId}");
-            var vehicleInInventory = await _evInventoryService.GetByIdAsync(request.VehicleInstanceId);
+            var vehicleInInventory = await _evInventoryService.GetByVehicleInstanceIdAsync(request.VehicleInstanceId);
             if (vehicleInInventory == null)
                 throw new KeyNotFoundException($"Không tìm thấy xe trong kho với ID {request.VehicleInstanceId}");
             var allocation = new Allocations
@@ -44,7 +44,7 @@ namespace AllocationService.Services
 
             await _allocationRepository.AddAsync(allocation);
             await _allocationRepository.SaveChangesAsync();
-            await _evInventoryService.DeleteInventoryAsync(request.VehicleInstanceId);
+            await _evInventoryService.DeleteByVehicleInstanceIdAsync(request.VehicleInstanceId);
             var response = MapToResponse(allocation);
             response.ContractReply = contract;
 

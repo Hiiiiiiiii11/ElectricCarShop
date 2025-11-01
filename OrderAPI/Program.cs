@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using OrderAPIService.Services; // nếu bạn có service riêng ở đây, giữ lại
 using OrderRepository.Data;
 using OrderRepository.Repositories;
+using OrderService.Implement;
 using OrderService.Service;
 using OrderService.Services;
 using Share.Setting;       // CloudDinarySetting
@@ -84,11 +85,7 @@ namespace OrderAPI
             builder.Services.AddScoped<IContractRepository, ContractRepository>();
             builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
             // ===== gRPC service wrappers (Share.ShareServices) =====
-            builder.Services.AddScoped<IEmailVerificationGrpcServiceClient, EmailVerificationGrpcServiceClient>();
-            builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
-            builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
-            builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
-            builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
+
             // IImageStorageService (ở OrderService) dùng Cloudinary đọc từ IConfiguration (env vars)
             builder.Services.AddScoped<IUploadPhotoService,UpLoadPhotoService>();
 
@@ -195,6 +192,11 @@ namespace OrderAPI
                 builder.Services.AddGrpcClient<CustomerGrpcService.CustomerGrpcServiceClient>(o =>
                     o.Address = new Uri(customerServiceUrl));
             }
+            builder.Services.AddScoped<IEmailVerificationGrpcServiceClient, EmailVerificationGrpcServiceClient>();
+            builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
+            builder.Services.AddScoped<IAgencyGrpcServiceClient, AgencyGrpcServiceClient>();
+            builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
+            builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
 
             // =================== Swagger & CORS ===================
             builder.Services.AddEndpointsApiExplorer();
@@ -287,6 +289,7 @@ namespace OrderAPI
 
             app.MapControllers();
             app.MapGrpcService<CustomerGrpcServiceImpl>();
+            app.MapGrpcService<OrderGrpcServiceImpl>();
 
             app.Run();
         }

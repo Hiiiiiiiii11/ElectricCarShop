@@ -80,7 +80,6 @@ namespace OrderRepository.Model.Request
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int? CreateBy { get; set; }
-        public DateTime? CreateAt { get; set; }
     }
     public class UpdateQuotationRequest
     {
@@ -198,7 +197,6 @@ namespace OrderRepository.Model.Request
     {
         public int? OrderId { get; set; }
         public int? AgencyOrderId { get; set; }
-        public DateTime PaymentDate { get; set; }
         public decimal Prepay { get; set; }
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }
@@ -206,7 +204,6 @@ namespace OrderRepository.Model.Request
     }
     public class UpdatePaymentRequest
     {
-        public DateTime? PaymentDate { get; set; }
         public decimal? Prepay { get; set; }
         public decimal? Amount { get; set; }
         public string? PaymentMethod { get; set; }

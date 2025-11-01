@@ -62,6 +62,15 @@ namespace AllocationService.Services
             await _evInventoryRepository.SaveChangesAsync();
         }
 
+        public async Task DeleteByVehicleInstanceIdAsync(int vehicleInstanceId)
+        {
+            var inv = await _evInventoryRepository.GetByVehicleInstanceIdAsync(vehicleInstanceId);
+            if (inv == null)
+                throw new KeyNotFoundException($"Không tìm thấy xe trong kho với VehicleInstanceId = {vehicleInstanceId}");
+
+            _evInventoryRepository.Remove(inv);
+            await _evInventoryRepository.SaveChangesAsync();
+        }
         public async Task<IEnumerable<EVInventoryResponse>> GetAllInventoriesAsync()
         {
             var list = await _evInventoryRepository.GetAllWithVehiclesAsync();
@@ -76,6 +85,15 @@ namespace AllocationService.Services
                 throw new KeyNotFoundException($"Inventory with Id = {id} not found");
             }
             return MapToResponse(inv);
+        }
+        public async Task<EVInventoryResponse?> GetByVehicleInstanceIdAsync(int vehicleInstanceId)
+        {
+            var inv = await _evInventoryRepository.GetByVehicleInstanceIdAsync(vehicleInstanceId);
+            if (inv == null)
+            {
+                throw new KeyNotFoundException($"Inventory for vehicle instance {vehicleInstanceId} not found");
+            }
+            return inv == null ? null : MapToResponse(inv);
         }
 
         public async Task<EVInventoryResponse?> GetByVehicleIdAsync(int vehicleId)

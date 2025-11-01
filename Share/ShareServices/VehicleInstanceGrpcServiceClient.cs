@@ -31,11 +31,20 @@ namespace Share.ShareServices
         {
             return _client.GetAllVehicles(request);
         }
+        public AsyncServerStreamingCall<VehicleInstanceReply> GetAllVehicleInstances(GetAllVehicleInstanceRequest request)
+        {
+            return _client.GetAllVehicleInstances(request);
+        }
+        public AsyncServerStreamingCall<VehicleInstanceReply> GetAllVehiclePrices(GetAllVehicleInstanceRequest request)
+        {
+            return _client.GetAllVehicleInstances(request);
+        }
 
         public AsyncServerStreamingCall<VehiclePriceReply> GetAllVehiclePrices(GetAllVehiclePriceRequest request)
         {
             return _client.GetAllVehiclePrices(request);
         }
+        
 
         public AsyncServerStreamingCall<VehiclePromotionReply> GetAllVehiclePromotions(GetAllVehiclePromotionRequest request)
         {
@@ -45,5 +54,7 @@ namespace Share.ShareServices
         {
             return _client.GetAllocations(request);
         }
+
+
     }
 }

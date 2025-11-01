@@ -191,6 +191,7 @@ namespace AgencyRepository.Model.DTO
         /*        public int AgencyContractId { get; set; }  */          // Mã hợp đồng (liên kết)
         /*        public DateTime? DueDate { get; set; }         */      // Hạn thanh toán
         /*        public string PaymentMethod { get; set; }    */        // Hình thức thanh toán
+        public string? Status { get; set; }
         public string Notes { get; set; }                    // Ghi chú
         //public string CreatedBy { get; set; }
     }
@@ -199,7 +200,8 @@ namespace AgencyRepository.Model.DTO
     public class MakePaymentRequest
     {
         /*        public int AgencyContractId { get; set; }      */      // Mã hợp đồng liên quan
-        public decimal Amount { get; set; }                  // Số tiền thanh toán
+        public decimal Amount { get; set; }
+        public string? Status { get; set; }// Số tiền thanh toán
         /*        public string PaymentMethod { get; set; }   */         // Hình thức thanh toán
         public string Notes { get; set; }                    // Ghi chú khi thanh toán
         //public string UpdatedBy { get; set; }

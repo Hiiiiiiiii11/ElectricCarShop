@@ -23,6 +23,7 @@ namespace UserRepository.Model.DTO
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; }
+        
 
         public int? RoleId { get; set; }
 
@@ -61,6 +62,7 @@ namespace UserRepository.Model.DTO
         public string Phone { get; set; }
         public string AvartarUrl { get; set; }
         public string Status { get; set; }
+        public int AgencyId { get; set; }
         public DateTime Created_At { get; set; }
         public DateTime Updated_At { get; set; }
         public int Created_By { get; set; } 
