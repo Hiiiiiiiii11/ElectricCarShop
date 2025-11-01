@@ -17,5 +17,7 @@ namespace AllocationRepository.Repositories
         Task<bool> IsEngineNumberExistAsync(string engineNumber);
         Task<int> CountByVehicleIdAsync(int vehicleId);
         Task<VehicleInstance> GetByIdWithDetailsAsync(int id);
+        Task<IEnumerable<VehicleInstance>> GetAllWithDetailsAsync();
+
     }
 }

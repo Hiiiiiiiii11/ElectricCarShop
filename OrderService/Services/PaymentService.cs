@@ -16,10 +16,12 @@ namespace OrderAPIService.Services
         private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
         private readonly IOrderRepository _orderRepository;
 
-        public PaymentService(IPaymentRepository paymentRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient)
+        public PaymentService(IPaymentRepository paymentRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient, IOrderRepository orderRepository)
         {
             _paymentRepository = paymentRepository;
             _agencyGrpcServiceClient = agencyGrpcServiceClient;
+            _orderRepository = orderRepository;
+
         }
 
         public async Task<PaymentResponse> CreatePaymentAsync(CreatePaymentRequest request)
@@ -48,7 +50,7 @@ namespace OrderAPIService.Services
             {
                 OrderId = request.OrderId,
                 AgencyOrderId = request.AgencyOrderId,
-                PaymentDate = request.PaymentDate,
+                PaymentDate = DateTime.UtcNow,
                 Prepay = request.Prepay,
                 Amount = request.Amount,
                 PaymentMethod = request.PaymentMethod,
@@ -102,7 +104,6 @@ namespace OrderAPIService.Services
                 throw new KeyNotFoundException($"Payment with ID {id} not found.");
 
             // Giữ giá trị cũ nếu không truyền dữ liệu mới
-            payment.PaymentDate = request.PaymentDate ?? payment.PaymentDate;
             payment.Prepay = request.Prepay ?? payment.Prepay;
             payment.Amount = request.Amount ?? payment.Amount;
             payment.PaymentMethod = request.PaymentMethod ?? payment.PaymentMethod;

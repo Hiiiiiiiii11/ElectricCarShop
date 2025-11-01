@@ -5,6 +5,8 @@ option csharp_namespace = "GrpcService";
 // Tin nhắn trống cho các yêu cầu "GetAll"
 message GetAllVehicleRequest {
 }
+message GetAllVehicleInstanceRequest {
+}
 message GetAllVehiclePriceRequest {
 }
 message GetAllVehiclePromotionRequest {
@@ -18,6 +20,7 @@ service VehicleInstanceGrpcService {
 
   // 1. Lấy tất cả các loại xe (Vehicle)
   rpc GetAllVehicles (GetAllVehicleRequest) returns (stream VehicleReply);
+   rpc GetAllVehicleInstances (GetAllVehicleInstanceRequest) returns (stream VehicleInstanceReply);
 
   // 2. Lấy tất cả giá xe (từ hãng và đại lý)
   rpc GetAllVehiclePrices (GetAllVehiclePriceRequest) returns (stream VehiclePriceReply);
@@ -51,15 +54,16 @@ message AllocationReply {
 }
 message VehicleInstanceReply {
   int32 id = 1;
-  string vin = 2;
-  string engineNumber = 3;
+  int32 vehicleId = 2;
+  string vin = 3;
+  string engineNumber = 4;
   string variantName = 5;
-  string status = 4;
   string color = 6;
   string batteryCapacity = 7;
   int32 rangeKM = 8;
   string modelName = 9;
   string description = 10;
+  string status = 11;
 }
 
 message VehicleReply {

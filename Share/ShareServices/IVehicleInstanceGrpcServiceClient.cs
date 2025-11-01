@@ -13,6 +13,7 @@ namespace Share.ShareServices
         Task<VehicleInstanceReply> GetVehicleInstanceByIdAsync(int instanceId);
         Task<VehicleReply> GetVehicleByIdAsync(int vehicleId);
         AsyncServerStreamingCall<VehicleReply> GetAllVehicles(GetAllVehicleRequest request);
+        AsyncServerStreamingCall<VehicleInstanceReply> GetAllVehicleInstances(GetAllVehicleInstanceRequest request);
         AsyncServerStreamingCall<VehiclePriceReply> GetAllVehiclePrices(GetAllVehiclePriceRequest request);
         AsyncServerStreamingCall<VehiclePromotionReply> GetAllVehiclePromotions(GetAllVehiclePromotionRequest request);
         AsyncServerStreamingCall<AllocationReply> GetAllocations(GetAllocationRequest request);

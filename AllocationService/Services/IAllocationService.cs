@@ -16,6 +16,7 @@ namespace AllocationService.Services
         Task<IEnumerable<AllocationResponse>> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
         Task<AllocationResponse> UpdateAsync(int id, AllocationRequestModel request);
         Task<bool> DeleteAsync(int id);
+
         //Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId);
     }
 }

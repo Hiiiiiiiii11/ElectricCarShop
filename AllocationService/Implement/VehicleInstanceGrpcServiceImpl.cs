@@ -12,6 +12,7 @@ namespace AllocationAPIService.Implement
     {
         private readonly IVehicleInstanceRepository _instanceRepository;
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IVehicleInstanceRepository _vehicleInstanceRepository;
         private readonly IVehiclePriceRepository _vehiclePriceRepository ;
         private readonly IVehiclePromotionRepository _vehiclePromotionRepository;
         private readonly IAllocationRepository _allocationRepository;
@@ -20,7 +21,8 @@ namespace AllocationAPIService.Implement
             IVehicleRepository vehicleRepository,
             IVehiclePriceRepository vehiclePriceRepository,
             IVehiclePromotionRepository vehiclePromotionRepository,
-            IAllocationRepository allocationRepository
+            IAllocationRepository allocationRepository,
+            IVehicleInstanceRepository vehicleInstanceRepository
 
             )
         {
@@ -29,6 +31,7 @@ namespace AllocationAPIService.Implement
             _vehiclePriceRepository = vehiclePriceRepository;
             _vehiclePromotionRepository = vehiclePromotionRepository;
             _allocationRepository = allocationRepository;
+            _vehicleInstanceRepository = vehicleInstanceRepository;
 
         }
 
@@ -49,6 +52,7 @@ namespace AllocationAPIService.Implement
                 // Từ VehicleInstance
                 Id = instance.Id,
                 Vin = instance.Vin ?? "",
+                VehicleId = instance.VehicleId,
                 EngineNumber = instance.EngineNumber ?? "",
                 Status = instance.Status ?? "",
 
@@ -103,6 +107,32 @@ namespace AllocationAPIService.Implement
                     ModelName = vehicle.VehicleOption.ModelName ?? "",
                     Description = vehicle.VehicleOption.Description ?? "",
                     Features = vehicle.Features ?? ""
+                });
+            }
+        }
+        public override async Task GetAllVehicleInstances(GetAllVehicleInstanceRequest request, IServerStreamWriter<VehicleInstanceReply> responseStream, ServerCallContext context)
+        {
+            // Giả sử bạn có hàm GetAllWithDetailsAsync (tương tự GetVehicleWithDetailsAsync)
+            var vehicles = await _vehicleInstanceRepository.GetAllWithDetailsAsync();
+
+            foreach (var vehicle in vehicles)
+            {
+                // Bỏ qua nếu dữ liệu không nhất quán
+
+                await responseStream.WriteAsync(new VehicleInstanceReply
+                {
+                    Id = vehicle.Id,
+                    Vin = vehicle.Vin ?? "",
+                    VehicleId = vehicle.VehicleId,
+                    EngineNumber = vehicle.EngineNumber ?? "",
+                    Status = vehicle.Status ?? "",
+                    VariantName = vehicle.Vehicle?.VariantName ?? "",
+                    Color = vehicle.Vehicle?.Color ?? "",
+                    BatteryCapacity = vehicle.Vehicle?.BatteryCapacity ?? "",
+                    RangeKM = vehicle.Vehicle?.RangeKM ?? 0,
+                    ModelName = vehicle.Vehicle?.VehicleOption?.ModelName ?? "",
+                    Description = vehicle.Vehicle?.VehicleOption?.Description ?? ""
+
                 });
             }
         }

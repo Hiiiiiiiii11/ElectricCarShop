@@ -69,7 +69,7 @@ namespace AllocationAPI.Controllers
 
         // ================= UPDATE =================
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTestDrive(int id, [FromBody] UpdateTestDriveRequest request)
+        public async Task<IActionResult> UpdateTestDrive(int id, [FromForm] UpdateTestDriveRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

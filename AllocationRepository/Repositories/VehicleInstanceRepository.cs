@@ -60,5 +60,12 @@ namespace AllocationRepository.Repositories
                                     .ThenInclude(v => v.VehicleOption) // Từ Vehicles, nạp tiếp VehicleOption
                                  .FirstOrDefaultAsync(vi => vi.Id == id);
         }
+        public async Task<IEnumerable<VehicleInstance>> GetAllWithDetailsAsync()
+        {
+            return await _context.VehicleInstances
+                                 .Include(vi => vi.Vehicle) // N���p thông tin từ Vehicles
+                                    .ThenInclude(v => v.VehicleOption) // Từ Vehicles, nạp tiếp VehicleOption
+                                 .ToListAsync();
+        }
     }
 }

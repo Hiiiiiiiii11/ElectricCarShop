@@ -164,6 +164,7 @@ namespace UserService.Services
                 Phone = user.Phone,
                 AvartarUrl = user.AvartarUrl,
                 Status = user.Status,
+                AgencyId = user.AgencyId,
                 Created_At = user.Created_At,
                 Updated_At = user.Updated_At,
                 Created_By = user.Created_By,
