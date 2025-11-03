@@ -20,6 +20,7 @@ services:
       - agencyapi
       - allocationapi
       - orderapi
+      - analyticapi
     networks:
       - electric-car-network
 
