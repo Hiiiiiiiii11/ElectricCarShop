@@ -223,7 +223,7 @@ namespace AnalyticAPI
                     try
                     {
                         var dbContext = services.GetRequiredService<AnalyticDbContext>();
-                        var defaultConnStr = builder.Configuration.GetConnectionString("AllocationDbConnection");
+                        var defaultConnStr = builder.Configuration.GetConnectionString("AnalyticDbConnection");
                         var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(defaultConnStr).InitialCatalog;
                         var masterConnStr = defaultConnStr.Replace($"Database={dbName}", "Database=master");
 
