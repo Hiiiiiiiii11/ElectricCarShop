@@ -122,6 +122,23 @@ services:
     networks:
       - electric-car-network
     restart: unless-stopped
+  analyticapi:
+    build:
+      context: .
+      dockerfile: AnalyticAPI/Dockerfile
+    container_name: electric_car_analyticapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Kestrel__CertificatePassword=1234
+      - "ConnectionStrings:AnalyticDbConnection=Server=sqlserver;Database=AnalyticDB;User Id=sa;Password=Admin@2025!;TrustServerCertificate=true;Encrypt=false"
+    volumes:
+      - ./certs/local:/https/certs:ro
+    depends_on:
+      sqlserver:
+        condition: service_started
+    networks:
+      - electric-car-network
+    restart: unless-stopped
 
 # ===================== VOLUMES & NETWORKS =====================
 volumes:
