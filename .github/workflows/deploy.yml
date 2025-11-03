@@ -73,6 +73,7 @@ jobs:
             docker rmi $(docker-compose images -q agencyapi) || true
             docker rmi $(docker-compose images -q allocationapi) || true
             docker rmi $(docker-compose images -q orderapi) || true
+            docker rmi $(docker-compose images -q analyticapi) || true
             docker rmi $(docker-compose images -q nginx) || true
             
             echo "🚀 Forcing REBUILD of all services (no-cache) and RECREATING containers..."
@@ -95,8 +96,12 @@ jobs:
             echo "--- 5. Rebuilding Order API ---"
             docker-compose build --no-cache orderapi
             docker-compose up --force-recreate -d orderapi
+
+            echo "--- 6. Rebuilding Analytic API ---"
+            docker-compose build --no-cache analyticapi
+            docker-compose up --force-recreate -d analyticapi
             
-            echo "--- 6. Rebuilding NGINX ---"
+            echo "--- 7. Rebuilding NGINX ---"
             docker-compose build --no-cache nginx
             docker-compose up --force-recreate -d nginx
             
