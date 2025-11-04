@@ -56,7 +56,8 @@ namespace OrderAPI
                     builder.Configuration.GetConnectionString("OrderDbConnection"),
                     sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)
                 ));
-
+            var emailSetting = builder.Configuration.GetSection("EmailSettings").Get<EmailSetting>();
+            builder.Services.AddSingleton(emailSetting);
             // =================== JWT ===================
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
             builder.Services.AddSingleton(jwtSettings);
@@ -105,6 +106,7 @@ namespace OrderAPI
             builder.Services.AddScoped<IInstallmentPlansService, InstallmentPlansService>();
             builder.Services.AddScoped<IInstallmentItemsService, InstallmentItemsService>();
             builder.Services.AddScoped<IInstallmentPaymentsService, InstallmentPaymentsService>();
+            builder.Services.AddScoped<IContractEmailService, ContractEmailService>();
 
             // =================== AUTH ===================
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
