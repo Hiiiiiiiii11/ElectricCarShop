@@ -4,6 +4,7 @@ using OrderRepository.Model;
 using Share.ShareRepo;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,23 +21,20 @@ namespace OrderRepository.Repositories
         public async Task<InstallmentPlans?> GetByContractIdAsync(int contractId)
         {
             return await _context.InstallmentPlans
-                .Include(p => p.Items)
+                .Include(p => p.Payments) // Tải Payments của Plan
+                .Include(p => p.Items)    // Tải Items của Plan
+                    .ThenInclude(i => i.Payments)
                 .FirstOrDefaultAsync(p => p.ContractId == contractId);
         }
 
-        public async Task<IEnumerable<InstallmentPlans>> GetByAgencyContractIdAsync(int agencyContractId)
+        public async Task<InstallmentPlans?> GetByAgencyContractIdAsync(int agencyContractId)
         {
             return await _context.InstallmentPlans
-                .Include(p => p.Items)
-                .Where(p => p.AgencyContractId == agencyContractId)
-                .ToListAsync();
-        }
+                .Include(p => p.Payments) // Tải Payments của Plan
+                .Include(p => p.Items)    // Tải Items của Plan
+                    .ThenInclude(i => i.Payments)
+                .FirstOrDefaultAsync(p => p.AgencyContractId == agencyContractId);
 
-        public async Task<IEnumerable<InstallmentPlans>> GetAllWithItemsAsync()
-        {
-            return await _context.InstallmentPlans
-                .Include(p => p.Items)
-                .ToListAsync();
         }
 
         public async Task<InstallmentPlans?> GetWithItemsByIdAsync(int id)

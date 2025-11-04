@@ -11,8 +11,7 @@ namespace OrderRepository.Repositories
     public interface IInstallmentPlansRepository : IGenericRepository<InstallmentPlans>
     {
         Task<InstallmentPlans?> GetByContractIdAsync(int contractId);
-        Task<IEnumerable<InstallmentPlans>> GetByAgencyContractIdAsync(int agencyContractId);
-        Task<IEnumerable<InstallmentPlans>> GetAllWithItemsAsync();
+        Task<InstallmentPlans?> GetByAgencyContractIdAsync(int agencyContractId);
         Task<InstallmentPlans?> GetWithItemsByIdAsync(int id);
         Task<InstallmentPlans?> GetPlanWithDetailsAsync(int id);
         Task<IEnumerable<InstallmentPlans>> GetAllPlansWithDetailsAsync();
