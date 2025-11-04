@@ -6,6 +6,7 @@ using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using static GrpcService.AgencyGrpcService;
 
@@ -243,6 +244,43 @@ namespace OrderAPIService.Services
             _plansRepository.Remove(plan);
             await _plansRepository.SaveChangesAsync();
         }
+        public async Task<InstallmentPlanResponse> GetByContractIdAsync(int contractId)
+        {
+            var contract = await _contractRepository.GetByIdAsync(contractId);
+            if (contract == null)
+                throw new KeyNotFoundException($"Contract with ID {contractId} not found.");
+
+            // 'plan' là một object (hoặc null)
+            var plan = await _plansRepository.GetByContractIdAsync(contractId);
+
+            // Sửa 2: Kiểm tra null cho plan
+            if (plan == null)
+            {
+                throw new KeyNotFoundException($"No installment plan found for Contract ID {contractId}.");
+            }
+
+            // Sửa 3: Chỉ cần map 1 object, không dùng .Select()
+            return MapToResponse(plan);
+        }
+
+        public async Task<InstallmentPlanResponse> GetByAgencyContractIdAsync(int agencyContractId)
+        {
+            var agencyContract = await _agencyGrpcServiceClient.GetContractByIdAsync(agencyContractId);
+            if (agencyContract == null)
+                throw new KeyNotFoundException($"Agency contract with ID {agencyContractId} not found.");
+
+            // 'plan' là một object (hoặc null)
+            var plan = await _plansRepository.GetByAgencyContractIdAsync(agencyContractId);
+
+            // Sửa 2: Kiểm tra null cho plan
+            if (plan == null)
+            {
+                throw new KeyNotFoundException($"No installment plan found for Agency Contract ID {agencyContractId}.");
+            }
+
+            // Sửa 3: Chỉ cần map 1 object
+            return MapToResponse(plan);
+        }
 
         // 🧩 Mapping function
         private static InstallmentPlanResponse MapToResponse(InstallmentPlans p)
@@ -302,6 +340,7 @@ namespace OrderAPIService.Services
             Status = p.Status,
             Note = p.Note
         };
+
 
     }
 }

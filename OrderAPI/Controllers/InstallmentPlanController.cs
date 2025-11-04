@@ -44,6 +44,35 @@ namespace OrderAPI.Controllers
             }
 
         }
+
+        [HttpGet("contract/{contractId}")]
+        public async Task<IActionResult> GetInstallmentPlanByContractId([FromRoute] int contractId)
+        {
+            try
+            {
+                var result = await _installmentPlansService.GetByContractIdAsync(contractId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpGet("agency-contract/{agencyContractId}")]
+        public async Task<IActionResult> GetInstallmentPlanByAgencyContractId([FromRoute] int agencyContractId)
+        {
+            try
+            {
+                var result = await _installmentPlansService.GetByAgencyContractIdAsync(agencyContractId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllInstallmentPlans()
         {
@@ -84,5 +113,7 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
+       
     }
 }

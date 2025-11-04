@@ -11,6 +11,8 @@ namespace OrderService.Services
     {
         Task<InstallmentPlanResponse> CreateInstallmentPlanAsync(InstallmentPlanRequest request);
         Task<InstallmentPlanResponse?> GetByIdAsync(int id);
+        Task<InstallmentPlanResponse> GetByContractIdAsync(int contractId);
+        Task<InstallmentPlanResponse> GetByAgencyContractIdAsync(int agencyContractId);
         Task<IEnumerable<InstallmentPlanResponse>> GetAllAsync();
         Task<InstallmentPlanResponse> UpdateInstallmentPlanAsync(int id, InstallmentPlanUpdateRequest request);
         Task DeleteAsync(int id);

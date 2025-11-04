@@ -41,5 +41,44 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _installmentItemService.GetByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            try
+            {
+                var result = await _installmentItemService.GetAllAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                await _installmentItemService.DeleteAsync(id);
+                return Ok(new { message = $"Installment item with ID {id} has been deleted." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
     }
 }
