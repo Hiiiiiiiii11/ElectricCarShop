@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model.DTO;
 using AllocationService.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace AllocationAPI.Controllers
 {
@@ -38,9 +39,9 @@ namespace AllocationAPI.Controllers
                 var updatedPromotion = await _vehiclePromotionService.UpdateAsync(id, request);
                 return Ok(updatedPromotion);
             }
-            catch (KeyNotFoundException knfEx)
+            catch (KeyNotFoundException exception)
             {
-                return NotFound(knfEx.Message);
+                return NotFound(new { message = exception.Message });
             }
             catch (Exception ex)
             {
@@ -54,7 +55,7 @@ namespace AllocationAPI.Controllers
             {
                 var result = await _vehiclePromotionService.DeleteAsync(id);
                 if (!result)
-                    return NotFound($"Vehicle promotion with id {id} not found.");
+                    return NotFound(new { message = $"Vehicle promotion with id {id} not found." });
                 return Ok(new { Message = $"Delete promotion with id {id} successfully" });
             }
             catch (Exception ex)
@@ -69,7 +70,7 @@ namespace AllocationAPI.Controllers
             {
                 var promotion = await _vehiclePromotionService.GetByIdAsync(id);
                 if (promotion == null)
-                    return NotFound($"Vehicle promotion with id {id} not found.");
+                    return NotFound(new { message = $"Vehicle promotion with id {id} not found." });
                 return Ok(promotion);
             }
             catch (Exception ex)

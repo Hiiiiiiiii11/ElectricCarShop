@@ -45,11 +45,69 @@ namespace OrderService.Services
             await _itemsRepository.SaveChangesAsync();
             return MapToResponse(item);
         }
+        //public async Task<InstallmentItemResponse> UpdateAsync(int id, InstallmentItemUpdateRequest request)
+        //{
+        //    var item = await _itemsRepository.GetByIdAsync(id);
+        //    if (item == null)
+        //    {
+        //        throw new KeyNotFoundException($"Installment item with ID {id} not found.");
+        //    }
+
+        //    // Cập nhật các trường nếu chúng được cung cấp trong request
+        //    if (request.InstallmentNo.HasValue)
+        //        item.InstallmentNo = request.InstallmentNo.Value;
+        //    if (request.DueDate.HasValue)
+        //        item.DueDate = request.DueDate.Value;
+        //    if (request.AmountDue.HasValue)
+        //        item.AmountDue = request.AmountDue.Value;
+        //    if (request.PrincipalComponent.HasValue)
+        //        item.PrincipalComponent = request.PrincipalComponent.Value;
+        //    if (request.InterestComponent.HasValue)
+        //        item.InterestComponent = request.InterestComponent.Value;
+        //    if (request.FeeComponent.HasValue)
+        //        item.FeeComponent = request.FeeComponent.Value;
+        //    if (request.Notes != null) // Cho phép cập nhật ghi chú (kể cả thành rỗng)
+        //        item.Notes = request.Notes;
+        //    if (!string.IsNullOrEmpty(request.Status))
+        //        item.Status = request.Status;
+
+        //    _itemsRepository.Update(item);
+        //    await _itemsRepository.SaveChangesAsync();
+
+        //    return MapToResponse(item);
+        //}
 
         // 🟡 GET BY PLAN
         public async Task<IEnumerable<InstallmentItemResponse>> GetByPlanIdAsync(int planId)
         {
             var items = await _itemsRepository.GetByPlanIdAsync(planId);
+            return items.Select(MapToResponse);
+        }
+        public async Task DeleteAsync(int id)
+        {
+            var item = await _itemsRepository.GetByIdAsync(id);
+            if (item == null)
+            {
+                throw new KeyNotFoundException($"Installment item with ID {id} not found.");
+            }
+
+            _itemsRepository.Remove(item);
+            await _itemsRepository.SaveChangesAsync();
+        }
+
+        // 🟡 GET BY ID (Hàm mới)
+        public async Task<InstallmentItemResponse> GetByIdAsync(int id)
+        {
+            var item = await _itemsRepository.GetByIdAsync(id);
+            if (item == null)
+            {
+                throw new KeyNotFoundException($"Installment item with ID {id} not found.");
+            }
+            return MapToResponse(item);
+        }
+        public async Task<IEnumerable<InstallmentItemResponse>> GetAllAsync()
+        {
+            var items = await _itemsRepository.GetAllAsync();
             return items.Select(MapToResponse);
         }
 

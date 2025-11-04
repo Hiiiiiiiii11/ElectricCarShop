@@ -171,6 +171,7 @@ namespace AllocationAPIService.Implement
                 {
                     Id = promo.Id,
                     VehicleId = promo.VehicleId,
+                    AgencyId = promo.AgencyId ?? 0,
                     PromoName = promo.PromoName ?? "",
                     DiscountAmount = (double)promo.DiscountAmount, // Chuyển decimal sang double
                     StartDate = promo.StartDate.ToString("o"),
