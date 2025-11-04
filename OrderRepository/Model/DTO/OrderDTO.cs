@@ -40,6 +40,7 @@ namespace OrderRepository.Model.Request
         public string Content { get; set; }
         public string? Reply { get; set; }
         public string? Status { get; set; }
+        public int? AgencyId { get; set; }
     }
     public class FeedbackUpdateRequest
     {
@@ -48,6 +49,7 @@ namespace OrderRepository.Model.Request
         public string? Content { get; set; }
         public string? Reply { get; set; }
         public string? Status { get; set; }
+        public int? AgencyId { get; set; }
     }
     public class FeedbackResponse
     {
@@ -57,6 +59,7 @@ namespace OrderRepository.Model.Request
         public string Content { get; set; }
         public string Reply { get; set; }
         public string Status { get; set; }
+        public int? AgencyId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

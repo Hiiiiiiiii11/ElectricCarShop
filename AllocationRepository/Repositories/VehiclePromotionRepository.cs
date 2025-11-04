@@ -41,5 +41,12 @@ namespace AllocationRepository.Repositories
                 .OrderByDescending(p => p.EndDate)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<VehiclePromotions>> GetPromotionByAgencyIdAsync(int agencyId)
+        {
+            return await _context.VehiclePromotions
+                .Where(p => p.AgencyId == agencyId )
+                .OrderBy(p => p.StartDate)
+                .ToListAsync();
+        }
     }
 }

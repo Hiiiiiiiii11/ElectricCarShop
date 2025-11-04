@@ -30,5 +30,12 @@ namespace OrderRepository.Repositories
                 .OrderByDescending(f => f.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Feedback>> GetFeedbackByAgencyId(int agencyId)
+        {
+            return await _context.Feedbacks
+                .Where(f => f.AgencyId == agencyId)
+                .ToListAsync();
+        }
+
     }
 }

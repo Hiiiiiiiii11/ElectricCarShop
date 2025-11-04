@@ -12,6 +12,7 @@ namespace OrderService.Services
         Task<IEnumerable<FeedbackResponse>> GetAllAsync();
         Task<FeedbackResponse?> GetByIdAsync(int id);
         Task<IEnumerable<FeedbackResponse>> GetByCustomerIdAsync(int customerId);
+        Task<IEnumerable<FeedbackResponse>> GetByAgencyIdAsync(int agencyId);
         Task<IEnumerable<FeedbackResponse>> GetByStatusAsync(string status);
         Task<FeedbackResponse> CreateAsync(FeedbackRequest request);
         Task<FeedbackResponse> UpdateAsync(int id, FeedbackUpdateRequest request);

@@ -10,6 +10,7 @@ namespace AllocationRepository.Model
     {
         public int Id { get; set; }
         public int VehicleId { get; set; }
+        public int? AgencyId { get; set; }
         public string PromoName { get; set; }
         public decimal DiscountAmount { get; set; }
         public DateTime StartDate { get; set; }

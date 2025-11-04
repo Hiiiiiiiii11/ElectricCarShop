@@ -18,5 +18,7 @@ namespace AllocationRepository.Repositories
 
         // 🔹 Lấy lịch sử khuyến mãi (đã hết hạn)
         Task<IEnumerable<VehiclePromotions>> GetExpiredPromotionsAsync();
+        Task<IEnumerable<VehiclePromotions>> GetPromotionByAgencyIdAsync(int agencyId);
+
     }
 }

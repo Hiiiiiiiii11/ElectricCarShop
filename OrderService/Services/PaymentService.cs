@@ -163,5 +163,10 @@ namespace OrderAPIService.Services
             var payments = await _paymentRepository.GetAllAsync();
             return payments.Select(MapToResponse);
         }
+        public async Task<IEnumerable<PaymentResponse>> GetCustomerPaymentsByAgencyIdAsync(int agencyId)
+        {
+            var payments = await _paymentRepository.GetCustomerPaymentsByAgencyIdAsync(agencyId);
+            return payments.Select(MapToResponse);
+        }
     }
 }

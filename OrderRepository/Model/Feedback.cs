@@ -17,6 +17,7 @@ namespace OrderRepository.Model
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public int? AgencyId { get; set; }
 
         public string Status { get; set; }
 

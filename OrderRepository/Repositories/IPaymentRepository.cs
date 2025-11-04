@@ -14,5 +14,6 @@ namespace OrderRepository.Repositories
         Task<IEnumerable<Payments>> GetByAgencyOrderIdAsync(int agencyOrderId);
         Task<IEnumerable<Payments>> GetByStatusAsync(string status);
         Task<decimal> GetTotalPaidByOrderAsync(int orderId);
+        Task<List<Payments>> GetCustomerPaymentsByAgencyIdAsync(int agencyId);
     }
 }

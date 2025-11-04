@@ -72,9 +72,22 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpGet("agency/{agencyId}")]
+        public async Task<IActionResult> GetFeedbacksByAgencyId(int agencyId)
+        {
+            try
+            {
+                var feedbacks = await _feedbackService.GetByAgencyIdAsync(agencyId);
+                return Ok(feedbacks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
 
         [HttpPost]
-        public async Task<IActionResult> CreateFeedback([FromBody] FeedbackRequest request)
+        public async Task<IActionResult> CreateFeedback([FromForm] FeedbackRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

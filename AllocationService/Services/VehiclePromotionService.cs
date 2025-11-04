@@ -28,6 +28,7 @@ namespace AllocationService.Services
             var entity = new VehiclePromotions
             {
                 VehicleId = request.VehicleId,
+                AgencyId = request.AgencyId,
                 PromoName = request.PromoName,
                 DiscountAmount = request.DiscountAmount,
                 StartDate = request.StartDate,
@@ -49,6 +50,7 @@ namespace AllocationService.Services
             // Giữ lại giá trị cũ nếu null
             entity.VehicleId = request.VehicleId ?? entity.VehicleId;
             entity.PromoName = request.PromoName ?? entity.PromoName;
+            entity.AgencyId = request.AgencyId ?? entity.AgencyId;
             entity.DiscountAmount = request.DiscountAmount ?? entity.DiscountAmount;
             entity.StartDate = request.StartDate ?? entity.StartDate;
             entity.EndDate = request.EndDate ?? entity.EndDate;
@@ -103,7 +105,11 @@ namespace AllocationService.Services
             var list = await _vehiclePromotionRepository.GetPromotionsByVehicleIdAsync(vehicleId);
             return list.Select(MapToResponse);
         }
-
+        public async Task<IEnumerable<VehiclePromotionResponse>> GetPromotionByAgencyIdAsync(int agencyId)
+        {
+            var list = await _vehiclePromotionRepository.GetPromotionByAgencyIdAsync(agencyId);
+            return list.Select(MapToResponse);
+        }
 
         private VehiclePromotionResponse MapToResponse(VehiclePromotions entity)
         {
@@ -111,6 +117,7 @@ namespace AllocationService.Services
             {
                 Id = entity.Id,
                 VehicleId = entity.VehicleId,
+                AgencyId = entity.AgencyId ?? 0,
                 PromoName = entity.PromoName,
                 DiscountAmount = entity.DiscountAmount,
                 StartDate = entity.StartDate,

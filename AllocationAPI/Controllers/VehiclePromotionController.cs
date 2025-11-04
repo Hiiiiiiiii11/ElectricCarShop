@@ -77,6 +77,19 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("agecy/{agencyId}")]
+        public async Task<IActionResult> GetPromotionsByAgencyId(int agencyId)
+        {
+            try
+            {
+                var promotions = await _vehiclePromotionService.GetPromotionByAgencyIdAsync(agencyId);
+                return Ok(promotions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> GetAllVehiclePromotions()
         {

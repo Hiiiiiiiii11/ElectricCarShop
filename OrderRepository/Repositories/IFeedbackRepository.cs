@@ -12,5 +12,6 @@ namespace OrderRepository.Repositories
     {
         Task<IEnumerable<Feedback>> GetByCustomerIdAsync(int customerId);
         Task<IEnumerable<Feedback>> GetByStatusAsync(string status);
+        Task<IEnumerable<Feedback>> GetFeedbackByAgencyId(int agencyId);
     }
 }
