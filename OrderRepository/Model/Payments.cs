@@ -14,7 +14,7 @@ namespace OrderRepository.Model
         public DateTime PaymentDate { get; set; }
         public decimal Prepay { get; set; }
         public decimal Amount { get; set; }
-        public string PaymentMethod { get; set; }
+        public string? PaymentMethod { get; set; }
         public string Status { get; set; }
 
         public Orders Order { get; set; }

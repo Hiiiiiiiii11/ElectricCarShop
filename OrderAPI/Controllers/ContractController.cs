@@ -9,10 +9,12 @@ namespace OrderAPI.Controllers
     public class ContractController : Controller
     {
         private readonly IContractService _contractService;
+        private readonly IContractEmailService _contractEmailService;
 
-        public ContractController(IContractService contractService)
+        public ContractController(IContractService contractService, IContractEmailService contractEmailService)
         {
             _contractService = contractService;
+            _contractEmailService = contractEmailService;
         }
 
         [HttpGet("{id}")]
@@ -125,6 +127,23 @@ namespace OrderAPI.Controllers
                     return NotFound("Contract not found");
 
                 return Ok("Contract deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpPost("sent-contracr-email/{contractId}")]
+        public async Task<IActionResult> SendContractEmail(int contractId, string customerEmail,IFormFile file)
+        {
+            try
+            {
+                await _contractEmailService.UploadAndUpdateContractEmailAsync(contractId, customerEmail, file);
+                return Ok(new { message = "Contract email sent successfully." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Contract not found");
             }
             catch (Exception ex)
             {

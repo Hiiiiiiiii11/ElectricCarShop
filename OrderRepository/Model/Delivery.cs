@@ -13,7 +13,7 @@ namespace OrderRepository.Model
         public int OrderId { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string DeliveryStatus { get; set; }
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
         public string? ImgUrlBefore { get; set; }
         public string? ImgUrlAfter { get; set; }
 

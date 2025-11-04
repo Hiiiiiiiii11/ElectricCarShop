@@ -219,10 +219,12 @@ namespace OrderRepository.Model.Request
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }
         public string Status { get; set; }
+        public string? TransactionCode { get; set; }
     }
     public class CreateTransactionRequest
     {
-        public int PaymentId { get; set; }
+        public int? PaymentId { get; set; }
+        public int? InstallPaymentId { get; set; }
         public string TransactionCode { get; set; }
         public DateTime TransactionDate { get; set; }
         public decimal Amount { get; set; }
@@ -239,6 +241,7 @@ namespace OrderRepository.Model.Request
     {
         public int Id { get; set; }
         public int PaymentId { get; set; }
+        public int InstallPaymentId { get; set; }
         public string TransactionCode { get; set; }
         public DateTime TransactionDate { get; set; }
         public decimal Amount { get; set; }
@@ -271,4 +274,127 @@ namespace OrderRepository.Model.Request
         public string? ImgUrlBefore { get; set; }
         public string? ImgUrlAfter { get; set; }
     }
+    public class InstallmentPlanRequest
+    {
+        public int? ContractId { get; set; }
+        public int? AgencyContractId { get; set; }
+        public decimal PrincipalAmount { get; set; }          // Tổng gốc
+        public decimal DepositAmount { get; set; }            // Tiền đặt cọc
+        public decimal InterestRate { get; set; }             // Lãi suất %
+        public string InterestMethod { get; set; } = "flat";  // flat / declining / none
+        public string? RuleJson { get; set; }                 // Cấu hình kỳ (JSON)
+        public string? Note { get; set; }                     // Ghi chú
+    }
+    public class InstallmentPlanUpdateRequest
+    {
+        public int? ContractId { get; set; }
+        public int? AgencyContractId { get; set; }
+        public decimal? PrincipalAmount { get; set; }
+        public decimal? DepositAmount { get; set; }
+        public decimal? InterestRate { get; set; }
+        public string? InterestMethod { get; set; }
+        public string? RuleJson { get; set; }
+        public string? Note { get; set; }
+        public string? Status { get; set; } // pending / active / closed
+    }
+
+    public class InstallmentPlanResponse
+    {
+        public int Id { get; set; }
+        public int? ContractId { get; set; }
+        public int? AgencyContractId { get; set; }
+        public decimal PrincipalAmount { get; set; }
+        public decimal DepositAmount { get; set; }
+        public decimal InterestRate { get; set; }
+        public string InterestMethod { get; set; }
+        public string Status { get; set; }
+        public string? RuleJson { get; set; }
+        public string? Note { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+
+        // Tổng tiền đã thanh toán
+        public decimal TotalPaid { get; set; }
+
+        // Danh sách kỳ trả
+        public List<InstallmentItemResponse>? Items { get; set; }
+
+        // Danh sách các thanh toán thực tế
+        public List<InstallmentPaymentResponse>? Payments { get; set; }
+    }
+    public class InstallmentItemRequest
+    {
+        public int InstallmentPlanId { get; set; }
+        public int InstallmentNo { get; set; }        // Kỳ thứ mấy
+        public DateTime DueDate { get; set; }         // Ngày đến hạn
+
+        public decimal Percentage { get; set; }       // % tổng tiền trong kỳ này
+        public decimal AmountDue { get; set; }        // Tổng phải trả
+        public decimal PrincipalComponent { get; set; }
+        public decimal InterestComponent { get; set; }
+        public decimal FeeComponent { get; set; }
+
+        public string Status { get; set; } = "Pending"; // Pending / Paid / Overdue
+        public string? Notes { get; set; }
+    }
+    public class InstallmentItemResponse
+    {
+        public int Id { get; set; }
+        public int InstallmentPlanId { get; set; }
+        public int InstallmentNo { get; set; }
+        public DateTime DueDate { get; set; }
+
+        public decimal Percentage { get; set; }               // % trong tổng số tiền
+        public decimal AmountDue { get; set; }
+        public decimal PrincipalComponent { get; set; }
+        public decimal InterestComponent { get; set; }
+        public decimal FeeComponent { get; set; }
+
+        public decimal AmountPaid { get; set; }
+        public decimal AmountRemaining { get; set; }
+
+        public DateTime? PaidDate { get; set; }
+        public string Status { get; set; } = "Pending";       // pending / partial / paid / overdue
+        public string? Note { get; set; }
+    }
+
+    public class InstallmentPaymentRequest
+    {
+        public int InstallmentPlanId { get; set; }
+        public int? InstallmentItemId { get; set; } // có thể null nếu trả nhiều kỳ cùng lúc
+        public decimal AmountPaid { get; set; }
+        public DateTime PaidDate { get; set; }
+        public string? PaymentMethod { get; set; }
+        public string? Note { get; set; }
+        public string? Status { get; set; }
+    }
+
+    public class UpdateInstallmentPaymentRequest
+    {
+        public decimal? AmountPaid { get; set; }
+        public DateTime? PaidDate { get; set; }
+        public string? PaymentMethod { get; set; }
+        public string? Note { get; set; }
+        public string? Status { get; set; }   // pending / completed / failed
+    }
+
+    public class InstallmentPaymentResponse
+    {
+        public int Id { get; set; }
+        public int InstallmentPlanId { get; set; }
+        public int? InstallmentItemId { get; set; }
+        public decimal AmountPaid { get; set; }
+        public DateTime PaidDate { get; set; }
+        public string PaymentMethod { get; set; }
+        public string Status { get; set; }
+        public string? Note { get; set; }
+    }
+
+    public class InstallmentRule
+    {
+        public int Months { get; set; }
+        public double Percentage { get; set; }
+    }
+
+
 }

@@ -86,7 +86,8 @@ namespace OrderAPIService.Services
             return new TransactionResponse
             {
                 Id = t.Id,
-                PaymentId = t.PaymentId,
+                PaymentId = t.PaymentId ?? 0,
+                InstallPaymentId = t.InstallPaymentId ?? 0,
                 TransactionCode = t.TransactionCode,
                 TransactionDate = t.TransactionDate,
                 Amount = t.Amount,
