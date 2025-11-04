@@ -43,6 +43,11 @@ namespace OrderService.Service
             var feedbacks = await _feedbackRepository.GetByStatusAsync(status);
             return feedbacks.Select(MapToResponse);
         }
+        public async Task<IEnumerable<FeedbackResponse>> GetByAgencyIdAsync(int agencyId)
+        {
+            var feedbacks = await _feedbackRepository.GetFeedbackByAgencyId(agencyId);
+            return feedbacks.Select(MapToResponse);
+        }
 
 
         public async Task<FeedbackResponse> CreateAsync(FeedbackRequest request)
@@ -54,6 +59,7 @@ namespace OrderService.Service
                 Type = request.Type,
                 Status = request.Status ?? "Pending",
                 Reply = string.Empty,
+                AgencyId = request.AgencyId ?? 0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -80,6 +86,8 @@ namespace OrderService.Service
            if(!string.IsNullOrEmpty(request.Reply))
                 feedback.Reply = request.Reply;
             feedback.UpdatedAt = DateTime.UtcNow;
+            if(request.AgencyId.HasValue)
+                feedback.AgencyId = request.AgencyId.Value;
 
             _feedbackRepository.Update(feedback);
             await _feedbackRepository.SaveChangesAsync();
@@ -113,5 +121,7 @@ namespace OrderService.Service
                 UpdatedAt = f.UpdatedAt
             };
         }
+
+
     }
 }

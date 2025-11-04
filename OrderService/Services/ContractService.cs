@@ -90,7 +90,7 @@ namespace OrderAPIService.Services
 
                 if (!string.IsNullOrEmpty(uploadResult))
                 {
-                    contract.ContractImagageUrl = uploadResult;
+                    contract.ContractImageUrl = uploadResult;
                 }
             }
 
@@ -120,7 +120,7 @@ namespace OrderAPIService.Services
             ContractName = c.ContractName,
             ContractNumber = c.ContractNumber,
             ContractDate = c.ContractDate,
-            ContractImagageUrl = c.ContractImagageUrl,
+            ContractImagageUrl = c.ContractImageUrl,
             Status = c.Status,
             Terms = c.Terms
         };

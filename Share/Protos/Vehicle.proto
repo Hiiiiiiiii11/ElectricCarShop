@@ -95,8 +95,9 @@ message VehiclePriceReply {
 message VehiclePromotionReply {
   int32 id = 1;
   int32 vehicleId = 2;
-  string promoName = 3;
-  double discountAmount = 4; // Dùng double
-  string startDate = 5;
-  string endDate = 6;
+  int32 agencyId = 3;
+  string promoName = 4;
+  double discountAmount = 5; // Dùng double
+  string startDate = 6;
+  string endDate = 7;
 }

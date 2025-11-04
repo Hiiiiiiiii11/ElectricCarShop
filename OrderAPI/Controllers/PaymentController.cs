@@ -106,6 +106,21 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
+        [HttpGet("GetPaymentByAgencyId/{agencyid}")]
+        public async Task<IActionResult> GetPaymentByAgencyId(int agencyid)
+        {
+            try
+            {
+                var payments = await _paymentService.GetCustomerPaymentsByAgencyIdAsync(agencyid);
+                if (payments == null || !payments.Any())
+                    return NotFound(new { message = $"No payments found for Agency ID {agencyid}." });
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            }
+        }
 
         [HttpPost("CreatePayment")]
         public async Task<IActionResult> CreatePayment([FromForm] CreatePaymentRequest request)
@@ -161,5 +176,7 @@ namespace OrderAPI.Controllers
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
+
+
     }
 }

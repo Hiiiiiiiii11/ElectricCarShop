@@ -19,6 +19,9 @@ namespace OrderRepository.Data
         public DbSet<Quotations> Quotations { get; set; } = default!;
         public DbSet<OrderDetail> OrderDetail { get; set; } = default!;
         public DbSet<Delivery> Deliveries { get; set; } = default!;
+        public DbSet<InstallmentPlans> InstallmentPlans { get; set; } = default!;
+        public DbSet<InstallmentItems> InstallmentItems { get; set; } = default!;
+        public DbSet<InstallmentPayments> InstallmentPayments { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,6 +105,40 @@ namespace OrderRepository.Data
             {
                 e.Property(t => t.Amount).HasColumnType("decimal(18,2)");
                 e.HasIndex(t => t.TransactionCode).IsUnique();
+            });
+            modelBuilder.Entity<InstallmentPlans>(e =>
+            {
+                // 1. Quan hệ (Contracts 1 -> n InstallmentPlans)
+                e.HasOne(p => p.Contract)              // Một Plan có một Contract
+                 .WithMany(c => c.Installments)      // Một Contract có nhiều Plan
+                 .HasForeignKey(p => p.ContractId)     // Khóa ngoại
+                 .OnDelete(DeleteBehavior.Restrict); // Không cho xóa Hợp đồng nếu còn Kế hoạch trả góp
+
+                // 2. RÀNG BUỘC CHECK (Logic quan trọng)
+                // Đảm bảo chỉ 1 trong 2 ContractId hoặc AgencyContractId có giá trị
+                e.HasCheckConstraint("CK_InstallmentPlans_ContractType",
+                    "([ContractId] IS NOT NULL AND [AgencyContractId] IS NULL) OR ([ContractId] IS NULL AND [AgencyContractId] IS NOT NULL)");
+
+                // 3. Cấu hình tiền tệ
+                e.Property(p => p.PrincipalAmount).HasColumnType("decimal(18,2)");
+                e.Property(p => p.DepositAmount).HasColumnType("decimal(18,2)");
+                e.Property(p => p.InterestRate).HasColumnType("decimal(5,2)"); // Ví dụ: 12.50%
+            });
+
+            modelBuilder.Entity<InstallmentItems>(e =>
+            {
+                // 1. Quan hệ (InstallmentPlans 1 -> n InstallmentItems)
+                e.HasOne(i => i.InstallmentPlans)         // Một Item thuộc một Plan
+                 .WithMany(p => p.Items)               // Một Plan có nhiều Item
+                 .HasForeignKey(i => i.InstallmentPlanId) // Khóa ngoại
+                 .OnDelete(DeleteBehavior.Cascade);   // Xóa Plan thì xóa luôn các Item
+
+                // 2. Cấu hình tiền tệ
+                e.Property(i => i.Percentage).HasColumnType("decimal(5,2)"); // Ví dụ: 50.00%
+                e.Property(i => i.AmountDue).HasColumnType("decimal(18,2)");
+                e.Property(i => i.PrincipalComponent).HasColumnType("decimal(18,2)");
+                e.Property(i => i.InterestComponent).HasColumnType("decimal(18,2)");
+                e.Property(i => i.FeeComponent).HasColumnType("decimal(18,2)");
             });
         }
     }

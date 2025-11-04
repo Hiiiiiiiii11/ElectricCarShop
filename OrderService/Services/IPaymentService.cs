@@ -19,6 +19,7 @@ namespace OrderService.Services
         Task<decimal> GetTotalPaidByOrderAsync(int orderId);
         Task<PaymentResponse> UpdatePaymentAsync(int id, UpdatePaymentRequest request);
         Task<bool> DeletePaymentAsync(int id);
+        Task<IEnumerable<PaymentResponse>> GetCustomerPaymentsByAgencyIdAsync(int agencyId);
     }
 }
 

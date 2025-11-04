@@ -13,10 +13,11 @@ namespace OrderRepository.Model
         public Customers Customer { get; set; }
         public string Type { get; set; }    
         public string Content { get; set; }
-        public string Reply { get; set; }
+        public string? Reply { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public int? AgencyId { get; set; }
 
         public string Status { get; set; }
 

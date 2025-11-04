@@ -15,13 +15,14 @@ namespace OrderAPIService.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
         private readonly IOrderRepository _orderRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public PaymentService(IPaymentRepository paymentRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient, IOrderRepository orderRepository)
+        public PaymentService(IPaymentRepository paymentRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient, IOrderRepository orderRepository, ITransactionRepository transactionRepository)
         {
             _paymentRepository = paymentRepository;
             _agencyGrpcServiceClient = agencyGrpcServiceClient;
             _orderRepository = orderRepository;
-
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<PaymentResponse> CreatePaymentAsync(CreatePaymentRequest request)
@@ -60,9 +61,27 @@ namespace OrderAPIService.Services
             await _paymentRepository.AddAsync(payment);
             await _paymentRepository.SaveChangesAsync();
 
+            var transaction = new Transaction
+            {
+                PaymentId = payment.Id,
+                TransactionCode = GenerateTransactionCode(),
+                TransactionDate = DateTime.UtcNow,
+                Amount = payment.Amount,
+                Status = payment.Status
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveChangesAsync();
+
             return MapToResponse(payment);
         }
 
+        private string GenerateTransactionCode()
+        {
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            var random = new Random().Next(1000, 9999);
+            return $"TRANS-ORDER-{timestamp}-{random}";
+        }
         public async Task<PaymentResponse?> GetPaymentByIdAsync(int id)
         {
             var payment = await _paymentRepository.GetByIdAsync(id);
@@ -135,12 +154,18 @@ namespace OrderAPIService.Services
             Prepay = p.Prepay,
             Amount = p.Amount,
             PaymentMethod = p.PaymentMethod,
-            Status = p.Status
+            Status = p.Status,
+            TransactionCode = p.Transactions?.FirstOrDefault()?.TransactionCode
         };
 
         public async Task<IEnumerable<PaymentResponse?>> GetAllPayment()
         {
             var payments = await _paymentRepository.GetAllAsync();
+            return payments.Select(MapToResponse);
+        }
+        public async Task<IEnumerable<PaymentResponse>> GetCustomerPaymentsByAgencyIdAsync(int agencyId)
+        {
+            var payments = await _paymentRepository.GetCustomerPaymentsByAgencyIdAsync(agencyId);
             return payments.Select(MapToResponse);
         }
     }

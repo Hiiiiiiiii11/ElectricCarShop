@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using OrderRepository.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace OrderService.Services
 {
-    public interface IImageStorageService
+    public interface IContractEmailService
     {
-        Task<string> UploadAsync(IFormFile file, string folder);
+        Task UploadAndUpdateContractEmailAsync(int contractId, string customerEmail, IFormFile file);
     }
 }

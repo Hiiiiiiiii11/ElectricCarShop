@@ -84,6 +84,9 @@ namespace OrderAPI
             builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
             builder.Services.AddScoped<IContractRepository, ContractRepository>();
             builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+            builder.Services.AddScoped<IInstallmentPlansRepository, InstallmentPlansRepository>();
+            builder.Services.AddScoped<IInstallmentItemsRepository, InstallmentItemsRepository>();
+            builder.Services.AddScoped<IInstallmentPaymentsRepository, InstallmentPaymentsRepository>();
             // ===== gRPC service wrappers (Share.ShareServices) =====
 
             // IImageStorageService (ở OrderService) dùng Cloudinary đọc từ IConfiguration (env vars)
@@ -98,7 +101,10 @@ namespace OrderAPI
             builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IContractService, ContractService>();
-            builder.Services.AddScoped<IDeliveryService, DeliveryService>(); // <— thêm Delivery service
+            builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+            builder.Services.AddScoped<IInstallmentPlansService, InstallmentPlansService>();
+            builder.Services.AddScoped<IInstallmentItemsService, InstallmentItemsService>();
+            builder.Services.AddScoped<IInstallmentPaymentsService, InstallmentPaymentsService>();
 
             // =================== AUTH ===================
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);

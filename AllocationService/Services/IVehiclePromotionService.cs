@@ -1,4 +1,5 @@
-﻿using AllocationRepository.Model.DTO;
+﻿using AllocationRepository.Model;
+using AllocationRepository.Model.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,6 @@ namespace AllocationService.Services
         Task<IEnumerable<VehiclePromotionResponse>> GetPromotionsByVehicleIdAsync(int vehicleId);
         Task<IEnumerable<VehiclePromotionResponse>> GetActivePromotionsAsync();
         Task<IEnumerable<VehiclePromotionResponse>> GetExpiredPromotionsAsync();
+        Task<IEnumerable<VehiclePromotionResponse>> GetPromotionByAgencyIdAsync(int agencyId);
     }
 }

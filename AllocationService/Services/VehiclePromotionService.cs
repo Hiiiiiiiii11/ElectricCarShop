@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +13,38 @@ namespace AllocationService.Services
     {
         private readonly IVehiclePromotionRepository _vehiclePromotionRepository;
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
 
         public VehiclePromotionService(
             IVehiclePromotionRepository vehiclePromotionRepository,
-            IVehicleRepository vehicleRepository)
+            IVehicleRepository vehicleRepository,
+            IAgencyGrpcServiceClient agencyGrpcServiceClient
+            )
         {
             _vehiclePromotionRepository = vehiclePromotionRepository;
             _vehicleRepository = vehicleRepository;
+            _agencyGrpcServiceClient = agencyGrpcServiceClient;
         }
 
         // ------------------- CRUD -------------------
 
         public async Task<VehiclePromotionResponse> CreateAsync(VehiclePromotionRequest request)
         {
+            var vehicle = await _vehicleRepository.GetByIdAsync(request.VehicleId);
+            if (vehicle == null)
+                throw new KeyNotFoundException("Vehicle not found.");
+
+            if (request.AgencyId.HasValue)
+            {
+                var agency = await _agencyGrpcServiceClient.GetAgencyByIdAsync(request.AgencyId.Value);
+                if (agency == null)
+                    throw new KeyNotFoundException("Agency not found.");
+            }
+
             var entity = new VehiclePromotions
             {
                 VehicleId = request.VehicleId,
+                AgencyId = request.AgencyId,
                 PromoName = request.PromoName,
                 DiscountAmount = request.DiscountAmount,
                 StartDate = request.StartDate,
@@ -46,9 +63,16 @@ namespace AllocationService.Services
             if (entity == null)
                 throw new KeyNotFoundException("Vehicle promotion not found.");
 
+            if (request.VehicleId.HasValue)
+            {
+                var agency = await _vehicleRepository.GetByIdAsync(request.VehicleId.Value);
+                if (agency == null)
+                    throw new KeyNotFoundException("Vehicle not found.");
+            }
             // Giữ lại giá trị cũ nếu null
             entity.VehicleId = request.VehicleId ?? entity.VehicleId;
             entity.PromoName = request.PromoName ?? entity.PromoName;
+            entity.AgencyId = request.AgencyId ?? entity.AgencyId;
             entity.DiscountAmount = request.DiscountAmount ?? entity.DiscountAmount;
             entity.StartDate = request.StartDate ?? entity.StartDate;
             entity.EndDate = request.EndDate ?? entity.EndDate;
@@ -103,7 +127,11 @@ namespace AllocationService.Services
             var list = await _vehiclePromotionRepository.GetPromotionsByVehicleIdAsync(vehicleId);
             return list.Select(MapToResponse);
         }
-
+        public async Task<IEnumerable<VehiclePromotionResponse>> GetPromotionByAgencyIdAsync(int agencyId)
+        {
+            var list = await _vehiclePromotionRepository.GetPromotionByAgencyIdAsync(agencyId);
+            return list.Select(MapToResponse);
+        }
 
         private VehiclePromotionResponse MapToResponse(VehiclePromotions entity)
         {
@@ -111,6 +139,7 @@ namespace AllocationService.Services
             {
                 Id = entity.Id,
                 VehicleId = entity.VehicleId,
+                AgencyId = entity.AgencyId ?? 0,
                 PromoName = entity.PromoName,
                 DiscountAmount = entity.DiscountAmount,
                 StartDate = entity.StartDate,
