@@ -1,4 +1,5 @@
 ﻿using AgencyRepository.Repositories;
+using AgencyService.Services;
 using Grpc.Core;
 using GrpcService;
 
@@ -11,19 +12,23 @@ namespace AgencyService.Implement
         private readonly IAgencyTargetRepository _targetRepo;
         private readonly ITestDriveRepository _testDriveRepo;
         private readonly IAgencyOrderRepository _agencyOrderRepo;
+        private readonly IAgencyInventoryService _inventoryService;
 
         public AgencyGrpcServiceImpl(
             IAgencyRepository agencyRepository,
             IAgencyContractRepository contractRepo,
             IAgencyTargetRepository targetRepo,      
             ITestDriveRepository testDriveRepo,      
-            IAgencyOrderRepository agencyOrderRepo)  
+            IAgencyOrderRepository agencyOrderRepo,
+            IAgencyInventoryService inventoryService
+            )  
         {
             _agencyRepository = agencyRepository;
             _contractRepo = contractRepo;
             _targetRepo = targetRepo;
             _testDriveRepo = testDriveRepo;
             _agencyOrderRepo = agencyOrderRepo;
+            _inventoryService = inventoryService;
         }
 
         // Đây là method gRPC thực sự implement từ file .proto
@@ -132,7 +137,7 @@ namespace AgencyService.Implement
                 });
             }
         }
-        public override async Task<AgencyOrderReply> GetAgencyOrderById(GetAgencyOrderByIdRequest request,ServerCallContext context)
+        public override async Task<AgencyOrderReply> GetAgencyOrderById(GetAgencyOrderByIdRequest request, ServerCallContext context)
         {
             var order = await _agencyOrderRepo.GetByIdAsync(request.Id);
 
@@ -149,6 +154,17 @@ namespace AgencyService.Implement
                 Quantity = order.Quantity,
                 Status = order.Status ?? ""
             };
+        }
+        public override async Task<RemoveFromAgencyInventoryReply> RemoveVehicleFromInventory(RemoveFromAgencyInventoryRequest request, ServerCallContext context)
+        {
+                await _inventoryService.RemoveInventoryItemAsync(request.AgencyId, request.VehicleInstanceId);
+
+                return new RemoveFromAgencyInventoryReply
+                {
+                    Success = true,
+                    Message = "Vehicle removed from agency inventory successfully."
+                };
+
         }
     }
 }

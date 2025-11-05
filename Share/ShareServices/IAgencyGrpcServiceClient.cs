@@ -17,5 +17,6 @@ namespace Share.ShareServices
         AsyncServerStreamingCall<AgencyTargetReply> GetAllAgencyTargets(GetAllAgencyTargetRequest request);
         AsyncServerStreamingCall<TestDriveReply> GetAllTestDrives(GetAllTestDriveRequest request);
         AsyncServerStreamingCall<AgencyOrderReply> GetAllAgencyOrders(GetAllAgencyOrderRequest request);
+        Task<RemoveFromAgencyInventoryReply> RemoveVehicleFromInventoryAsync(int agencyId, int vehicleInstanceId);
     }
 }

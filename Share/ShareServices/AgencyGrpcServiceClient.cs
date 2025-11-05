@@ -52,5 +52,14 @@ namespace Share.ShareServices
         {
             return _client.GetAgencyOrderByIdAsync(new GetAgencyOrderByIdRequest { Id = agencyOrderId }).ResponseAsync;
         }
+        public async Task<RemoveFromAgencyInventoryReply> RemoveVehicleFromInventoryAsync(int agencyId, int vehicleInstanceId)
+        {
+            var request = new RemoveFromAgencyInventoryRequest
+            {
+                AgencyId = agencyId,
+                VehicleInstanceId = vehicleInstanceId
+            };
+            return await _client.RemoveVehicleFromInventoryAsync(request);
+        }
     }
 }

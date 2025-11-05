@@ -16,35 +16,45 @@ namespace AgencyService.Services
         private readonly IVehicleInstanceGrpcServiceClient _vehicleGrpcServiceClient;
         private readonly ICustomerGrpcServiceClient _customerGrpcServiceClient;
         private readonly IAgencyRepository _agencyRepository;
+        private readonly IOrderGrpcServiceClient _orderGrpcServiceClient;
 
         public TestDriveService(
             ITestDriveRepository testDriveRepository,
             IVehicleInstanceGrpcServiceClient vehicleGrpcServiceClient,
             ICustomerGrpcServiceClient customerGrpcServiceClient,
-            IAgencyRepository agencyRepository
+            IAgencyRepository agencyRepository,
+            IOrderGrpcServiceClient orderGrpcServiceClient
             )
         {
             _testDriveRepository = testDriveRepository;
             _vehicleGrpcServiceClient = vehicleGrpcServiceClient;
             _customerGrpcServiceClient = customerGrpcServiceClient;
             _agencyRepository = agencyRepository;
+            _orderGrpcServiceClient = orderGrpcServiceClient;
         }
 
         // ===== CREATE =====
         public async Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request)
         {
-            // --- BƯỚC 1: KIỂM TRA BOOKING TRÙNG LẶP (USER + VEHICLE) (MỚI) ---
+            // === BƯỚC 2: KIỂM TRA BÁO GIÁ TỒN TẠI (gRPC) ===
+            var quotationCheck = await _orderGrpcServiceClient.CheckQuotationExistsForVehicleAsync(request.VehicleInstanceId);
+            if (quotationCheck.Exists)
+            {
+                throw new InvalidOperationException($"Không thể đặt lịch. Xe (ID: {request.VehicleInstanceId}) đã nằm trong một Báo giá (Pending hoặc Accepted).");
+            }
+            // === KẾT THÚC KIỂM TRA BÁO GIÁ ===
+
+            // --- BƯỚC 1: KIỂM TRA BOOKING TRÙNG LẶP (USER + VEHICLE) (Logic cũ) ---
             var existingUserBookingForVehicle = await _testDriveRepository.FindAsync(td =>
                 td.CustomerId == request.CustomerId &&
                 td.VehicleInstanceId == request.VehicleInstanceId &&
-                td.Status == "Scheduled" || td.Status== "Completed" // Chỉ kiểm tra các lịch hẹn đang hoạt động
+                (td.Status == "Scheduled" || td.Status == "Completed")
             );
 
             if (existingUserBookingForVehicle.Any())
             {
-                throw new InvalidOperationException($"Khách hàng (ID: {request.CustomerId}) đã có lịch hẹn lái thử (Status: Scheduled) cho xe này (ID: {request.VehicleInstanceId}).");
+                throw new InvalidOperationException($"Khách hàng (ID: {request.CustomerId}) đã có lịch hẹn (Scheduled/Completed) cho xe này (ID: {request.VehicleInstanceId}).");
             }
-            // --- KẾT THÚC KIỂM TRA BOOKING TRÙNG ---
 
             // --- BƯỚC 2: KIỂM TRA TRÙNG NGÀY (Logic cũ) ---
             if (!request.AppointmentDate.HasValue)
@@ -65,7 +75,6 @@ namespace AgencyService.Services
             {
                 throw new InvalidOperationException($"Lịch trùng! Xe (ID: {request.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
             }
-            // --- KẾT THÚC KIỂM TRA NGÀY ---
 
             // --- BƯỚC 3: TẠO MỚI (Code cũ) ---
             var testDrive = new TestDrive

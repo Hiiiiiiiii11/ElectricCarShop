@@ -58,5 +58,20 @@ namespace OrderService.Implement
                 });
             }
         }
+        public override async Task<CheckQuotationExistsReply> CheckQuotationExistsForVehicle(
+            CheckQuotationExistsRequest request, ServerCallContext context)
+        {
+            // Tìm bất kỳ báo giá nào (đang chờ hoặc đã chấp nhận)
+            // cho chiếc xe này.
+            var existingQuotation = await _quotationRepo.FindAsync(q =>
+                q.VehicleInstanceId == request.VehicleInstanceId &&
+                (q.Status == "Pending" || q.Status == "Accepted")
+            );
+
+            return new CheckQuotationExistsReply
+            {
+                Exists = existingQuotation.Any()
+            };
+        }
     }
 }

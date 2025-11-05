@@ -15,6 +15,14 @@ message GetAllTestDriveRequest {
 message GetAllAgencyOrderRequest {
     // Có thể thêm phân trang (page_number, page_size) sau này nếu cần
 }
+message RemoveFromAgencyInventoryRequest {
+  int32 agencyId = 1;
+  int32 vehicleInstanceId = 2;
+}
+message RemoveFromAgencyInventoryReply {
+  bool success = 1;
+  string message = 2;
+}
 
 service AgencyGrpcService {
   rpc GetAgencyById (GetAgencyByIdRequest) returns (AgencyReply);
@@ -35,6 +43,7 @@ service AgencyGrpcService {
   rpc GetAllAgencyOrders (GetAllAgencyOrderRequest) returns (stream AgencyOrderReply);
 
   rpc GetAgencyOrderById (GetAgencyOrderByIdRequest) returns (AgencyOrderReply);
+  rpc RemoveVehicleFromInventory(RemoveFromAgencyInventoryRequest) returns (RemoveFromAgencyInventoryReply);
 }
 
 // === Định nghĩa các Message Request ===

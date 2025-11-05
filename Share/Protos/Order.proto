@@ -7,6 +7,12 @@ message GetAllOrderRequest {
 }
 message GetAllQuotationRequest {
 }
+message CheckQuotationExistsRequest {
+  int32 vehicleInstanceId = 1;
+}
+message CheckQuotationExistsReply {
+  bool exists = 1;
+}
 
 // Service này host chung với CustomerGrpcService trong OrderAPI
 service OrderGrpcService {
@@ -18,6 +24,8 @@ service OrderGrpcService {
 
   // 2. Lấy tất cả báo giá (đã chấp nhận)
   rpc GetAllQuotations (GetAllQuotationRequest) returns (stream QuotationReply);
+
+  rpc CheckQuotationExistsForVehicle(CheckQuotationExistsRequest) returns (CheckQuotationExistsReply);
 }
 
 // (Bạn cũng có thể thêm GetAllCustomers vào CustomerGrpcService nếu cần)
