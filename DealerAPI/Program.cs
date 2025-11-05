@@ -135,6 +135,7 @@ namespace AgencyAPI
             builder.Services.AddScoped<IUserGrpcServiceClient, UserGrpcServiceClient>();
             builder.Services.AddScoped<IVehicleInstanceGrpcServiceClient, VehicleInstanceGrpcServiceClient>();
             builder.Services.AddScoped<ICustomerGrpcServiceClient, CustomerGrpcServiceClient>();
+            builder.Services.AddScoped<IOrderGrpcServiceClient, OrderGrpcServiceClient>();
             builder.Services.AddHostedService<TestDriveReminderBackgroundService>();
 
             // =================== gRPC Client Configuration ===================
@@ -149,7 +150,9 @@ namespace AgencyAPI
             var customerServiceUrl = builder.Environment.IsDevelopment()
                 ? "https://localhost:7114"
                 : "https://orderapi:443";
-
+            var orderServiceUrl = builder.Environment.IsDevelopment()
+                ? "https://localhost:7114" // (Kiểm tra lại cổng của OrderAPI)
+                : "https://orderapi:443";
             // Tạo một HttpClientHandler duy nhất để tái sử dụng
             if (builder.Environment.IsProduction())
             {
@@ -177,6 +180,9 @@ namespace AgencyAPI
                 builder.Services.AddGrpcClient<CustomerGrpcService.CustomerGrpcServiceClient>(o =>
                     o.Address = new Uri(customerServiceUrl))
                     .ConfigurePrimaryHttpMessageHandler(() => handler);
+                builder.Services.AddGrpcClient<OrderGrpcService.OrderGrpcServiceClient>(o =>
+                    o.Address = new Uri(orderServiceUrl))
+                    .ConfigurePrimaryHttpMessageHandler(() => handler);
             }
             else
             {
@@ -188,6 +194,8 @@ namespace AgencyAPI
 
                 builder.Services.AddGrpcClient<CustomerGrpcService.CustomerGrpcServiceClient>(o =>
                     o.Address = new Uri(customerServiceUrl));
+                builder.Services.AddGrpcClient<OrderGrpcService.OrderGrpcServiceClient>(o =>
+                    o.Address = new Uri(orderServiceUrl));
             }
 
 

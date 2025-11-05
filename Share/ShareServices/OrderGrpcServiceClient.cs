@@ -27,5 +27,10 @@ namespace Share.ShareServices
             // Trả về stream
             return _client.GetAllQuotations(request);
         }
+        public async Task<CheckQuotationExistsReply> CheckQuotationExistsForVehicleAsync(int vehicleInstanceId)
+        {
+            var request = new CheckQuotationExistsRequest { VehicleInstanceId = vehicleInstanceId };
+            return await _client.CheckQuotationExistsForVehicleAsync(request);
+        }
     }
 }

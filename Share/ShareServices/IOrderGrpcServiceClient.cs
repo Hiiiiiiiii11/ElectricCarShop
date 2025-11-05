@@ -16,5 +16,6 @@ namespace Share.ShareServices
 
         // Trả về một stream call cho Quotations.
         AsyncServerStreamingCall<QuotationReply> GetAllQuotations(GetAllQuotationRequest request);
+        Task<CheckQuotationExistsReply> CheckQuotationExistsForVehicleAsync(int vehicleInstanceId);
     }
 }
