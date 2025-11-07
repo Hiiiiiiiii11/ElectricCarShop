@@ -13,7 +13,7 @@ namespace OrderService.Services
         Task<IEnumerable<CustomerResponse>> GetAllAsync();
         Task<CustomerResponse?> GetByIdAsync(int id);
         Task<CustomerResponse> CreateAsync(CustomerRequest request);
-        Task<CustomerResponse> UpdateAsync(int id, CustomerRequest request);
+        Task<CustomerResponse> UpdateAsync(int id, CustomerUpdateRequest request);
         Task<bool> DeleteAsync(int id);
 
         // Extra features

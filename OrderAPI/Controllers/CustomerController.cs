@@ -32,10 +32,8 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerRequest request)
+        public async Task<IActionResult> UpdateCustomer(int id, [FromForm] CustomerUpdateRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             try
             {
