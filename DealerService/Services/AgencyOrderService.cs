@@ -88,7 +88,7 @@ namespace AgencyService.Services
                 await _agencyOrderRepository.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException("Không thể xóa đơn hàng vì đang được tham chiếu ở bảng khác.", ex);
             }

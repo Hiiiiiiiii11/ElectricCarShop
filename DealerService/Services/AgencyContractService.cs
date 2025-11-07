@@ -153,7 +153,7 @@ namespace AgencyService.Services
             {
                 await _AgencyContractRepository.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException("Không thể xóa hợp đồng đại lý vì đang được tham chiếu ở bảng khác.", ex);
             }

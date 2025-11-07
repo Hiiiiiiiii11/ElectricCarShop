@@ -191,7 +191,7 @@ namespace OrderAPIService.Services
                 await _paymentRepository.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException("Không thể xóa phiếu thanh toán vì đang được tham chiếu ở bảng khác.", ex);
             }
