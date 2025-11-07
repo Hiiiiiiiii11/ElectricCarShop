@@ -16,6 +16,7 @@ namespace OrderRepository.Model.OrderDTO
         public string Phone { get; set; }
         public string Address { get; set; }
         public int? AgencyId { get; set; }
+        public string? Class { get; set; }
     }
     public class CustomerUpdateRequest
     {
@@ -24,6 +25,7 @@ namespace OrderRepository.Model.OrderDTO
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public int? AgencyId { get; set; }
+        public string? Class { get; set; }
     }
         public class CustomerResponse
         {
@@ -33,7 +35,8 @@ namespace OrderRepository.Model.OrderDTO
             public string Phone { get; set; }
             public string Address { get; set; }
             public int? AgencyId { get; set; }
-            public string CreateAt { get; set; }
+        public string? Class { get; set; }
+        public string CreateAt { get; set; }
         }
         public class FeedbackRequest
         {
