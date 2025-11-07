@@ -110,14 +110,21 @@ namespace UserService.Services
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
-            {
                 throw new KeyNotFoundException($"User with ID {id} not found.");
-            }
 
             _userRepository.Remove(user);
-            await _userRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _userRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa người dùng vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
+
         public async Task<IEnumerable<UserResponse>> GetUserCreateByUserId(int userId)
         {
            var users = await _userRepository.GetUserCreateByUserId(userId);

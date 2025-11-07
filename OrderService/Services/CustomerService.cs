@@ -1,5 +1,6 @@
-﻿using OrderRepository.Model;
-using OrderRepository.Model.Request;
+﻿using AllocationRepository.Model;
+using OrderRepository.Model;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using Share.ShareServices;
 using System;
@@ -39,6 +40,7 @@ namespace OrderService.Services
                 Email = request.Email,
                 Phone = request.Phone,
                 Address = request.Address,
+                AgencyId = request.AgencyId,
                 CreateAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
@@ -65,6 +67,10 @@ namespace OrderService.Services
 
             if (!string.IsNullOrWhiteSpace(request.Address))
                 customer.Address = request.Address;
+            if (request.AgencyId.HasValue)
+                customer.AgencyId = request.AgencyId.Value;
+            else if (request.AgencyId == null)
+                customer.AgencyId = null;
 
             _customerRepository.Update(customer);
             await _customerRepository.SaveChangesAsync();
@@ -129,6 +135,7 @@ namespace OrderService.Services
                 Email = c.Email,
                 Phone = c.Phone,
                 Address = c.Address,
+                AgencyId = c.AgencyId,
                 CreateAt = c.CreateAt
             };
         }

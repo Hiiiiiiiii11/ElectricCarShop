@@ -2,6 +2,7 @@
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
 using GrpcService;
+using Microsoft.EntityFrameworkCore;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
@@ -81,9 +82,18 @@ namespace AgencyService.Services
                 throw new KeyNotFoundException($"Không tìm thấy đơn hàng với ID {id}.");
 
             _agencyOrderRepository.Remove(order);
-            await _agencyOrderRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _agencyOrderRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa đơn hàng vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
+
 
         // ===== GET ALL =====
         public async Task<IEnumerable<AgencyOrderResponse>> GetAllAsync()

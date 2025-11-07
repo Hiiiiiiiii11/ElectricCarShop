@@ -1,7 +1,7 @@
 ﻿using AllocationRepository.Repositories;
 using Microsoft.Extensions.Logging;
 using OrderRepository.Model;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using Share.ShareServices;
 using System.Net.WebSockets;

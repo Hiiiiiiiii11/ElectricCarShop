@@ -3,7 +3,8 @@ using AllocationRepository.Repositories;
 using AllocationService.Services;
 using Azure.Core;
 using GrpcService;
-using OrderRepository.Model.Request;
+using Microsoft.EntityFrameworkCore;
+using OrderRepository.Model.OrderDTO;
 using Share.ShareServices;
 using System;
 using System.Threading.Tasks;
@@ -109,14 +110,21 @@ namespace OrderAPIService.Services
         {
             var quotation = await _quotationRepository.GetByIdAsync(id);
             if (quotation == null)
-            {
                 throw new KeyNotFoundException($"Quotation with ID {id} not found.");
-            }
 
             _quotationRepository.Remove(quotation);
-            await _quotationRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _quotationRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa báo giá vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
+
 
         // Phương thức mapping thủ công tương tự CustomerService
         private QuotationResponse MapToResponse(Quotations q)

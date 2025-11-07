@@ -1,5 +1,5 @@
 ﻿using OrderRepository.Model;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using OrderService.Services;
 using System;

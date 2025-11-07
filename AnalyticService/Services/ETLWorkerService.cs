@@ -119,7 +119,7 @@ namespace AnalyticService.Services
                 logger.LogInformation("ETL Step 2: Transforming data...");
 
                 // Xử lý tháng trước
-                var processFullDate = DateTime.UtcNow;
+                var processFullDate = DateTime.UtcNow.AddMonths(-1);
                 var processYear = processFullDate.Year;
                 var processMonth = processFullDate.Month;
                 var monthStart = new DateTime(processYear, processMonth, 1);
