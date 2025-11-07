@@ -79,7 +79,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         //[Authorize(Roles = "AgencyManager")]
@@ -96,7 +96,7 @@ namespace AgencyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         //[Authorize(Roles = "EVManager,AgencyManager")]

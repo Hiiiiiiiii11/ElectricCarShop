@@ -1,5 +1,6 @@
-﻿using OrderRepository.Model;
-using OrderRepository.Model.Request;
+﻿using Microsoft.EntityFrameworkCore;
+using OrderRepository.Model;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using OrderService.Services;
 using Share.ShareServices;
@@ -109,8 +110,16 @@ namespace OrderAPIService.Services
                 throw new KeyNotFoundException($"Contract with ID {id} not found.");
 
             _contractRepository.Remove(contract);
-            await _contractRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _contractRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa hợp đồng vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
 
         private static ContractResponse MapToResponse(Contracts c) => new ContractResponse

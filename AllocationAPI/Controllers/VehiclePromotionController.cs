@@ -26,7 +26,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpPut("{id}")]
@@ -45,7 +45,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpDelete("{id}")]
@@ -60,7 +60,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("{id}")]
@@ -75,7 +75,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("agecy/{agencyId}")]
@@ -88,7 +88,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -101,7 +101,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -115,7 +115,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -129,7 +129,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -143,7 +143,7 @@ namespace AllocationAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }

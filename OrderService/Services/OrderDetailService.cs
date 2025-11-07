@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OrderRepository.Data;
 using OrderRepository.Model;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories; // nơi có IOrderDetailRepository, IOrderRepository, IQuotationRepository
 using OrderService.Services;
 using System;

@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
@@ -90,8 +91,16 @@ namespace AllocationService.Services
                 throw new KeyNotFoundException("Vehicle promotion not found.");
 
             _vehiclePromotionRepository.Remove(entity);
-            await _vehiclePromotionRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _vehiclePromotionRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("Không thể xóa khuyến mãi vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
 
 

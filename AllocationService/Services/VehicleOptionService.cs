@@ -1,6 +1,7 @@
 ﻿using AllocationRepository.Model;
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +37,17 @@ namespace AllocationService.Services
             var option = await _vehicleOptionRepository.GetByIdAsync(id);
             if (option == null)
                 throw new KeyNotFoundException($"Vehicle option {id} not found");
+
             _vehicleOptionRepository.Remove(option);
-            await _vehicleOptionRepository.SaveChangesAsync();
+
+            try
+            {
+                await _vehicleOptionRepository.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("Không thể xóa tùy chọn xe vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
 
         public async Task<IEnumerable<VehicleOptionResponse>> GetAllAsync()

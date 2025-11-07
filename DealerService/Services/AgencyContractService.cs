@@ -10,6 +10,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using Share.ShareServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace AgencyService.Services
 {
@@ -144,10 +145,20 @@ namespace AgencyService.Services
         {
             var contract = await _AgencyContractRepository.GetByIdAsync(contractId);
             if (contract == null)
-                throw new KeyNotFoundException($"Contract with Id {contractId} not found.");
+                throw new KeyNotFoundException($"Agency contract with ID {contractId} not found.");
+
             _AgencyContractRepository.Remove(contract);
-            await _AgencyContractRepository.SaveChangesAsync();
+
+            try
+            {
+                await _AgencyContractRepository.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa hợp đồng đại lý vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
+
 
         //mapping
         public AgencyContractResponse MapToResponse(AgencyContracts contract)

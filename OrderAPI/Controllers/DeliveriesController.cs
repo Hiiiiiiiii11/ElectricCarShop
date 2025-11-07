@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
 namespace OrderAPI.Controllers
@@ -27,7 +27,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -43,7 +43,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 
@@ -57,7 +57,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet("agency/{agencyId}")]
@@ -70,7 +70,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpGet]
@@ -88,7 +88,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpPut("{id}")]
@@ -109,7 +109,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
         [HttpDelete("{id}")]
@@ -126,7 +126,7 @@ namespace OrderAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
 

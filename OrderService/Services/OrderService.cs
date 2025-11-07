@@ -1,4 +1,4 @@
-﻿using OrderRepository.Model.Request;
+﻿using OrderRepository.Model.OrderDTO;
 using OrderRepository.Model;
 using OrderRepository.Repositories;
 using System;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AllocationRepository.Repositories;
 using Share.ShareServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrderService.Services
 {
@@ -139,11 +140,18 @@ namespace OrderService.Services
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
-            {
                 throw new KeyNotFoundException($"Order with ID {orderId} not found.");
-            }
+
             _orderRepository.Remove(order);
-            await _orderRepository.SaveChangesAsync();
+
+            try
+            {
+                await _orderRepository.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa đơn hàng vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
         public async Task<IEnumerable<OrderResponse>> GetOrdersByAgencyIdAsync(int agencyId)
         {

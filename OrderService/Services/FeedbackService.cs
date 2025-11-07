@@ -1,5 +1,5 @@
 ﻿using OrderRepository.Model;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using OrderService.Services;
 using System;
@@ -117,6 +117,7 @@ namespace OrderService.Service
                 Content = f.Content,
                 Reply= f.Reply, 
                 Status = f.Status,
+                AgencyId = f.AgencyId,
                 CreatedAt = f.CreatedAt,
                 UpdatedAt = f.UpdatedAt
             };

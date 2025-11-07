@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 using System;
 using System.Linq;

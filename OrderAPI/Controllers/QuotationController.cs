@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrderAPIService.Services;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

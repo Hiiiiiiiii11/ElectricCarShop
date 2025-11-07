@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderRepository.Model.Request;
+using OrderRepository.Model.OrderDTO;
 using OrderService.Services; // nơi khai báo IOrderDetailService
 using System;
 using System.Linq;

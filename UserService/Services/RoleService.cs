@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using UserRepository.Model;
 using UserRepository.Model.DTO;
 using UserRepository.Repositories;
@@ -86,14 +87,21 @@ namespace UserService.Services
         {
             var role = await _roleRepository.GetByIdAsync(id);
             if (role == null)
-            {
                 throw new KeyNotFoundException($"Role with ID {id} not found.");
-            }
 
-                _roleRepository.Remove(role);
-            await _roleRepository.SaveChangesAsync();
-            return true;
+            _roleRepository.Remove(role);
+
+            try
+            {
+                await _roleRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa vai trò vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
+
 
 
     }

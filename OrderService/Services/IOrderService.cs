@@ -1,4 +1,4 @@
-﻿using OrderRepository.Model.Request;
+﻿using OrderRepository.Model.OrderDTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -2,6 +2,7 @@
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
 using Google.Protobuf.WellKnownTypes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -106,8 +107,18 @@ namespace AllocationService.Services
             if (entity == null)
                 return false;
              _vehicleInstanceRepository.Remove(entity);
-            await _vehicleInstanceRepository.SaveChangesAsync();
-            return true;
+            try
+            {
+                await _vehicleInstanceRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("Không thể xóa instance xe vì đang được tham chiếu ở bảng khác.", ex);
+            }
+
+
+
         }
 
         // ================== MAP TO RESPONSE ==================

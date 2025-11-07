@@ -1,4 +1,4 @@
-﻿using OrderRepository.Model.Request;
+﻿using OrderRepository.Model.OrderDTO;
 
 namespace OrderService.Services
 {

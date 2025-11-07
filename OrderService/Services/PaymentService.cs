@@ -1,5 +1,6 @@
-﻿using OrderRepository.Model;
-using OrderRepository.Model.Request;
+﻿using Microsoft.EntityFrameworkCore;
+using OrderRepository.Model;
+using OrderRepository.Model.OrderDTO;
 using OrderRepository.Repositories;
 using OrderService.Services;
 using Share.ShareServices;
@@ -33,6 +34,7 @@ namespace OrderAPIService.Services
 
             if (!request.OrderId.HasValue && !request.AgencyOrderId.HasValue)
                 throw new Exception("Thanh toán phải có OrderId hoặc AgencyOrderId.");
+
             if (request.OrderId.HasValue)
             {
                 var order = await _orderRepository.GetByIdAsync(request.OrderId.Value);
@@ -46,7 +48,7 @@ namespace OrderAPIService.Services
                     throw new KeyNotFoundException($"Không tìm thấy đơn hàng đại lý với ID {request.AgencyOrderId.Value}.");
             }
 
-            // 🧩 Tạo mới
+            // 🧩 Tạo mới Payment
             var payment = new Payments
             {
                 OrderId = request.OrderId,
@@ -61,20 +63,38 @@ namespace OrderAPIService.Services
             await _paymentRepository.AddAsync(payment);
             await _paymentRepository.SaveChangesAsync();
 
-            var transaction = new Transaction
-            {
-                PaymentId = payment.Id,
-                TransactionCode = GenerateTransactionCode(),
-                TransactionDate = DateTime.UtcNow,
-                Amount = payment.Amount,
-                Status = payment.Status
-            };
+            // 🧩 Logic tạo transaction
+            decimal transactionAmount = 0;
 
-            await _transactionRepository.AddAsync(transaction);
-            await _transactionRepository.SaveChangesAsync();
+            if (payment.Status == "Completed")
+            {
+                // ✅ Thanh toán hoàn tất ngay => tạo transaction toàn bộ Amount
+                transactionAmount = payment.Amount;
+            }
+            else if (payment.Prepay > 0)
+            {
+                // ✅ Nếu chưa hoàn tất mà có Prepay, tạo transaction cho phần Prepay
+                transactionAmount = payment.Prepay;
+            }
+
+            if (transactionAmount > 0)
+            {
+                var transaction = new Transaction
+                {
+                    PaymentId = payment.Id,
+                    TransactionCode = GenerateTransactionCode(),
+                    TransactionDate = DateTime.UtcNow,
+                    Amount = transactionAmount,
+                    Status = payment.Status
+                };
+
+                await _transactionRepository.AddAsync(transaction);
+                await _transactionRepository.SaveChangesAsync();
+            }
 
             return MapToResponse(payment);
         }
+
 
         private string GenerateTransactionCode()
         {
@@ -122,7 +142,9 @@ namespace OrderAPIService.Services
             if (payment == null)
                 throw new KeyNotFoundException($"Payment with ID {id} not found.");
 
-            // Giữ giá trị cũ nếu không truyền dữ liệu mới
+            // Giữ giá trị cũ
+            var oldStatus = payment.Status;
+
             payment.Prepay = request.Prepay ?? payment.Prepay;
             payment.Amount = request.Amount ?? payment.Amount;
             payment.PaymentMethod = request.PaymentMethod ?? payment.PaymentMethod;
@@ -130,6 +152,28 @@ namespace OrderAPIService.Services
 
             _paymentRepository.Update(payment);
             await _paymentRepository.SaveChangesAsync();
+
+            // 🧩 Kiểm tra nếu trạng thái chuyển từ pending -> completed
+            if (oldStatus?.ToLower() == "pending" && payment.Status?.ToLower() == "completed")
+            {
+                decimal remaining = payment.Amount - payment.Prepay;
+
+                if (remaining > 0)
+                {
+                    var transaction = new Transaction
+                    {
+                        PaymentId = payment.Id,
+                        TransactionCode = GenerateTransactionCode(),
+                        TransactionDate = DateTime.UtcNow,
+                        Amount = remaining,
+                        Status = "completed"
+                    };
+
+                    await _transactionRepository.AddAsync(transaction);
+                    await _transactionRepository.SaveChangesAsync();
+                }
+            }
+
             return MapToResponse(payment);
         }
 
@@ -141,8 +185,16 @@ namespace OrderAPIService.Services
                 throw new KeyNotFoundException($"Payment with ID {id} not found.");
 
             _paymentRepository.Remove(payment);
-            await _paymentRepository.SaveChangesAsync();
-            return true;
+
+            try
+            {
+                await _paymentRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                throw new InvalidOperationException("Không thể xóa phiếu thanh toán vì đang được tham chiếu ở bảng khác.", ex);
+            }
         }
 
         private static PaymentResponse MapToResponse(Payments p) => new PaymentResponse
