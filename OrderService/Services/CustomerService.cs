@@ -49,13 +49,12 @@ namespace OrderService.Services
 
             return MapToResponse(newCustomer);
         }
-        public async Task<CustomerResponse> UpdateAsync(int id, CustomerRequest request)
+        public async Task<CustomerResponse> UpdateAsync(int id, CustomerUpdateRequest request)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
             if (customer == null)
                 throw new KeyNotFoundException($"Customer with ID {id} not found.");
 
-            // chỉ update nếu có giá trị mới
             if (!string.IsNullOrWhiteSpace(request.FullName))
                 customer.FullName = request.FullName;
 
@@ -67,6 +66,7 @@ namespace OrderService.Services
 
             if (!string.IsNullOrWhiteSpace(request.Address))
                 customer.Address = request.Address;
+
             if (request.AgencyId.HasValue)
                 customer.AgencyId = request.AgencyId.Value;
             else if (request.AgencyId == null)
@@ -77,6 +77,7 @@ namespace OrderService.Services
 
             return MapToResponse(customer);
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {
