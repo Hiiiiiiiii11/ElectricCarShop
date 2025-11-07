@@ -119,9 +119,9 @@ namespace OrderAPIService.Services
                 await _quotationRepository.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            catch (DbUpdateException ex)
             {
-                throw new InvalidOperationException("Không thể xóa báo giá vì đang được tham chiếu ở bảng khác.", ex);
+                throw new InvalidOperationException("Không thể xóa báo giá vì đang được sử dụng ở bảng khác.", ex);
             }
         }
 
