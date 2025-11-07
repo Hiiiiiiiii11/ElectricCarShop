@@ -16,6 +16,7 @@ namespace OrderRepository.Model
         public string Address { get; set; }
         public string CreateAt { get; set; }
         public int? AgencyId { get; set; }
+        public string Class { get; set; }
 
         public ICollection<Orders> Orders { get; set; } = new List<Orders>();
         public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();

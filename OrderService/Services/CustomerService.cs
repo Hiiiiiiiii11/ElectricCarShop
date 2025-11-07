@@ -41,6 +41,7 @@ namespace OrderService.Services
                 Phone = request.Phone,
                 Address = request.Address,
                 AgencyId = request.AgencyId,
+                Class = request.Class ?? "Normal",
                 CreateAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
@@ -66,6 +67,8 @@ namespace OrderService.Services
 
             if (!string.IsNullOrWhiteSpace(request.Address))
                 customer.Address = request.Address;
+            if (!string.IsNullOrWhiteSpace(request.Class))
+                customer.Class = request.Class;
 
             if (request.AgencyId.HasValue)
                 customer.AgencyId = request.AgencyId.Value;
@@ -137,6 +140,7 @@ namespace OrderService.Services
                 Phone = c.Phone,
                 Address = c.Address,
                 AgencyId = c.AgencyId,
+                Class = c.Class,
                 CreateAt = c.CreateAt
             };
         }
