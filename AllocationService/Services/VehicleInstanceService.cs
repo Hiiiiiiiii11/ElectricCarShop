@@ -14,15 +14,23 @@ namespace AllocationService.Services
     public class VehicleInstanceService : IVehicleInstanceService
     {
         private readonly IVehicleInstanceRepository _vehicleInstanceRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public VehicleInstanceService(IVehicleInstanceRepository vehicleInstanceRepository)
+        public VehicleInstanceService(IVehicleInstanceRepository vehicleInstanceRepository,
+            IVehicleRepository vehicleRepository)
         {
             _vehicleInstanceRepository = vehicleInstanceRepository;
+            _vehicleRepository = vehicleRepository;
+
         }
 
         // ================== CREATE ==================
         public async Task<VehicleInstanceResponse> CreateAsync(CreateVehicleInstanceRequest instance)
         {
+            var vehicle = await _vehicleRepository.GetByIdAsync(instance.VehicleId);
+            if (vehicle == null) 
+                throw new KeyNotFoundException("Vehicle  not found");
+                    
             if (await _vehicleInstanceRepository.IsVinExistAsync(instance.Vin))
                 throw new Exception("Số khung (VIN) đã tồn tại trong hệ thống.");
 

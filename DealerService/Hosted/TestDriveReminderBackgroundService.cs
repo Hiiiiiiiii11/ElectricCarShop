@@ -51,7 +51,7 @@ namespace AgencyService.Hosted
                 _logger.LogInformation("[TestDriveReminder] Check finished. Waiting for next cycle.");
 
                 // Sửa lại: Chờ 1 tiếng (hoặc 10 phút/30 phút tùy bạn)
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
             _logger.LogInformation("[TestDriveReminder] Service is stopping.");
         }
