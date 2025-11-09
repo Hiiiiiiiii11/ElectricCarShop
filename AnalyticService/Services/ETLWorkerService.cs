@@ -182,7 +182,7 @@ namespace AnalyticService.Services
                         // Đếm số Order đã "Completed" trong tháng, khớp với các khách hàng trên
                         int unitsSold = orders.Count(o =>
                             customerIdsFromQuotes.Contains(o.CustomerId) &&
-                            o.Status == "Completed" &&
+                            o.Status == "Completed" ||  o.Status.ToLower() == "ending-payment" &&
                             IsDateInProcessMonth(o.OrderDate, processYear, processMonth)
                         );
 
