@@ -13,6 +13,7 @@ namespace AllocationService.Services
     public class VehiclePriceService : IVehiclePriceService
     {
         private readonly IVehiclePriceRepository _vehiclePriceRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
         public VehiclePriceService(IVehiclePriceRepository vehiclePriceRepository)
         {
@@ -21,6 +22,9 @@ namespace AllocationService.Services
 
         public async Task<VehiclePriceResponse> CreateAsync(VehiclePriceRequest request)
         {
+            var vehicle = await _vehicleRepository.GetByIdAsync(request.VehicleId);
+            if (vehicle == null)
+                throw new KeyNotFoundException("Vehicle not found.");
             var entity = new VehiclePrices
             {
                 VehicleId = request.VehicleId,
