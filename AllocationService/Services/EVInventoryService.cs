@@ -13,14 +13,19 @@ namespace AllocationService.Services
     public class EVInventoryService : IEVInventoryService
     {
         private readonly IEVInventoryRepository _evInventoryRepository;
-        public EVInventoryService(IEVInventoryRepository evInventoryRepository)
+        private readonly IVehicleInstanceRepository _vehicleInstanceRepository;
+        public EVInventoryService(IEVInventoryRepository evInventoryRepository, IVehicleInstanceRepository vehicleInstanceRepository)
         {
             _evInventoryRepository = evInventoryRepository;
+            _vehicleInstanceRepository = vehicleInstanceRepository;
         }
 
         public async Task<EVInventoryResponse> CreateInventoryAsync(EVInventoryRequest request)
         {
             // Đã bỏ phần kiểm tra tồn tại (if existing != null) theo yêu cầu.
+            var vehicleInstance = await _vehicleInstanceRepository.GetByIdAsync(request.VehicleInstanceId);
+            if (vehicleInstance == null)
+                throw new KeyNotFoundException($"Không tìm thấy VehicleInstance với ID = {request.VehicleInstanceId}");
 
             var inv = new EVInventory
             {

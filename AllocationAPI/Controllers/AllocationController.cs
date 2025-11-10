@@ -71,8 +71,34 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpGet("agencyOrder/{agencyOrderId}")]
+        public async Task<IActionResult> GetByAgencyOrderId(int agencyOrderId)
+        {
+            try
+            {
+                var allocations = await _allocationService.GetByAgencyOrderIdAsync(agencyOrderId);
+                return Ok(allocations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+        [HttpGet("GetAllAllocations")]
+        public async Task<IActionResult> GetAllAllocations()
+        {
+            try
+            {
+                var allocations = await _allocationService.GetAllocationsAsync();
+                return Ok(allocations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAllocation(int id, [FromForm] AllocationRequestModel request)
+        public async Task<IActionResult> UpdateAllocation(int id, [FromForm] AllocationUpdateModel request)
         {
             try
             {
