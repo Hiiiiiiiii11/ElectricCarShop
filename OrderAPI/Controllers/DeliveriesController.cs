@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -14,6 +15,7 @@ namespace OrderAPI.Controllers
             _deliveryService = deliveryService;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromForm] DeliveryCreateRequest request)
         {
             try
@@ -92,6 +94,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [FromForm] DeliveryUpdateRequest request)
         {
             try
@@ -113,6 +116,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             try

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -87,6 +88,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateFeedback([FromForm] FeedbackRequest request)
         {
             if (!ModelState.IsValid)
@@ -104,6 +106,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateFeedback(int id, [FromForm] FeedbackUpdateRequest request)
         {
             if (!ModelState.IsValid)
@@ -125,6 +128,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteFeedback(int id)
         {
             try

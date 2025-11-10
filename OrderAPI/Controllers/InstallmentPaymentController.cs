@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -16,6 +17,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost("process-installment")]
+        [Authorize]
         public async Task<IActionResult> ProcessInstallmentPayment([FromBody] InstallmentPaymentRequest request)
         {
             try
@@ -30,6 +32,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet("by-plan/{planId}")]
+        [Authorize]
         public async Task<IActionResult> GetPaymentsByPlanId([FromRoute] int planId)
         {
             try
@@ -44,6 +47,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet("by-item/{itemId}")]
+        [Authorize]
         public async Task<IActionResult> GetPaymentsByItemId([FromRoute] int itemId)
         {
             try
@@ -58,6 +62,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{paymentId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateInstallmentPayment([FromRoute] int paymentId, [FromForm] UpdateInstallmentPaymentRequest request)
         {
             try
@@ -72,6 +77,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteInstallmentPayment([FromRoute] int id)
         {
             try

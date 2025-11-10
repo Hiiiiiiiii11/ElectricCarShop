@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -14,6 +15,7 @@ namespace OrderAPI.Controllers
             _installmentPlansService = installmentPlansService;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateInstallmentPlan([FromBody] InstallmentPlanRequest request)
         {
             try
@@ -27,6 +29,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetInstallmentPlanById([FromRoute] int id)
         {
             try
@@ -46,6 +49,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet("contract/{contractId}")]
+        [Authorize]
         public async Task<IActionResult> GetInstallmentPlanByContractId([FromRoute] int contractId)
         {
             try
@@ -60,6 +64,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet("agency-contract/{agencyContractId}")]
+        [Authorize]
         public async Task<IActionResult> GetInstallmentPlanByAgencyContractId([FromRoute] int agencyContractId)
         {
             try
@@ -74,6 +79,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllInstallmentPlans()
         {
             try
@@ -87,6 +93,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateInstallmentPlan([FromRoute] int id, [FromForm] InstallmentPlanUpdateRequest request)
         {
             try
@@ -101,6 +108,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteInstallmentPlan([FromRoute] int id)
         {
             try

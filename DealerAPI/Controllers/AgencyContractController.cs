@@ -1,6 +1,7 @@
 ﻿
 using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -15,6 +16,7 @@ namespace AgencyAPI.Controllers
             _AgencyContractService = AgencyContractService;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateAgencyContract(int AgencyId ,[FromBody] CreateAgencyContractRequest request)
         {
             if (!ModelState.IsValid)
@@ -36,6 +38,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPut("{contractId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAgencyContract(int contractId, [FromForm] UpdateAgencyContractRequest request)
         {
             if (!ModelState.IsValid)
@@ -157,6 +160,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPut("update/{contractId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateContract(int contractId, [FromBody] UpdateStatusAgencyContractRequest request)
         {
             if (!ModelState.IsValid)
@@ -181,6 +185,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpDelete("{contractId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteContract(int contractId)
         {
             try

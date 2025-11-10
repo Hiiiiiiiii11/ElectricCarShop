@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -47,6 +48,7 @@ namespace AgencyAPI.Controllers
         }
 
         [HttpPost("Agency/{AgencyId}/inventory")]
+        [Authorize]
         public async Task<IActionResult> CreateAgencyInventory(int AgencyId, [FromBody] CreateAgencyInventoryRequest request)
         {
             try
@@ -61,6 +63,7 @@ namespace AgencyAPI.Controllers
         }
 
         [HttpDelete("Agency/{AgencyId}/inventory/{vehicleInstanceId}")]
+        [Authorize]
         public async Task<IActionResult> RemoveInventoryItem(int AgencyId, int vehicleInstanceId)
         {
             try
@@ -77,7 +80,8 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpPut("Agency/{id}")]                       
+        [HttpPut("Agency/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateInventoryItem(int id, [FromBody] UpdateAgencyInventoryRequest request)
         {
             try
