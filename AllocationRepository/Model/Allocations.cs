@@ -12,6 +12,7 @@ namespace AllocationRepository.Model
         public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
         public DateTime AllocationDate { get; set; }
+        public int? AgencyOrderId { get; set; }
         public VehicleInstance VehicleInstance { get; set; }
     }
 }

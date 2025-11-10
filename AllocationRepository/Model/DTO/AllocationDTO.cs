@@ -78,6 +78,13 @@ namespace AllocationRepository.Model.DTO
     {
         public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
+        public int? AgencyOrderId { get; set; }
+    }
+    public class AllocationUpdateModel
+    {
+        public int? AgencyContractId { get; set; }
+        public int? VehicleInstanceId { get; set; }
+        public int? AgencyOrderId { get; set; }
     }
 
     public class AllocationResponse
@@ -85,6 +92,7 @@ namespace AllocationRepository.Model.DTO
         public int Id { get; set; }
         public int AgencyContractId { get; set; }
         public int VehicleInstanceId { get; set; }
+        public int? AgencyOrderId { get; set; }
         public DateTime AllocationDate { get; set; }
         public AgencyContractReply ContractReply { get; set; }
         public VehicleInstanceResponse? VehicleInstance { get; set; }

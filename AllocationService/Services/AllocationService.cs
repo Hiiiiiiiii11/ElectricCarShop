@@ -2,9 +2,11 @@
 using AllocationRepository.Model.DTO;
 using AllocationRepository.Repositories;
 using Azure.Core;
+using GrpcService;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,15 +17,18 @@ namespace AllocationService.Services
         private readonly IAllocationRepository _allocationRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcClient;
         private readonly IEVInventoryService _evInventoryService;
+        private readonly IVehicleInstanceService _vehicleInstanceService;
 
         public AllocationService(
             IAllocationRepository allocationRepository,
             IAgencyGrpcServiceClient agencyGrpcClient,
-            IEVInventoryService evInventoryService)
+            IEVInventoryService evInventoryService,
+            IVehicleInstanceService vehicleInstanceService)
         {
             _allocationRepository = allocationRepository;
             _agencyGrpcClient = agencyGrpcClient;
             _evInventoryService = evInventoryService;
+            _vehicleInstanceService = vehicleInstanceService;
         }
 
         public async Task<AllocationResponse> CreateAsync(AllocationRequestModel request)
@@ -50,24 +55,34 @@ namespace AllocationService.Services
 
             return response;
         }
-        public async Task<AllocationResponse> UpdateAsync(int id, AllocationRequestModel request)
+        public async Task<AllocationResponse> UpdateAsync(int id, AllocationUpdateModel request)
         {
             var allocation = await _allocationRepository.GetByIdAsync(id);
             if (allocation == null)
                 throw new KeyNotFoundException($"Không tìm thấy phân phối với ID {id}");
 
-            // Cập nhật dữ liệu
-            allocation.AgencyContractId = request.AgencyContractId;
-            allocation.VehicleInstanceId = request.VehicleInstanceId;
-            allocation.AllocationDate = DateTime.UtcNow;
+            // --- Cập nhật giữ nguyên giá trị cũ nếu không truyền ---
+
+            allocation.AgencyContractId = request.AgencyContractId.HasValue && request.AgencyContractId.Value > 0
+                ? request.AgencyContractId.Value
+                : allocation.AgencyContractId;
+
+            allocation.VehicleInstanceId = request.VehicleInstanceId.HasValue && request.VehicleInstanceId.Value > 0
+                ? request.VehicleInstanceId.Value
+                : allocation.VehicleInstanceId;
+
+            allocation.AgencyOrderId = request.AgencyOrderId ?? allocation.AgencyOrderId;
+
+            // Có thể cập nhật AllocationDate nếu bạn muốn mỗi lần update đều ghi lại thời gian
+            // allocation.AllocationDate = DateTime.UtcNow;
 
             _allocationRepository.Update(allocation);
             await _allocationRepository.SaveChangesAsync();
 
-            // Có thể gọi lại gRPC để làm giàu dữ liệu
             var response = MapToResponse(allocation);
             return response;
         }
+
 
         public async Task<IEnumerable<AllocationResponse>> GetByAgencyContractIdAsync(int agencyContractId)
         {
@@ -107,22 +122,42 @@ namespace AllocationService.Services
 
             return response;
         }
+        public async Task<IEnumerable<AllocationResponse>> GetAllocationsAsync()
+        {
+            var entities = await _allocationRepository.GetAllWithDetailsAsync();
+            var result = new List<AllocationResponse>();
+            foreach (var entity in entities)
+            {
+                var agencycontract = await _agencyGrpcClient.GetContractByIdAsync(entity.AgencyContractId);
+                var res = MapToResponse(entity);
+                res.ContractReply = agencycontract;
+                result.Add(res);
+            }
+            return result;
+        }
 
-        //public async Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId)
-        //{
-        //    var entity = await _allocationRepository.GetByInventoryIdAsync(evInventoryId);
-        //    if (entity == null)
-        //    {
-        //        throw new KeyNotFoundException($"Không tìm thấy kho với ID {evInventoryId}");
-        //    }
 
-        //    var agency = await _agencyGrpcClient.GetAgencyByIdAsync(entity.AgencyId);
-        //    var response = MapToResponse(entity);
-        //    response.AgencyName = agency?.AgencyName;
-        //    response.AgencyEmail = agency?.Email;
+        public async Task<IEnumerable<AllocationResponse>> GetByAgencyOrderIdAsync(int agencyOrderId)
+        {
+            var agencyOrder = await _agencyGrpcClient.GetAgencyOrderByIdAsync(agencyOrderId);
+            if (agencyOrder == null)
+                throw new KeyNotFoundException($"Không tìm thấy đơn hàng đại lý với ID {agencyOrderId}");
 
-        //    return response;
-        //}
+            var entities = await _allocationRepository.GetByAgencyOrderIdAsync(agencyOrderId);
+            var result = new List<AllocationResponse>();
+            //var result = new List<AllocationResponse>();
+            foreach (var entity in entities)
+            {
+                var agencycontract = await _agencyGrpcClient.GetContractByIdAsync(entity.AgencyContractId);
+                var res = MapToResponse(entity);
+                res.ContractReply = agencycontract;
+                result.Add(res);
+            }
+                //
+
+            return result;
+        }
+
 
         public async Task<IEnumerable<AllocationResponse>> GetByVehicleInstanceIdAsync(int vehicleInstanceId)
         {
@@ -152,6 +187,7 @@ namespace AllocationService.Services
                 Id = a.Id,
                 AgencyContractId = a.AgencyContractId,
                 VehicleInstanceId = a.VehicleInstanceId,
+                AgencyOrderId = a.AgencyOrderId,
                 AllocationDate = a.AllocationDate,
                 VehicleInstance = a.VehicleInstance == null ? null : new VehicleInstanceResponse
                 {
@@ -162,5 +198,7 @@ namespace AllocationService.Services
                 },
             };
         }
+
+
     }
 }

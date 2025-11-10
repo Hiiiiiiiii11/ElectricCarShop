@@ -19,5 +19,7 @@ namespace AllocationRepository.Repositories
 
         // Tìm allocation theo Agency + Vehicle
         Task<Allocations?> GetByAgencyAndVehicleInstanceAsync(int agencycontractId, int vehicleInstanceId);
+        Task<IEnumerable<Allocations>> GetByAgencyOrderIdAsync(int agencyOrderId);
+        Task<IEnumerable<Allocations>> GetAllWithDetailsAsync();
     }
 }
