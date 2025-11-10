@@ -17,18 +17,15 @@ namespace AllocationService.Services
         private readonly IAllocationRepository _allocationRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcClient;
         private readonly IEVInventoryService _evInventoryService;
-        private readonly IVehicleInstanceService _vehicleInstanceService;
 
         public AllocationService(
             IAllocationRepository allocationRepository,
             IAgencyGrpcServiceClient agencyGrpcClient,
-            IEVInventoryService evInventoryService,
-            IVehicleInstanceService vehicleInstanceService)
+            IEVInventoryService evInventoryService)
         {
             _allocationRepository = allocationRepository;
             _agencyGrpcClient = agencyGrpcClient;
             _evInventoryService = evInventoryService;
-            _vehicleInstanceService = vehicleInstanceService;
         }
 
         public async Task<AllocationResponse> CreateAsync(AllocationRequestModel request)

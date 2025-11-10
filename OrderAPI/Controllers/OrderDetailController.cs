@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services; // nơi khai báo IOrderDetailService
 using System;
@@ -19,6 +20,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize]
         public async Task<IActionResult> CreateOrderDetail([FromBody] CreateOrderDetailRequest request)
         {
             try
@@ -58,6 +60,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateOrderDetailPrice([FromRoute] int id, [FromBody] UpdateOrderDetailPriceRequest request)
         {
             try
@@ -71,6 +74,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteOrderDetail([FromRoute] int id)
         {
             try

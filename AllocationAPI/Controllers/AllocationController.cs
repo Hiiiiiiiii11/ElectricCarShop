@@ -1,11 +1,13 @@
 ﻿using AllocationRepository.Model.DTO;
 using AllocationService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllocationAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class AllocationController : Controller
     {
         private readonly IAllocationService _allocationService;
@@ -14,6 +16,7 @@ namespace AllocationAPI.Controllers
             _allocationService = allocationService;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateAllocation([FromForm] AllocationRequestModel request)
         {
             try
@@ -26,6 +29,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpGet("agency/{agencyContractId}")]
         public async Task<IActionResult> GetByAgencyId(int agencyContractId)
         {
@@ -43,6 +47,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpGet("agency/{agencyContractId}/vehicle/{vehicleInstanceId}")]
         public async Task<IActionResult> GetByAgencyAndVehicle(int agencyContractId, int vehicleInstanceId)
         {
@@ -58,6 +63,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpGet("vehicle/{vehicleInstanceId}")]
         public async Task<IActionResult> GetByVehicleInstanceId(int vehicleInstanceId)
         {
@@ -71,6 +77,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpGet("agencyOrder/{agencyOrderId}")]
         public async Task<IActionResult> GetByAgencyOrderId(int agencyOrderId)
         {
@@ -97,6 +104,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAllocation(int id, [FromForm] AllocationUpdateModel request)
         {
@@ -114,6 +122,7 @@ namespace AllocationAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAllocation(int id)
         {

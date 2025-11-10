@@ -1,5 +1,6 @@
 ﻿using AllocationRepository.Model.DTO;
 using AllocationService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllocationAPI.Controllers
@@ -45,6 +46,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddVehicle([FromForm] CreateVehicleRequest request)
         {
             if (!ModelState.IsValid)
@@ -66,6 +68,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateVehicle(int id, [FromForm] UpdateVehicleRequest request)
         {
             try
@@ -87,6 +90,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
             try

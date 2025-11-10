@@ -1,6 +1,7 @@
 ﻿using AgencyRepository.Model;
 using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -42,6 +43,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpGet("GetAll/{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> GetAllByAgencyId(int AgencyId)
         {
             try
@@ -55,6 +57,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpGet("Remaining/{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> GetRemainingDebtsAgencyId(int AgencyId)
         {
             try
@@ -68,6 +71,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpGet("{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> GetByAgencyId(int AgencyId)
         {
             try
@@ -85,6 +89,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPost("Add/{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> AddDebt(int AgencyId, int contractId ,[FromBody] AddAgencyDebtRequest request)
         {
             if (!ModelState.IsValid)
@@ -131,6 +136,7 @@ namespace AgencyAPI.Controllers
         }
 
         [HttpPost("Clear/{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> ClearDebt(int AgencyId)
         {
             try
@@ -162,6 +168,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpDelete("{debtId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteDebt(int debtId)
         {
             try
