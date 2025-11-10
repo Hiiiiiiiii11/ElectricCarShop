@@ -5,6 +5,7 @@ using Azure.Core;
 using GrpcService;
 using Microsoft.EntityFrameworkCore;
 using OrderRepository.Model.OrderDTO;
+using OrderRepository.Repositories;
 using Share.ShareServices;
 using System;
 using System.Threading.Tasks;
@@ -17,19 +18,22 @@ namespace OrderAPIService.Services
         private readonly IAgencyGrpcServiceClient _agencyClient;
         private readonly IVehicleInstanceGrpcServiceClient _vehicleClient;
         private readonly IUserGrpcServiceClient _userGrpcServiceClient;
+        private readonly ICustomerRepository _customerRepository ;
 
         // Đã loại bỏ IMapper khỏi constructor
         public QuotationService(
             IQuotationRepository quotationRepository,
             IAgencyGrpcServiceClient agencyClient,
             IVehicleInstanceGrpcServiceClient vehicleClient,
-            IUserGrpcServiceClient userGrpcServiceClient
+            IUserGrpcServiceClient userGrpcServiceClient,
+            ICustomerRepository customerRepository
             )
         {
             _quotationRepository = quotationRepository;
             _agencyClient = agencyClient;
             _vehicleClient = vehicleClient;
             _userGrpcServiceClient = userGrpcServiceClient;
+            _customerRepository = customerRepository;
         }
 
         public async Task<QuotationResponse> GetQuotationByIdAsync(int id)
@@ -57,7 +61,7 @@ namespace OrderAPIService.Services
 
         public async Task<QuotationResponse> CreateQuotationAsync(CreateQuotationRequest request)
         {
-            var customer = await _userGrpcServiceClient.GetUserByIdAsync(request.CustomerId);
+            var customer = await _customerRepository.GetByIdAsync(request.CustomerId);
             if (customer == null)
                 throw new KeyNotFoundException($"Customer with ID {request.CustomerId} not found.");
             var quotation = new Quotations
