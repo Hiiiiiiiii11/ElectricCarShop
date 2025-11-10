@@ -57,6 +57,9 @@ namespace OrderAPIService.Services
 
         public async Task<QuotationResponse> CreateQuotationAsync(CreateQuotationRequest request)
         {
+            var customer = await _userGrpcServiceClient.GetUserByIdAsync(request.CustomerId);
+            if (customer == null)
+                throw new KeyNotFoundException($"Customer with ID {request.CustomerId} not found.");
             var quotation = new Quotations
             {
                 AgencyId = request.AgencyId,

@@ -170,7 +170,7 @@ namespace AnalyticService.Services
                         var acceptedQuotes = quotations.Where(q =>
                            q.AgencyId == agencyId &&
                            instancesForThisModel.Contains(q.VehicleInstanceId) &&
-                           q.Status == "Accepted" &&
+                           q.Status == "Accepted" || q.Status == "Converted" && 
                            IsDateInProcessMonth(q.CreatedDate, processYear, processMonth)
                         ).ToList();
                         int quotationsAcceptedCount = acceptedQuotes.Count;
@@ -182,7 +182,7 @@ namespace AnalyticService.Services
                         // Đếm số Order đã "Completed" trong tháng, khớp với các khách hàng trên
                         int unitsSold = orders.Count(o =>
                             customerIdsFromQuotes.Contains(o.CustomerId) &&
-                            o.Status == "Completed" ||  o.Status.ToLower() == "ending-payment" &&
+                            o.Status == "Completed" ||  o.Status.ToLower() == "pending-payment" &&
                             IsDateInProcessMonth(o.OrderDate, processYear, processMonth)
                         );
 

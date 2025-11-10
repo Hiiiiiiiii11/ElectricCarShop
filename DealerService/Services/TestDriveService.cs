@@ -63,6 +63,10 @@ namespace AgencyService.Services
             }
 
             var requestedDate = request.AppointmentDate.Value.Date;
+            if (requestedDate < DateTime.UtcNow.Date)
+            {
+                throw new InvalidOperationException("Ngày hẹn không thể trước ngày hiện tại.");
+            }
 
             var existingVehicleBookingOnDate = await _testDriveRepository.FindAsync(td =>
                 td.VehicleInstanceId == request.VehicleInstanceId &&
@@ -134,6 +138,11 @@ namespace AgencyService.Services
 
                 // Nếu không trùng, gán ngày mới
                 testDrive.AppointmentDate = request.AppointmentDate.Value;
+
+                if (requestedDate < DateTime.UtcNow.Date)
+                {
+                    throw new InvalidOperationException("Ngày hẹn không thể trước ngày hiện tại.");
+                }
             }
             // --- KẾT THÚC KIỂM TRA ---
 

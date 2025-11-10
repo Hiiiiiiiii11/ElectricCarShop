@@ -41,5 +41,20 @@ namespace AllocationRepository.Repositories
                .Include(a => a.VehicleInstance)
                .ToListAsync();
         }
+        public async Task<IEnumerable<Allocations>> GetByAgencyOrderIdAsync(int agencyOrderId)
+        {
+            return await _context.Allocations
+                .Where(a => a.AgencyOrderId == agencyOrderId) // Lọc theo khóa ngoại mới
+                .Include(a => a.VehicleInstance)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Allocations>> GetAllWithDetailsAsync()
+        {
+            return await _context.Allocations
+                .Include(a => a.VehicleInstance)       // Tải VehicleInstance
+                    .ThenInclude(vi => vi.Vehicle)      // Tải Vehicle (từ VehicleInstance)
+                        .ThenInclude(v => v.VehicleOption) // Tải VehicleOption (từ Vehicle)
+                .ToListAsync();
+        }
     }
 }

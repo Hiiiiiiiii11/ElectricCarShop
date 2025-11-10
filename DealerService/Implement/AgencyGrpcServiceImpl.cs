@@ -131,6 +131,7 @@ namespace AgencyService.Implement
                 {
                     Id = order.Id,
                     AgencyId = order.AgencyId,
+                    AgencyContractId = order.AgencyContractId,
                     VehicleId = order.VehicleId,
                     Quantity = order.Quantity,
                     Status = order.Status ?? ""

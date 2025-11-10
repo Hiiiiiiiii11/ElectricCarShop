@@ -14,9 +14,10 @@ namespace AllocationService.Services
         Task<IEnumerable<AllocationResponse>> GetByAgencyContractIdAsync(int agencyContractId);
         Task<AllocationResponse?> GetByAgencyContractAndVehicleAsync(int agencyContractId, int vehicleInstanceId);
         Task<IEnumerable<AllocationResponse>> GetByVehicleInstanceIdAsync(int vehicleInstanceId);
-        Task<AllocationResponse> UpdateAsync(int id, AllocationRequestModel request);
+        Task<AllocationResponse> UpdateAsync(int id, AllocationUpdateModel request);
+        Task<IEnumerable<AllocationResponse>> GetAllocationsAsync();
         Task<bool> DeleteAsync(int id);
 
-        //Task<AllocationResponse?> GetByInventoryIdAsync(int evInventoryId);
+        Task<IEnumerable<AllocationResponse>> GetByAgencyOrderIdAsync(int agencyOrderId);
     }
 }

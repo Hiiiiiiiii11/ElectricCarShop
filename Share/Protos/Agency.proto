@@ -102,8 +102,9 @@ message TestDriveReply {
 
 message AgencyOrderReply {
   int32 id = 1;
-  int32 agencyId = 2;
-  int32 vehicleId = 3;
-  int32 quantity = 4;
-  string status = 5;
+  int32 agencyContractId =2;
+  int32 agencyId = 3;
+  int32 vehicleId = 4;
+  int32 quantity = 5;
+  string status = 6;
 }
