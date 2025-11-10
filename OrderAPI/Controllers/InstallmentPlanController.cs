@@ -79,7 +79,6 @@ namespace OrderAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllInstallmentPlans()
         {
             try
