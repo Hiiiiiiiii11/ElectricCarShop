@@ -16,7 +16,6 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRequest request)
         {
             if (!ModelState.IsValid)
