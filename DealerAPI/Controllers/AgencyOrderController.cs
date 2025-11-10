@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -14,6 +15,7 @@ namespace AgencyAPI.Controllers
             _agencyOrderService = agencyOrderService;
         }
         [HttpPost("create")]
+        [Authorize]
         public async Task<IActionResult> CreateAgencyOrder([FromBody] CreateAgencyOrderRequest request)
         {
             try
@@ -27,6 +29,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAgencyOrder([FromRoute] int id,[FromForm] UpdateAgencyOrderRequest request)
         {
             try
@@ -71,6 +74,7 @@ namespace AgencyAPI.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAgencyOrder([FromRoute] int id)
         {
             try

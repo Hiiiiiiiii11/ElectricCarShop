@@ -1,5 +1,6 @@
 ﻿using AllocationRepository.Model.DTO;
 using AllocationService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllocationAPI.Controllers
@@ -14,6 +15,7 @@ namespace AllocationAPI.Controllers
             _evInventoryService = evInventoryService;
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateInventory([FromBody] EVInventoryRequest request)
         {
             try
@@ -27,6 +29,7 @@ namespace AllocationAPI.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteInventory(int id)
         {
             try
@@ -45,6 +48,7 @@ namespace AllocationAPI.Controllers
         }
 
         [HttpGet("vehicle/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetInventoryById(int id)
         {
             try
@@ -61,6 +65,7 @@ namespace AllocationAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllInventories()
         {
             try

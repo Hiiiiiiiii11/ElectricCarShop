@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -80,6 +81,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateContract([FromBody] CreateContractRequest request)
         {
             if (request == null)
@@ -97,6 +99,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateContract(int id, [FromForm] UpdateContractRequest request)
         {
             if (request == null)
@@ -118,6 +121,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteContract(int id)
         {
             try
@@ -134,6 +138,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpPost("sent-contracr-email/{contractId}")]
+        [Authorize]
         public async Task<IActionResult> SendContractEmail(int contractId, string customerEmail,IFormFile file)
         {
             try

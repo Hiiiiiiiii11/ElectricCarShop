@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -14,6 +15,7 @@ namespace OrderAPI.Controllers
             _installmentItemService = installmentItemService;
         }
         [HttpGet("plan/{planId}")]
+        [Authorize]
         public async Task<IActionResult> GetByPlanIdAsync(int planId)
         {
             try
@@ -29,6 +31,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateInstallmentItem([FromForm] InstallmentItemRequest request)
         {
             try
@@ -42,6 +45,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             try
@@ -68,6 +72,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try

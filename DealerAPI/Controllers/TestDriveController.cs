@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllocationAPI.Controllers
@@ -51,6 +52,7 @@ namespace AllocationAPI.Controllers
 
         // ================= CREATE =================
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateTestDrive([FromBody] CreateTestDriveRequest request)
         {
             if (!ModelState.IsValid)
@@ -69,6 +71,7 @@ namespace AllocationAPI.Controllers
 
         // ================= UPDATE =================
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateTestDrive(int id, [FromForm] UpdateTestDriveRequest request)
         {
             if (!ModelState.IsValid)
@@ -91,6 +94,7 @@ namespace AllocationAPI.Controllers
 
         // ================= DELETE =================
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteTestDrive(int id)
         {
             try

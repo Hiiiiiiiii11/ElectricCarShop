@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -123,6 +124,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost("CreatePayment")]
+        [Authorize]
         public async Task<IActionResult> CreatePayment([FromForm] CreatePaymentRequest request)
         {
             try
@@ -140,6 +142,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("UpdatePayment/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdatePayment(int id, [FromBody] UpdatePaymentRequest request)
         {
             try
@@ -161,6 +164,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("DeletePayment/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeletePayment(int id)
         {
             try

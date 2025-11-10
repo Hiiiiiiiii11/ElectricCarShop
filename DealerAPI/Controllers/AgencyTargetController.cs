@@ -1,5 +1,6 @@
 ﻿using AgencyRepository.Model.DTO;
 using AgencyService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgencyAPI.Controllers
@@ -14,6 +15,7 @@ namespace AgencyAPI.Controllers
             _AgencyTargetService = AgencyTargetService;
         }
         [HttpPost("Agency/{AgencyId}/targets")]
+        [Authorize]
         public async Task<IActionResult> CreateTarget(int AgencyId, [FromBody] CreateAgencyTargetRequest request)
         {
             try
@@ -75,6 +77,7 @@ namespace AgencyAPI.Controllers
             }
         }
         [HttpPut("Agency/{AgencyId}/target")]
+        [Authorize]
         public async Task<IActionResult> UpdateAgencyTarget(int AgencyId,int targetId, [FromBody] UpdateAgencyTargetRequest request)
         {
             try
@@ -109,6 +112,7 @@ namespace AgencyAPI.Controllers
         //    }
         //}
         [HttpDelete("Agency/{AgencyId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteTarget(int AgencyId ,int targetId)
         {
             try

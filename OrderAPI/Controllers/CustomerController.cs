@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 
@@ -15,6 +16,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRequest request)
         {
             if (!ModelState.IsValid)
@@ -32,6 +34,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCustomer(int id, [FromForm] CustomerUpdateRequest request)
         {
 
@@ -82,6 +85,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             try

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderRepository.Model.OrderDTO;
 using OrderService.Services;
 using System;
@@ -19,6 +20,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
             try
@@ -79,6 +81,7 @@ namespace OrderAPI.Controllers
         //    }
         //}
         [HttpPut("update/{orderId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateOrder([FromRoute] int orderId, [FromForm] UpdateOrderStatusRequest request)
         {
             try
@@ -96,6 +99,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpDelete("delete/{orderId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteOrder([FromRoute] int orderId)
         {
             try
@@ -113,6 +117,7 @@ namespace OrderAPI.Controllers
             }
         }
         [HttpGet("agency/{agencyId}")]
+
         public async Task<IActionResult> GetOrdersByAgencyId([FromRoute] int agencyId)
         {
             try

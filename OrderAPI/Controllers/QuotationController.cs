@@ -51,6 +51,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateQuotation([FromForm] CreateQuotationRequest request)
         {
             try
@@ -70,6 +71,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateQuotation(int id, [FromForm] UpdateQuotationRequest request)
         {
             try
@@ -91,6 +93,7 @@ namespace OrderAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteQuotation(int id)
         {
             try

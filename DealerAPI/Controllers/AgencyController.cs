@@ -50,6 +50,7 @@ namespace AgencyAPI.Controllers
         }
         //[Authorize(Roles = "EVManager")]
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateAgency([FromForm] CreateAgencyRequest request)
         {
             if (!ModelState.IsValid)
@@ -67,6 +68,7 @@ namespace AgencyAPI.Controllers
         }
         //[Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/assign-user")]
+        [Authorize]
         public async Task<IActionResult> AssignUserToAgency(int agencyId, [FromBody] AssignUserAgencyRequest request)
         {
             try
@@ -84,6 +86,7 @@ namespace AgencyAPI.Controllers
         }
         //[Authorize(Roles = "AgencyManager")]
         [HttpPost("{agencyId}/remove-user")]
+        [Authorize]
         public async Task<IActionResult> RemoveUserFromAgency(int agencyId, [FromBody] RemoveUserAgencyRequest request)
         {
             try
@@ -101,6 +104,7 @@ namespace AgencyAPI.Controllers
         }
         //[Authorize(Roles = "EVManager,AgencyManager")]
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAgency(int id, [FromForm] UpdateAgencyRequest request)
         {
             if (!ModelState.IsValid)
@@ -122,6 +126,7 @@ namespace AgencyAPI.Controllers
         }
         //[Authorize(Roles = "EVManager")]
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAgency(int id)
         {
             try
