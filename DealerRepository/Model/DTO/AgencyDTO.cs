@@ -19,7 +19,7 @@ namespace AgencyRepository.Model.DTO
         public string Address { get; set; }
         [Required(ErrorMessage = "Phone is required")]
         public string Phone { get; set; }
-        [Required(ErrorMessage = "Email is required")]
+        [Required(ErrorMessage = "Avatar is required")]
         public IFormFile Avartar { get; set; }
         public string? Location { get; set; }
         public string Email { get; set; }
