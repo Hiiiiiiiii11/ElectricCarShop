@@ -174,7 +174,7 @@ namespace AgencyAPI.Controllers
             try
             {
                 await _AgencyDebtService.DeleteDebtAsync(debtId);
-                return NoContent();
+                return Ok(new {message = " Delete debt success"});
             }
             catch (KeyNotFoundException ex)
             {

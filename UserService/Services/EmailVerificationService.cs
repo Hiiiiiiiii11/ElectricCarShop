@@ -22,6 +22,22 @@ namespace UserService.Services
             _emailSetting = emailSetting;
         }
 
+        public async Task DeleteEmailAsync(int id)
+        {
+           var existing = await _emailVerificationRepository.GetByIdAsync(id);
+            if (existing == null)
+            {
+                throw new KeyNotFoundException("Email verification record not found");
+            }
+            _emailVerificationRepository.Remove(existing);
+           await _emailVerificationRepository.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<EmailVerification>> GetAllEmailAsync()
+        {
+            return await _emailVerificationRepository.GetAllAsync();
+        }
+
         public async Task SendVerificationCodeAsync(string email)
         {
             var existing = await _emailVerificationRepository.GetByEmailAsync(email);

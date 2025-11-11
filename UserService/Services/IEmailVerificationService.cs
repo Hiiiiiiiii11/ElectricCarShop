@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UserRepository.Model;
 using UserRepository.Model.DTO;
 
 namespace UserService.Services
@@ -11,5 +12,8 @@ namespace UserService.Services
     {
         Task SendVerificationCodeAsync(string email);
         Task<bool> VerifyCodeAsync(VerifyOTPRequest request);
+
+        Task<IEnumerable<EmailVerification>> GetAllEmailAsync();
+        Task DeleteEmailAsync(int id);
     }
 }
