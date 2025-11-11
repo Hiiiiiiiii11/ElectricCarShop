@@ -15,9 +15,10 @@ namespace AllocationService.Services
         private readonly IVehiclePriceRepository _vehiclePriceRepository;
         private readonly IVehicleRepository _vehicleRepository;
 
-        public VehiclePriceService(IVehiclePriceRepository vehiclePriceRepository)
+        public VehiclePriceService(IVehiclePriceRepository vehiclePriceRepository, IVehicleRepository vehicleRepository)
         {
             _vehiclePriceRepository = vehiclePriceRepository;
+            _vehicleRepository = vehicleRepository;
         }
 
         public async Task<VehiclePriceResponse> CreateAsync(VehiclePriceRequest request)

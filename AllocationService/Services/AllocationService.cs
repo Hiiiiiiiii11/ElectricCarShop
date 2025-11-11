@@ -41,6 +41,7 @@ namespace AllocationService.Services
             {
                 AgencyContractId = request.AgencyContractId,
                 VehicleInstanceId = request.VehicleInstanceId,
+                AgencyOrderId = request.AgencyOrderId,
                 AllocationDate = DateTime.UtcNow
             };
 
