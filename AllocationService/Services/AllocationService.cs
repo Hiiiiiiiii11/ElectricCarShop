@@ -17,15 +17,18 @@ namespace AllocationService.Services
         private readonly IAllocationRepository _allocationRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcClient;
         private readonly IEVInventoryService _evInventoryService;
+        private readonly IVehicleInstanceRepository _vehicleInstanceRepository;
 
         public AllocationService(
             IAllocationRepository allocationRepository,
             IAgencyGrpcServiceClient agencyGrpcClient,
-            IEVInventoryService evInventoryService)
+            IEVInventoryService evInventoryService,
+            IVehicleInstanceRepository vehicleInstanceRepository)
         {
             _allocationRepository = allocationRepository;
             _agencyGrpcClient = agencyGrpcClient;
             _evInventoryService = evInventoryService;
+            _vehicleInstanceRepository = vehicleInstanceRepository;
         }
 
         public async Task<AllocationResponse> CreateAsync(AllocationRequestModel request)
@@ -48,6 +51,15 @@ namespace AllocationService.Services
             await _allocationRepository.AddAsync(allocation);
             await _allocationRepository.SaveChangesAsync();
             await _evInventoryService.DeleteByVehicleInstanceIdAsync(request.VehicleInstanceId);
+            var vehicleInstance = await _vehicleInstanceRepository.GetByIdAsync(request.VehicleInstanceId);
+            if (vehicleInstance != null)
+            {
+                // Ví dụ encode vào status: IN_AGENCY_{AgencyId}
+                vehicleInstance.Status = $"IN_AGENCY_{contract.AgencyId}";
+
+                _vehicleInstanceRepository.Update(vehicleInstance);
+                await _vehicleInstanceRepository.SaveChangesAsync();
+            }
             var response = MapToResponse(allocation);
             response.ContractReply = contract;
 
