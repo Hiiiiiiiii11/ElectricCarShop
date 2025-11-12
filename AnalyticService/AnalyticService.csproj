@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.23.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AnalyticRepository\AnalyticRepository.csproj" />
     <ProjectReference Include="..\Share\Share.csproj" />
   </ItemGroup>

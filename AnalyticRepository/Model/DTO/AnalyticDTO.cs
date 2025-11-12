@@ -1,9 +1,11 @@
 ﻿using GrpcService;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AnalyticRepository.Model.DTO
@@ -46,5 +48,33 @@ namespace AnalyticRepository.Model.DTO
 
         // Dấu thời gian cho biết lần cuối hàng này được cập nhật
         public DateTime LastUpdatedAt { get; set; }
+    }
+    public class PredictDemandDto
+    {
+        [Required]
+        public int Year { get; set; }
+        [Required]
+        [Range(1, 12)]
+        public int Month { get; set; }
+        [Required]
+        public int VehicleId { get; set; }
+        [Required]
+        public int AgencyId { get; set; }
+    }
+
+    // DTO cho C# API trả về (dữ liệu lịch sử)
+    // (Lấy từ AnalyticRepository.Model.Monthly_Demand_Features)
+    // Chúng ta có thể dùng trực tiếp Model, nhưng DTO sẽ sạch hơn
+
+    // DTO cho response trả về
+    public class PredictionResponseDto
+    {
+        public int VehicleId { get; set; }
+        public int AgencyId { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+
+        [JsonPropertyName("forecastedUnits")] // Đảm bảo tên nhất quán
+        public int ForecastedUnits { get; set; } // Số lượng dự đoán
     }
 }
