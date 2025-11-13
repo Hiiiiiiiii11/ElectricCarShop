@@ -36,7 +36,7 @@ namespace AnalyticAPI.Controllers
             catch (Exception ex)
             {
                 // Trả về lỗi 500 nếu model fail
-                return StatusCode(500, $"Lỗi máy chủ nội bộ khi dự đoán: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
     }
