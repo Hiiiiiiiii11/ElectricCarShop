@@ -3,10 +3,9 @@
 option csharp_namespace = "GrpcService";
 
 // Tin nhắn trống cho các yêu cầu "GetAll"
-message GetAllOrderRequest {
-}
-message GetAllQuotationRequest {
-}
+message GetAllOrderRequest {}
+message GetAllQuotationRequest {}
+
 message CheckQuotationExistsRequest {
   int32 vehicleInstanceId = 1;
 }
@@ -14,39 +13,50 @@ message CheckQuotationExistsReply {
   bool exists = 1;
 }
 
-// Service này host chung với CustomerGrpcService trong OrderAPI
+// =======================
+//   ORDER GRPC SERVICE
+// =======================
 service OrderGrpcService {
 
-  // === CẬP NHẬT CHO ETL ===
-
-  // 1. Lấy tất cả đơn hàng (đã chốt)
+  // 1. Lấy tất cả đơn hàng (có kèm chi tiết)
   rpc GetAllOrders (GetAllOrderRequest) returns (stream OrderReply);
 
-  // 2. Lấy tất cả báo giá (đã chấp nhận)
+  // 2. Lấy tất cả báo giá
   rpc GetAllQuotations (GetAllQuotationRequest) returns (stream QuotationReply);
 
   rpc CheckQuotationExistsForVehicle(CheckQuotationExistsRequest) returns (CheckQuotationExistsReply);
 }
 
-// (Bạn cũng có thể thêm GetAllCustomers vào CustomerGrpcService nếu cần)
+// =======================
+//     MESSAGE DEFINES
+// =======================
 
-// === Định nghĩa các Message Reply mới cho ETL ===
+// Chi tiết của đơn hàng
+message OrderDetailReply {
+  int32 id = 1;
+  int32 orderId = 2;
+  int32 quotationId = 3;  // ETL sử dụng quotationId để tìm được: Agency + VehicleInstance
+  double unitPrice = 4;
+}
 
+// Đơn hàng
 message OrderReply {
   int32 id = 1;
   int32 customerId = 2;
-  string orderDate = 3; // Dùng string ISO 8601
+  string orderDate = 3;  
   string status = 4;
   double totalAmount = 5;
-  // ... (Không cần OrderDetails, vì chúng ta chỉ cần COUNT đơn hàng)
+
+  repeated OrderDetailReply details = 6; // thêm chi tiết đơn hàng
 }
 
+// Báo giá
 message QuotationReply {
   int32 id = 1;
   int32 agencyId = 2;
   int32 customerId = 3;
   int32 vehicleInstanceId = 4;
   double quotedPrice = 5;
-  string createdDate = 6; // Dùng string ISO 8601
-  string status = 7; // (Chỉ lấy 'Accepted')
+  string createdDate = 6;
+  string status = 7; 
 }

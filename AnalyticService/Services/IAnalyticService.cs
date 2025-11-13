@@ -23,6 +23,8 @@ namespace AnalyticService.Services
         Task<IEnumerable<VehiclePromotionReply>> GetAllPromotionsAsync();
         Task<IEnumerable<TestDriveReply>> GetAllTestDrivesAsync();
         Task<IEnumerable<AgencyTargetReply>> GetAllAgencyTargetsAsync();
+        Task<IEnumerable<AgencyOrderReply>> GetAllAgencyOrdersAsync();
+
 
     }
 }

@@ -98,8 +98,11 @@ namespace AgencyService.Implement
                     AgencyId = target.AgencyId,
                     TargetYear = target.TargetYear,
                     TargetMonth = target.TargetMonth,
-                    TargetSales = target.TargetSales,
-                    AchievedSales = target.AchievedSales
+                    VehicleId = target.VehicleId,
+                    TargetUnits = target.TargetUnits,
+                    CreatedAt = target.CreatedAt.ToString(),
+                    UpdatedAt = target.UpdatedAt.ToString(),
+
                 });
             }
         }
@@ -153,6 +156,8 @@ namespace AgencyService.Implement
                 AgencyId = order.AgencyId,
                 VehicleId = order.VehicleId,
                 Quantity = order.Quantity,
+                AgencyContractId= order.AgencyContractId,
+                OrderDate = order.OrderDate.ToString(),
                 Status = order.Status ?? ""
             };
         }
