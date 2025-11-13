@@ -1,0 +1,21 @@
+[
+  "month",
+  "vehicleId",
+  "agencyId",
+  "unitsSoldLast1",
+  "unitsSoldLast2",
+  "unitsSoldLast3",
+  "rolling3",
+  "rolling6",
+  "trend3",
+  "momentum",
+  "targetAchievedRate",
+  "avgPrice",
+  "wasOnPromotion",
+  "promotionDiscountAmount",
+  "testDrivesCount",
+  "quotationsAcceptedCount",
+  "vehicleRangeKM",
+  "agencyRegion",
+  "vehicleBatteryCapacity"
+]
