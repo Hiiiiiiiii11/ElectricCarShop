@@ -54,7 +54,10 @@ namespace AnalyticAPI.Controllers
             [FromQuery] int startYear,
             [FromQuery] int startMonth,
             [FromQuery] int endYear,
-            [FromQuery] int endMonth)
+            [FromQuery] int endMonth,
+            [FromQuery] int? vehicleId,
+            [FromQuery] int? agencyId
+            )
         {
             if (startYear == 0 || startMonth == 0 || endYear == 0 || endMonth == 0)
             {
@@ -63,7 +66,7 @@ namespace AnalyticAPI.Controllers
                                   $"Ví dụ: ?startYear={now.Year - 1}&startMonth=1&endYear={now.Year}&endMonth={now.Month}");
             }
 
-            var data = await _analyticsService.GetDemandFeaturesAsync(startYear, startMonth, endYear, endMonth);
+            var data = await _analyticsService.GetDemandFeaturesAsync(startYear, startMonth, endYear, endMonth, vehicleId, agencyId);
             return Ok(data);
         }
 

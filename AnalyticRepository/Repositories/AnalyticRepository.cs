@@ -18,18 +18,38 @@ namespace AnalyticRepository.Repositories
             _context = context;
         }
 
-        public async Task<List<Monthly_Demand_Features>> GetFeaturesByDateRange(int startYear, int startMonth, int endYear, int endMonth)
+        public async Task<List<Monthly_Demand_Features>> GetFeaturesByDateRange(
+    int startYear,
+    int startMonth,
+    int endYear,
+    int endMonth,
+    int? vehicleId,
+    int? agencyId)
         {
-            var startDate = new DateTime(startYear, startMonth, 1);
-            // Lấy ngày cuối cùng của tháng kết thúc
-            var endDate = new DateTime(endYear, endMonth, 1).AddMonths(1).AddDays(-1);
+            var query = _context.MonthlyDemandFeatures.AsQueryable();
 
-            return await _context.MonthlyDemandFeatures
-                .Where(f => (f.Year > startYear || (f.Year == startYear && f.Month >= startMonth)) &&
-                            (f.Year < endYear || (f.Year == endYear && f.Month <= endMonth)))
-                .AsNoTracking()
-                .ToListAsync();
+            // Lọc theo thời gian
+            query = query.Where(f =>
+                (f.Year > startYear || (f.Year == startYear && f.Month >= startMonth)) &&
+                (f.Year < endYear || (f.Year == endYear && f.Month <= endMonth))
+            );
+
+            // Lọc theo vehicleId (optional)
+            if (vehicleId.HasValue)
+            {
+                query = query.Where(f => f.VehicleId == vehicleId.Value);
+            }
+
+            // Lọc theo agencyId (optional)
+            if (agencyId.HasValue)
+            {
+                query = query.Where(f => f.AgencyId == agencyId.Value);
+            }
+
+            return await query.AsNoTracking().ToListAsync();
         }
+
+
 
         public async Task<List<Monthly_Demand_Features>> GetHistoricalFeaturesForLagging(DateTime until)
         {
