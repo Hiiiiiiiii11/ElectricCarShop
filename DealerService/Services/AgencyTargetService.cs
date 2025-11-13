@@ -107,9 +107,6 @@ namespace AgencyService.Services
             if (request.TargetUnits.HasValue)
                 target.TargetUnits = request.TargetUnits.Value;
 
-            // ✔ Update AchievedUnits
-            if (request.AchievedUnits.HasValue)
-                target.AchievedUnits = request.AchievedUnits.Value;
 
             target.UpdatedAt = DateTime.UtcNow;
 

@@ -234,7 +234,6 @@ namespace AgencyRepository.Model.DTO
         public int TargetYear { get; set; }
         public int TargetMonth { get; set; }
         public int TargetUnits { get; set; }
-        public int? AchievedUnits { get; set; }
     }
     //request lấy báo cáo doanh số theo đại lý
     public class GetTargetReportRequest
@@ -263,7 +262,6 @@ namespace AgencyRepository.Model.DTO
         public int? TargetYear { get; set; }
         public int? TargetMonth { get; set; }
         public int? TargetUnits { get; set; }
-        public int? AchievedUnits { get; set; }
     }
 
     //request create Agency inventory

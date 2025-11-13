@@ -13,15 +13,17 @@ namespace AgencyService.Implement
         private readonly ITestDriveRepository _testDriveRepo;
         private readonly IAgencyOrderRepository _agencyOrderRepo;
         private readonly IAgencyInventoryService _inventoryService;
+        private readonly IAgencyTargetRepository _agencyTargetRepository;
 
         public AgencyGrpcServiceImpl(
             IAgencyRepository agencyRepository,
             IAgencyContractRepository contractRepo,
-            IAgencyTargetRepository targetRepo,      
-            ITestDriveRepository testDriveRepo,      
+            IAgencyTargetRepository targetRepo,
+            ITestDriveRepository testDriveRepo,
             IAgencyOrderRepository agencyOrderRepo,
-            IAgencyInventoryService inventoryService
-            )  
+            IAgencyInventoryService inventoryService,
+            IAgencyTargetRepository agencyTargetRepository
+            )
         {
             _agencyRepository = agencyRepository;
             _contractRepo = contractRepo;
@@ -29,6 +31,7 @@ namespace AgencyService.Implement
             _testDriveRepo = testDriveRepo;
             _agencyOrderRepo = agencyOrderRepo;
             _inventoryService = inventoryService;
+            _agencyTargetRepository = agencyTargetRepository;
         }
 
         // Đây là method gRPC thực sự implement từ file .proto
@@ -156,21 +159,78 @@ namespace AgencyService.Implement
                 AgencyId = order.AgencyId,
                 VehicleId = order.VehicleId,
                 Quantity = order.Quantity,
-                AgencyContractId= order.AgencyContractId,
+                AgencyContractId = order.AgencyContractId,
                 OrderDate = order.OrderDate.ToString(),
                 Status = order.Status ?? ""
             };
         }
         public override async Task<RemoveFromAgencyInventoryReply> RemoveVehicleFromInventory(RemoveFromAgencyInventoryRequest request, ServerCallContext context)
         {
-                await _inventoryService.RemoveInventoryItemAsync(request.AgencyId, request.VehicleInstanceId);
+            await _inventoryService.RemoveInventoryItemAsync(request.AgencyId, request.VehicleInstanceId);
 
-                return new RemoveFromAgencyInventoryReply
+            return new RemoveFromAgencyInventoryReply
+            {
+                Success = true,
+                Message = "Vehicle removed from agency inventory successfully."
+            };
+
+        }
+
+        public override async Task<IncreaseAchievedUnitsReply> IncreaseAchievedUnits(IncreaseAchievedUnitsRequest request, ServerCallContext context)
+        {
+            // Lấy tất cả target trong tháng
+            var targets = await _agencyTargetRepository
+                .GetByAgencyAndPeriodAsync(request.AgencyId, request.Year, request.Month);
+
+            var target = targets.FirstOrDefault(t => t.VehicleId == request.VehicleId);
+
+            if (target == null)
+            {
+                return new IncreaseAchievedUnitsReply
                 {
-                    Success = true,
-                    Message = "Vehicle removed from agency inventory successfully."
+                    Success = false
                 };
+            }
 
+            target.AchievedUnits += request.Units;
+            target.UpdatedAt = DateTime.UtcNow;
+
+            _agencyTargetRepository.Update(target);
+            await _agencyTargetRepository.SaveChangesAsync();
+
+            return new IncreaseAchievedUnitsReply
+            {
+                Success = true
+            };
+        }
+
+        public override async Task<DecreaseAchievedUnitsReply> DecreaseAchievedUnits(DecreaseAchievedUnitsRequest request,ServerCallContext context)
+        {
+            var targets = await _agencyTargetRepository
+                .GetByAgencyAndPeriodAsync(request.AgencyId, request.Year, request.Month);
+
+            var target = targets.FirstOrDefault(t => t.VehicleId == request.VehicleId);
+
+            if (target == null)
+            {
+                return new DecreaseAchievedUnitsReply
+                {
+                    Success = false
+                };
+            }
+
+            target.AchievedUnits -= request.Units;
+            if (target.AchievedUnits < 0) target.AchievedUnits = 0;
+
+            target.UpdatedAt = DateTime.UtcNow;
+
+            _agencyTargetRepository.Update(target);
+            await _agencyTargetRepository.SaveChangesAsync();
+
+            return new DecreaseAchievedUnitsReply
+            {
+                Success = true
+            };
         }
     }
 }

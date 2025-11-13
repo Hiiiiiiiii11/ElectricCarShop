@@ -44,6 +44,9 @@ service AgencyGrpcService {
 
   rpc GetAgencyOrderById (GetAgencyOrderByIdRequest) returns (AgencyOrderReply);
   rpc RemoveVehicleFromInventory(RemoveFromAgencyInventoryRequest) returns (RemoveFromAgencyInventoryReply);
+
+  rpc IncreaseAchievedUnits (IncreaseAchievedUnitsRequest) returns (IncreaseAchievedUnitsReply);
+  rpc DecreaseAchievedUnits (DecreaseAchievedUnitsRequest) returns (DecreaseAchievedUnitsReply);
 }
 
 // === Định nghĩa các Message Request ===
@@ -112,4 +115,26 @@ message AgencyOrderReply {
   int32 quantity = 5;
   string orderDate = 6;
   string status = 7;
+}
+
+message IncreaseAchievedUnitsRequest {
+  int32 agencyId = 1;
+  int32 vehicleId = 2;
+  int32 year = 3;
+  int32 month = 4;
+  int32 units = 5;
+}
+message IncreaseAchievedUnitsReply {
+  bool success = 1;
+}
+
+message DecreaseAchievedUnitsRequest {
+  int32 agencyId = 1;
+  int32 vehicleId = 2;
+  int32 year = 3;
+  int32 month = 4;
+  int32 units = 5;
+}
+message DecreaseAchievedUnitsReply {
+  bool success = 1;
 }

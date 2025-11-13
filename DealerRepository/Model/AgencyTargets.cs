@@ -23,7 +23,7 @@ namespace AgencyRepository.Model
         // 🎯 Số XE kỳ vọng bán được (thay cho target doanh thu)
         public int TargetUnits { get; set; }
 
-        public int? AchievedUnits { get; set; }
+        public int AchievedUnits { get; set; } = 0;
 
 
         // For BI / auditing

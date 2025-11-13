@@ -17,13 +17,15 @@ namespace OrderService.Services
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IQuotationRepository _quotationRepository;
         private readonly IAgencyGrpcServiceClient _agencyGrpcServiceClient;
+        private readonly IVehicleInstanceGrpcServiceClient _vehicleInstanceGrpcServiceClient;
 
-        public OrderService(IOrderRepository orderRepository , IOrderDetailRepository orderDetailRepository, IQuotationRepository quotationRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient)
+        public OrderService(IOrderRepository orderRepository , IOrderDetailRepository orderDetailRepository, IQuotationRepository quotationRepository, IAgencyGrpcServiceClient agencyGrpcServiceClient,IVehicleInstanceGrpcServiceClient vehicleInstanceGrpcServiceClient)
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _quotationRepository = quotationRepository;
             _agencyGrpcServiceClient = agencyGrpcServiceClient;
+            _vehicleInstanceGrpcServiceClient = vehicleInstanceGrpcServiceClient;
 
         }
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request)
@@ -122,20 +124,56 @@ namespace OrderService.Services
 
         public async Task<OrderResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusRequest request)
         {
-            var order = await _orderRepository.GetByIdAsync(orderId);
+            // Lấy đầy đủ Order + Details + Quotation
+            var order = await _orderRepository.GetWithDetailsAsync(orderId);
             if (order == null)
-            {
                 throw new KeyNotFoundException($"Order with ID {orderId} not found.");
-            }
 
+            // Cập nhật trạng thái đơn hàng
             order.Status = request.Status;
             _orderRepository.Update(order);
             await _orderRepository.SaveChangesAsync();
 
-            // Lấy lại thông tin đầy đủ để trả về
-            var updatedOrder = await _orderRepository.GetWithDetailsAsync(orderId);
-            return MapToResponse(updatedOrder);
+            // Nếu đơn hàng hoàn tất hoặc đang chờ thanh toán
+            if (request.Status == "Completed" || request.Status == "Pending-Payment")
+            {
+                var orderDate = order.OrderDate;
+
+                foreach (var detail in order.Details)
+                {
+                    // Lấy quotation
+                    var quotation = await _quotationRepository.GetByIdAsync(detail.QuotationId);
+                    if (quotation == null)
+                        continue;
+
+                    int agencyId = quotation.AgencyId;
+                    int vehicleInstanceId = quotation.VehicleInstanceId;
+
+                    // Lấy vehicleInstance (gRPC)
+                    var vehicleInstance = await _vehicleInstanceGrpcServiceClient
+                        .GetVehicleInstanceByIdAsync(vehicleInstanceId);
+
+                    if (vehicleInstance == null)
+                        continue;
+
+                    int vehicleId = vehicleInstance.VehicleId;
+
+                    // 🔥 Gọi gRPC để tăng AchievedUnits (+1 cho mỗi xe)
+                    await _agencyGrpcServiceClient.IncreaseAchievedUnitsAsync(
+                        agencyId,
+                        vehicleId,
+                        orderDate.Year,
+                        orderDate.Month,
+                        1
+                    );
+                }
+            }
+
+            // Lấy lại để trả về
+            var updated = await _orderRepository.GetWithDetailsAsync(orderId);
+            return MapToResponse(updated);
         }
+
         public async Task DeleteOrderAsync(int orderId)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
