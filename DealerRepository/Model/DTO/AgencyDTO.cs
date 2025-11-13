@@ -230,9 +230,10 @@ namespace AgencyRepository.Model.DTO
     //create Agency target request
     public class CreateAgencyTargetRequest
     {
+        public int VehicleId { get; set; }
         public int TargetYear { get; set; }
         public int TargetMonth { get; set; }
-        public int TargetSales { get; set; }
+        public int TargetUnits { get; set; }
     }
     //request lấy báo cáo doanh số theo đại lý
     public class GetTargetReportRequest
@@ -245,19 +246,22 @@ namespace AgencyRepository.Model.DTO
     {
         public int Id { get; set; }
         public int AgencyId { get; set; }
+        public int VehicleId { get; set; }
         public int TargetYear { get; set; }
         public int TargetMonth { get; set; }
-        public int TargetSales { get; set; }
-        public int AchievedSales { get; set; }
+        public int TargetUnits { get; set; }
+        public int? AchievedUnits { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
         public AgencyResponse? Agency { get; set; }
     }
     //request update Agency target
     public class UpdateAgencyTargetRequest
     {
+        public int? VehicleId { get; set; }
         public int? TargetYear { get; set; }
         public int? TargetMonth { get; set; }
-        public int? TargetSales { get; set; }
-        public int? AchievedSales { get; set; }
+        public int? TargetUnits { get; set; }
     }
 
     //request create Agency inventory

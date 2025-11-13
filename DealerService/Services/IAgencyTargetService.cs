@@ -11,8 +11,8 @@ namespace AgencyService.Services
     {
         Task<AgencyTargetReportResponse> CreateTargetAsync(int AgencyId, CreateAgencyTargetRequest request);
         Task<IEnumerable<AgencyTargetReportResponse>> GetAgencyTargetAsync(int AgencyId, GetTargetReportRequest request);
-        Task<AgencyTargetReportResponse> UpdateAchievedSalesAsync(int AgencyId,int targetId, UpdateAgencyTargetRequest request);
-        Task<AgencyTargetReportResponse> GetCurrentTargetByAgencyIdAsync(int AgencyId);
+        Task<AgencyTargetReportResponse> UpdateTargetAsync(int agencyId,int targetId,UpdateAgencyTargetRequest request);
+        Task<IEnumerable<AgencyTargetReportResponse>> GetCurrentTargetByAgencyIdAsync(int AgencyId);
         Task<IEnumerable<AgencyTargetReportResponse>> GetAllTargetsAsync(GetTargetReportRequest request);
         Task<IEnumerable<AgencyTargetReportResponse>> GetTargetsReportAsync(GetTargetReportRequest request);
         Task RemoveAgencyTarget(int AgencyId, int targetId);

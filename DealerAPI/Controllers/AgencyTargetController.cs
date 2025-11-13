@@ -42,23 +42,23 @@ namespace AgencyAPI.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
-        [HttpGet("Agency/{AgencyId}/current-target")]
-        public async Task<IActionResult> GetCurrentTargetByAgencyId(int AgencyId)
-        {
-            try
-            {
-                var result = await _AgencyTargetService.GetCurrentTargetByAgencyIdAsync(AgencyId);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
-            }
-        }
+        //[HttpGet("Agency/{AgencyId}/current-target")]
+        //public async Task<IActionResult> GetCurrentTargetByAgencyId(int AgencyId)
+        //{
+        //    try
+        //    {
+        //        var result = await _AgencyTargetService.GetCurrentTargetByAgencyIdAsync(AgencyId);
+        //        return Ok(result);
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+        //    }
+        //}
         [HttpGet("Agency/{AgencyId}/target")]
         public async Task<IActionResult> GetAgencyTarget(int AgencyId, [FromQuery] GetTargetReportRequest request)
         {
@@ -78,11 +78,11 @@ namespace AgencyAPI.Controllers
         }
         [HttpPut("Agency/{AgencyId}/target")]
         [Authorize]
-        public async Task<IActionResult> UpdateAgencyTarget(int AgencyId,int targetId, [FromBody] UpdateAgencyTargetRequest request)
+        public async Task<IActionResult> UpdateAgencyTarget(int AgencyId,int targetId, [FromForm] UpdateAgencyTargetRequest request)
         {
             try
             {
-                var result = await _AgencyTargetService.UpdateAchievedSalesAsync(AgencyId, targetId, request);
+                var result = await _AgencyTargetService.UpdateTargetAsync(AgencyId, targetId, request);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)

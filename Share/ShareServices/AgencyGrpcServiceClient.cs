@@ -61,5 +61,33 @@ namespace Share.ShareServices
             };
             return await _client.RemoveVehicleFromInventoryAsync(request);
         }
+
+        public async Task<bool> IncreaseAchievedUnitsAsync(int agencyId, int vehicleId, int year, int month, int units)
+        {
+            var res = await _client.IncreaseAchievedUnitsAsync(new IncreaseAchievedUnitsRequest
+            {
+                AgencyId = agencyId,
+                VehicleId = vehicleId,
+                Year = year,
+                Month = month,
+                Units = units
+            });
+
+            return res.Success;
+        }
+
+        public async Task<bool> DecreaseAchievedUnitsAsync(int agencyId, int vehicleId, int year, int month, int units)
+        {
+            var res = await _client.DecreaseAchievedUnitsAsync(new DecreaseAchievedUnitsRequest
+            {
+                AgencyId = agencyId,
+                VehicleId = vehicleId,
+                Year = year,
+                Month = month,
+                Units = units
+            });
+
+            return res.Success;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace AnalyticRepository.Repositories
 {
     public interface IAnalyticRepository : IGenericRepository<Monthly_Demand_Features>
     {
-        Task<List<Monthly_Demand_Features>> GetFeaturesByDateRange(int startYear, int startMonth, int endYear, int endMonth);
+        Task<List<Monthly_Demand_Features>> GetFeaturesByDateRange(int startYear, int startMonth, int endYear, int endMonth, int? vehicleId, int? agencyId);
 
         // Cập nhật hoặc Thêm mới (Upsert) một lô dữ liệu features cho 1 tháng
         Task UpsertFeaturesForMonthAsync(int year, int month, List<Monthly_Demand_Features> features);

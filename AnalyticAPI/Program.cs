@@ -72,6 +72,7 @@ namespace AnalyticAPI
             builder.Services.AddScoped<IOrderGrpcServiceClient, OrderGrpcServiceClient>();
             builder.Services.AddScoped<IAnalyticRepository, AnalyticRepository.Repositories.AnalyticRepository>();
             builder.Services.AddScoped<IAnalyticService, AnalyticService.Services.AnalyticsService>();
+            builder.Services.AddScoped<IPredictionService, PredictionService>();
             builder.Services.AddHostedService<ETLWorkerService>();
 
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();

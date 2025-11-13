@@ -13,7 +13,7 @@ namespace AnalyticService.Services
         Task<ETLStatusResponse> GetEtlStatusAsync();
         // Kích hoạt ETL (Không chờ)
         void TriggerEtlManually();
-        Task<IEnumerable<DemandFeatureResponse>> GetDemandFeaturesAsync(int startYear, int startMonth, int endYear, int endMonth);
+        Task<IEnumerable<DemandFeatureResponse>> GetDemandFeaturesAsync(int startYear, int startMonth, int endYear, int endMonth, int? vehicleId, int? agencyId );
         Task<IEnumerable<OrderReply>> GetAllOrdersAsync();
         Task<IEnumerable<AgencyReply>> GetAllAgencysAsync();
         Task<IEnumerable<VehicleReply>> GetAllVehiclesAsync();
@@ -23,6 +23,8 @@ namespace AnalyticService.Services
         Task<IEnumerable<VehiclePromotionReply>> GetAllPromotionsAsync();
         Task<IEnumerable<TestDriveReply>> GetAllTestDrivesAsync();
         Task<IEnumerable<AgencyTargetReply>> GetAllAgencyTargetsAsync();
+        Task<IEnumerable<AgencyOrderReply>> GetAllAgencyOrdersAsync();
+
 
     }
 }
