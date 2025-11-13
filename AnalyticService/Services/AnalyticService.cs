@@ -211,5 +211,16 @@ namespace AnalyticService.Services
             }
             return results;
         }
+        public async Task<IEnumerable<AgencyOrderReply>> GetAllAgencyOrdersAsync()
+        {
+            var results = new List<AgencyOrderReply>();
+            var call = _agencyGrpcClient.GetAllAgencyOrders(new GrpcService.GetAllAgencyOrderRequest());
+
+            await foreach (var item in call.ResponseStream.ReadAllAsync())
+            {
+                results.Add(item);
+            }
+            return results;
+        }
     }
 }

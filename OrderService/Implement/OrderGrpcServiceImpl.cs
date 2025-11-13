@@ -21,21 +21,35 @@ namespace OrderService.Implement
 
         // === TRIỂN KHAI CHO ETL (STREAMING) ===
 
-        public override async Task GetAllOrders(GetAllOrderRequest request, IServerStreamWriter<OrderReply> responseStream, ServerCallContext context)
+        public override async Task GetAllOrders(GetAllOrderRequest request,IServerStreamWriter<OrderReply> responseStream,ServerCallContext context)
         {
-            // Chỉ lấy các đơn hàng đã hoàn thành hoặc đang xử lý
+            // Lấy Order + OrderDetails
             var orders = await _orderRepo.GetAllWithDetailsAsync();
 
             foreach (var order in orders)
             {
-                await responseStream.WriteAsync(new OrderReply
+                var orderReply = new OrderReply
                 {
                     Id = order.Id,
                     CustomerId = order.CustomerId,
-                    OrderDate = order.OrderDate.ToString("o"), // Chuyển DateTime sang string
+                    OrderDate = order.OrderDate.ToString("o"),
                     Status = order.Status ?? "",
-                    TotalAmount = (double)order.TotalAmount // Chuyển decimal sang double
-                });
+                    TotalAmount = (double)order.TotalAmount
+                };
+
+                // ⭐ THÊM DETAILS VÀO ORDERREPLY
+                foreach (var d in order.Details)
+                {
+                    orderReply.Details.Add(new OrderDetailReply
+                    {
+                        Id = d.Id,
+                        OrderId = d.OrderId,
+                        QuotationId = d.QuotationId,
+                        UnitPrice = (double)d.UnitPrice
+                    });
+                }
+
+                await responseStream.WriteAsync(orderReply);
             }
         }
 

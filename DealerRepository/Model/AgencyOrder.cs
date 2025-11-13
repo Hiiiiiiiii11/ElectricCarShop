@@ -14,6 +14,7 @@ namespace AgencyRepository.Model
         public int VehicleId { get; set; }
         public int Quantity { get; set; }
         public string Status { get; set; }
+        public DateTime OrderDate { get; set; }
 
         public Agency Agency { get; set; }
         public AgencyContracts AgencyContracts { get; set; }
