@@ -199,7 +199,10 @@ namespace AnalyticService.Services
 
 
         // === HÀM LOGIC ETL CHÍNH (Xử lý data thật) ===
-        private async Task RunEtlProcess(IServiceScope scope, CancellationToken stoppingToken, DateTime processFullDate)
+        private async Task RunEtlProcess(
+    IServiceScope scope,
+    CancellationToken stoppingToken,
+    DateTime processFullDate)
         {
             try
             {
@@ -208,11 +211,11 @@ namespace AnalyticService.Services
 
                 // === 1. EXTRACT (Trích xuất) ===
                 logger.LogInformation("ETL Step 1: Extracting data via gRPC...");
+
                 var agencyClient = scope.ServiceProvider.GetRequiredService<IAgencyGrpcServiceClient>();
                 var vehicleClient = scope.ServiceProvider.GetRequiredService<IVehicleInstanceGrpcServiceClient>();
                 var orderClient = scope.ServiceProvider.GetRequiredService<IOrderGrpcServiceClient>();
 
-                // Chạy song song các lệnh gọi gRPC
                 var vehiclesTask = GrpcStreamHelper.ReadAllAsync(vehicleClient.GetAllVehicleInstances(new GetAllVehicleInstanceRequest()), stoppingToken);
                 var agenciesTask = GrpcStreamHelper.ReadAllAsync(agencyClient.GetAllAgencies(new GetAllAgencyRequest()), stoppingToken);
                 var pricesTask = GrpcStreamHelper.ReadAllAsync(vehicleClient.GetAllVehiclePrices(new GetAllVehiclePriceRequest()), stoppingToken);
@@ -223,7 +226,9 @@ namespace AnalyticService.Services
                 var quotationsTask = GrpcStreamHelper.ReadAllAsync(orderClient.GetAllQuotations(new GetAllQuotationRequest()), stoppingToken);
                 var agencyOrdersTask = GrpcStreamHelper.ReadAllAsync(agencyClient.GetAllAgencyOrders(new GetAllAgencyOrderRequest()), stoppingToken);
 
-                await Task.WhenAll(vehiclesTask, agenciesTask, pricesTask, promotionsTask, targetsTask, testDrivesTask, ordersTask, quotationsTask, agencyOrdersTask);
+                await Task.WhenAll(
+                    vehiclesTask, agenciesTask, pricesTask, promotionsTask,
+                    targetsTask, testDrivesTask, ordersTask, quotationsTask, agencyOrdersTask);
 
                 var vehicles = await vehiclesTask;
                 var agencies = await agenciesTask;
@@ -233,90 +238,143 @@ namespace AnalyticService.Services
                 var testDrives = await testDrivesTask;
                 var orders = await ordersTask;
                 var quotations = await quotationsTask;
-                var agencyOrders = await agencyOrdersTask; // (Dù không dùng nhưng vẫn lấy)
+                var agencyOrders = await agencyOrdersTask;
 
-                logger.LogInformation($"Extracted: {agencies.Count} agencies, {vehicles.Count} vehicle instances, {orders.Count} customer orders.");
+                logger.LogInformation(
+                    "Extracted: {AgencyCount} agencies, {VehicleInstanceCount} vehicle instances, {OrderCount} orders, {QuotationCount} quotations.",
+                    agencies.Count, vehicles.Count, orders.Count, quotations.Count);
 
-                // === 2. TRANSFORM (Chuyển đổi) ===
-                logger.LogInformation("ETL Step 2: Transforming data for {Year}-{Month}...", processFullDate.Year, processFullDate.Month);
-
+                // === 2. TRANSFORM ===
                 var processYear = processFullDate.Year;
                 var processMonth = processFullDate.Month;
 
-                // Lấy TẤT CẢ Lịch sử (bao gồm cả data giả vừa tạo)
-                var historicalData = (await analyticRepo.GetHistoricalFeaturesForLagging(DateTime.UtcNow)).ToList();
+                logger.LogInformation(
+                    "ETL Step 2: Transforming data for {Year}-{Month}...",
+                    processYear, processMonth);
 
-                // --- CHUẨN BỊ LOOKUP TABLES ---
-                var instanceToModelLookup = vehicles.ToDictionary(v => v.Id, v => v.VehicleId);
-                var vehicleModels = vehicles.Where(v => v.VehicleId > 0).Select(v => new { v.VehicleId, v.BatteryCapacity, v.RangeKM }).Distinct().ToList();
-                var agencyModels = agencies.Select(a => new { a.Id, a.Location }).Distinct().ToList();
+                // Lịch sử để tính lag & rolling
+                var historicalData = (await analyticRepo
+                    .GetHistoricalFeaturesForLagging(DateTime.UtcNow))
+                    .ToList();
+
+                // Lookup nhanh
+                var quotationLookup = quotations.ToDictionary(q => q.Id, q => q);
+                var vehicleInstanceToModel = vehicles.ToDictionary(v => v.Id, v => v.VehicleId);
+
+                var vehicleModels = vehicles
+                    .Where(v => v.VehicleId > 0)
+                    .Select(v => new { v.VehicleId, v.BatteryCapacity, v.RangeKM })
+                    .Distinct()
+                    .ToList();
+
+                var agencyModels = agencies
+                    .Select(a => new { a.Id, a.Location })
+                    .Distinct()
+                    .ToList();
+
                 var featuresToLoad = new List<Monthly_Demand_Features>();
 
                 foreach (var vehicleModel in vehicleModels)
                 {
                     var vehicleId = vehicleModel.VehicleId;
-                    // Lấy các xe (instances) thuộc model (loại xe) này
-                    var instancesForThisModel = vehicles.Where(v => v.VehicleId == vehicleId).Select(v => v.Id).ToHashSet();
-                    if (!instancesForThisModel.Any()) continue; // Bỏ qua nếu model này không có xe instance
+
+                    var instancesForModel = vehicles
+                        .Where(v => v.VehicleId == vehicleId)
+                        .Select(v => v.Id)
+                        .ToHashSet();
+
+                    if (!instancesForModel.Any())
+                        continue;
 
                     foreach (var agency in agencyModels)
                     {
                         var agencyId = agency.Id;
 
-                        // --- BẮT ĐẦU TÍNH TOÁN FEATURES ---
+                        // === 2.1 UnitsSold: đếm xe thật bán ra ===
+                       int unitsSold = ComputeUnitsSold(
+                           orders,
+                           quotationLookup,
+                           instancesForModel,
+                           agencyId,
+                           processYear,
+                           processMonth);
 
-                        // 1. Quotations & UnitsSold
-                        var acceptedQuotes = quotations.Where(q =>
-                           q.AgencyId == agencyId &&
-                           instancesForThisModel.Contains(q.VehicleInstanceId) &&
-                           q.Status == "Accepted" &&
-                           IsDateInProcessMonth(q.CreatedDate, processYear, processMonth)
-                        ).ToList();
-                        int quotationsAcceptedCount = acceptedQuotes.Count;
-                        var customerIdsFromQuotes = acceptedQuotes.Select(q => q.CustomerId).ToHashSet();
-                        int unitsSold = orders.Count(o =>
-                            customerIdsFromQuotes.Contains(o.CustomerId) &&
-                            o.Status == "Completed" &&
-                            IsDateInProcessMonth(o.OrderDate, processYear, processMonth)
-                        );
-
-                        // 2. TestDrives
+                        // === 2.2 TestDrives ===
                         int testDrivesCount = testDrives.Count(t =>
                             t.AgencyId == agencyId &&
-                            instancesForThisModel.Contains(t.VehicleInstanceId) &&
+                            instancesForModel.Contains(t.VehicleInstanceId) &&
                             t.Status == "Completed" &&
-                            IsDateInProcessMonth(t.AppointmentDate, processYear, processMonth)
-                        );
+                            IsDateInProcessMonth(t.AppointmentDate, processYear, processMonth));
 
-                        // 3. Price
-                        var price = prices.FirstOrDefault(p => p.VehicleId == vehicleId && p.OptionalAgencyIdCase == VehiclePriceReply.OptionalAgencyIdOneofCase.AgencyId && p.AgencyId == agencyId && IsDateInRange(p.StartDate, p.EndDate, processFullDate))
-                                 ?? prices.FirstOrDefault(p => p.VehicleId == vehicleId && p.OptionalAgencyIdCase == VehiclePriceReply.OptionalAgencyIdOneofCase.None && IsDateInRange(p.StartDate, p.EndDate, processFullDate));
+                        // === 2.3 Giá bán trung bình ===
+                        var price = prices.FirstOrDefault(p =>
+                                        p.VehicleId == vehicleId &&
+                                        p.OptionalAgencyIdCase == VehiclePriceReply.OptionalAgencyIdOneofCase.AgencyId &&
+                                        p.AgencyId == agencyId &&
+                                        IsDateInRange(p.StartDate, p.EndDate, processFullDate))
+                                    ?? prices.FirstOrDefault(p =>
+                                        p.VehicleId == vehicleId &&
+                                        p.OptionalAgencyIdCase == VehiclePriceReply.OptionalAgencyIdOneofCase.None &&
+                                        IsDateInRange(p.StartDate, p.EndDate, processFullDate));
+
                         decimal avgPrice = (decimal)(price?.PriceAmount ?? 0);
 
-                        // 4. Promotion
-                        var promo = promotions.FirstOrDefault(p => p.VehicleId == vehicleId && IsDateInRange(p.StartDate, p.EndDate, processFullDate));
+                        // === 2.4 Promotion ===
+                        var promo = promotions.FirstOrDefault(p =>
+                            p.VehicleId == vehicleId &&
+                            IsDateInRange(p.StartDate, p.EndDate, processFullDate));
+
                         bool wasOnPromo = promo != null;
                         decimal promotionDiscountAmount = (decimal)(promo?.DiscountAmount ?? 0);
 
-                        // 6. AgencyTarget
-                        int agencyTarget = targets.FirstOrDefault(t => t.AgencyId == agencyId && t.TargetYear == processYear && t.TargetMonth == processMonth)?.TargetSales ?? 0;
+                        // === 2.5 Target (số xe kỳ vọng) ===
+                        int agencyTarget = targets
+                            .Where(t => t.AgencyId == agencyId
+                                     && t.VehicleId == vehicleId
+                                     && t.TargetYear == processYear
+                                     && t.TargetMonth == processMonth)
+                            .Select(t => t.TargetUnits)
+                            .FirstOrDefault();
 
-                        // 7. AgencyOrdersQuantity (Proxy)
-                        int agencyOrdersQuantity = agencyTarget; // Dùng proxy
+                        // === 2.6 AgencyOrdersQuantity (đặt hàng từ HQ xuống đại lý) ===
+                        // ⚠️ Tùy thuộc AgencyOrderReply có trường gì
+                        int agencyOrdersQuantity = agencyOrders
+                            .Where(o =>
+                                o.AgencyId == agencyId &&
+                                o.VehicleId == vehicleId &&                  // nếu là VehicleModel
+                                IsDateInProcessMonth(o.OrderDate, processYear, processMonth))
+                            .Sum(o => o.Quantity); // điều chỉnh nếu tên field khác
 
-                        // 8. Lag
-                        var lastMonth = processFullDate.AddMonths(-1);
-                        var lastYear = processFullDate.AddYears(-1);
-                        var lastMonthData = historicalData.FirstOrDefault(h => h.VehicleId == vehicleId && h.AgencyId == agencyId && h.Year == lastMonth.Year && h.Month == lastMonth.Month);
-                        var lastYearData = historicalData.FirstOrDefault(h => h.VehicleId == vehicleId && h.AgencyId == agencyId && h.Year == lastYear.Year && h.Month == lastYear.Month);
+                        // === 2.7 Lag features ===
+                        var lastMonthDate = processFullDate.AddMonths(-1);
+                        var lastYearDate = processFullDate.AddYears(-1);
+
+                        var lastMonthData = historicalData.FirstOrDefault(h =>
+                            h.VehicleId == vehicleId &&
+                            h.AgencyId == agencyId &&
+                            h.Year == lastMonthDate.Year &&
+                            h.Month == lastMonthDate.Month);
+
+                        var lastYearData = historicalData.FirstOrDefault(h =>
+                            h.VehicleId == vehicleId &&
+                            h.AgencyId == agencyId &&
+                            h.Year == lastYearDate.Year &&
+                            h.Month == lastYearDate.Month);
+
                         int unitsSoldLastMonth = lastMonthData?.UnitsSold ?? 0;
                         int unitsSoldSameMonthLastYear = lastYearData?.UnitsSold ?? 0;
-
-                        // 9. Rolling
                         double rollingAvg3Months = GetRollingAverage(historicalData, vehicleId, agencyId, processFullDate, 3);
                         double rollingAvg6Months = GetRollingAverage(historicalData, vehicleId, agencyId, processFullDate, 6);
 
-                        featuresToLoad.Add(new Monthly_Demand_Features
+                        // === 2.8 QuotationsAcceptedCount ===
+                        int quotationsAcceptedCount = quotations.Count(q =>
+                            q.AgencyId == agencyId &&
+                            instancesForModel.Contains(q.VehicleInstanceId) &&
+                            q.Status == "Accepted" &&
+                            IsDateInProcessMonth(q.CreatedDate.ToString(), processYear, processMonth));
+
+                        // === 2.9 Build feature row ===
+                        var feature = new Monthly_Demand_Features
                         {
                             Year = processYear,
                             Month = processMonth,
@@ -332,18 +390,22 @@ namespace AnalyticService.Services
                             PromotionDiscountAmount = promotionDiscountAmount,
                             TestDrivesCount = testDrivesCount,
                             QuotationsAcceptedCount = quotationsAcceptedCount,
-                            AgencyOrdersQuantity = agencyOrdersQuantity,
-                            AgencyTarget = agencyTarget,
+                            AgencyOrdersQuantity = agencyOrdersQuantity, // real data
+                            AgencyTarget = agencyTarget,        // chỉ để KPI / report
                             VehicleBatteryCapacity = vehicleModel.BatteryCapacity,
                             VehicleRangeKM = vehicleModel.RangeKM,
                             AgencyRegion = agency.Location,
                             LastUpdatedAt = DateTime.UtcNow
-                        });
+                        };
+
+                        featuresToLoad.Add(feature);
                     }
                 }
 
-                // === 3. LOAD (Tải) ===
-                logger.LogInformation($"ETL Step 3: Loading {featuresToLoad.Count} feature rows for {processYear}-{processMonth}...");
+                // === 3. LOAD ===
+                logger.LogInformation(
+                    "ETL Step 3: Loading {RowCount} feature rows for {Year}-{Month}...",
+                    featuresToLoad.Count, processYear, processMonth);
 
                 if (featuresToLoad.Any())
                 {
@@ -360,6 +422,51 @@ namespace AnalyticService.Services
                 logger.LogError(ex, "ETL process crashed inside RunEtlProcess");
                 throw;
             }
+        }
+
+
+
+        private int ComputeUnitsSold(
+    IEnumerable<OrderReply> orders,
+    Dictionary<int, QuotationReply> quotationLookup,
+    HashSet<int> instancesForModel,
+    int agencyId,
+    int processYear,
+    int processMonth)
+        {
+            int count = 0;
+
+            foreach (var order in orders)
+            {
+                if (order.Status != "Completed" && order.Status != "Pending-Payment")
+                    continue;
+
+                var orderDate = DateTime.Parse(order.OrderDate);
+
+                if (orderDate.Year != processYear || orderDate.Month != processMonth)
+                    continue;
+
+                foreach (var detail in order.Details)
+                {
+                    if (!quotationLookup.ContainsKey(detail.QuotationId))
+                        continue;
+
+                    var q = quotationLookup[detail.QuotationId];
+
+                    // --- match đúng loại xe ---
+                    if (!instancesForModel.Contains(q.VehicleInstanceId))
+                        continue;
+
+                    // --- match đúng đại lý ---
+                    if (q.AgencyId != agencyId)
+                        continue;
+
+                    // *** COUNT 1 XE BÁN ***
+                    count += 1;
+                }
+            }
+
+            return count;
         }
 
         // (Các hàm Helper: IsDateInRange, IsDateInProcessMonth, GetRollingAverage)

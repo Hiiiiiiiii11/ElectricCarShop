@@ -217,6 +217,21 @@ namespace AnalyticAPI.Controllers
 
             }
         }
+        [HttpGet("agency-orders")]
+        [ProducesResponseType(typeof(IEnumerable<AgencyOrderReply>), 200)]
+        public async Task<IActionResult> GetAgencyOrders()
+        {
 
+            try
+            {
+                var data = await _analyticsService.GetAllAgencyOrdersAsync();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+
+            }
+        }
     }
 }

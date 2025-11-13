@@ -18,20 +18,20 @@ namespace AgencyRepository.Repositories
             _context = context;
         }
 
-        public async Task<AgencyTargets?> GetByAgencyAndPeriodAsync(int AgencyId, int year, int month)
+        public async Task<IEnumerable<AgencyTargets>> GetByAgencyAndPeriodAsync(int AgencyId, int year, int month)
         {
             return await _context.AgencyTargets.Include(dt => dt.Agency)
-                .FirstOrDefaultAsync(dt => dt.AgencyId == AgencyId && dt.TargetYear == year && dt.TargetMonth == month);
+                .Where(dt => dt.AgencyId == AgencyId && dt.TargetYear == year && dt.TargetMonth == month).ToListAsync();
         }
 
-        public async Task<AgencyTargets?> GetAgencyTargetsByAgencyId(int AgencyId)
+        public async Task<IEnumerable<AgencyTargets>> GetAgencyTargetsByAgencyId(int AgencyId)
         {
-           return await _context.AgencyTargets
-                .Include(dt => dt.Agency)
-                .Where(dt => dt.AgencyId == AgencyId)
-                .OrderByDescending(dt => dt.TargetYear)
-                .ThenByDescending(dt => dt.TargetMonth)
-                .FirstOrDefaultAsync();
+            return await _context.AgencyTargets
+                 .Include(dt => dt.Agency)
+                 .Where(dt => dt.AgencyId == AgencyId)
+                 .OrderByDescending(dt => dt.TargetYear)
+                 .ThenByDescending(dt => dt.TargetMonth).ToListAsync();
+                
         }
 
         public async Task<IEnumerable<AgencyTargets>> GetTargetsByAgencyAsync(int AgencyId, int? year = null, int? month = null)
@@ -66,16 +66,16 @@ namespace AgencyRepository.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task UpdateAchievedSalesAsync(int targetId, int achievedSales)
-        {
-            var target = await _context.AgencyTargets.FindAsync(targetId);
-            if(target == null)
-            {
-                throw new KeyNotFoundException($"Agency target with ID {targetId} not found.");
-            }
-            target.AchievedSales += achievedSales;
-            _context.AgencyTargets.Update(target);
-            await _context.SaveChangesAsync();
-        }
+        //public async Task UpdateAchievedSalesAsync(int targetId, int achievedSales)
+        //{
+        //    var target = await _context.AgencyTargets.FindAsync(targetId);
+        //    if(target == null)
+        //    {
+        //        throw new KeyNotFoundException($"Agency target with ID {targetId} not found.");
+        //    }
+        //    target.AchievedSales += achievedSales;
+        //    _context.AgencyTargets.Update(target);
+        //    await _context.SaveChangesAsync();
+        //}
     }
 }

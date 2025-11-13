@@ -65,16 +65,27 @@ namespace OrderAPIService.Services
 
             // 🧩 Logic tạo transaction
             decimal transactionAmount = 0;
+            string transactionStatus = "Pending";
 
             if (payment.Status == "Completed")
             {
                 // ✅ Thanh toán hoàn tất ngay => tạo transaction toàn bộ Amount
                 transactionAmount = payment.Amount;
+                transactionStatus = "Success";
+
+
+            }
+            else if (payment.Status == "Failed")
+            {
+                // Thanh toán thất bại
+                transactionAmount = 0;
+                transactionStatus = "Fail";
             }
             else if (payment.Prepay > 0)
             {
                 // ✅ Nếu chưa hoàn tất mà có Prepay, tạo transaction cho phần Prepay
                 transactionAmount = payment.Prepay;
+                transactionStatus = "Success";
             }
 
             if (transactionAmount > 0)
@@ -85,7 +96,7 @@ namespace OrderAPIService.Services
                     TransactionCode = GenerateTransactionCode(),
                     TransactionDate = DateTime.UtcNow,
                     Amount = transactionAmount,
-                    Status = payment.Status
+                    Status = transactionStatus
                 };
 
                 await _transactionRepository.AddAsync(transaction);
