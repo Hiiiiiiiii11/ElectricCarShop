@@ -67,7 +67,13 @@ namespace AnalyticService.Services
             var firstReq = requests[0];
             var (startDate, endDate) = GetHistoricalDateRange(firstReq.Year, firstReq.Month);
             var historicalData = await _analyticRepo.GetFeaturesByDateRange(
-                startDate.Year, startDate.Month, endDate.Year, endDate.Month);
+    startDate.Year,
+    startDate.Month,
+    endDate.Year,
+    endDate.Month,
+    null,     // vehicleId optional
+    null      // agencyId optional
+);
 
             // 2. Chuẩn bị Tensor đầu vào
             var inputData = new float[batchSize * _numFeatures];
@@ -76,11 +82,8 @@ namespace AnalyticService.Services
             {
                 var req = requests[i];
 
-                // Tìm dòng lịch sử GẦN NHẤT cho (vehicle, agency)
-                var history = FindHistory(historicalData, req.VehicleId, req.AgencyId, req.Year, req.Month);
-
-                // Tạo 1 hàng feature (ĐÃ SỬA)
-                var featureRow = CreateFeatureRow(req, history);
+                // Tạo 1 hàng feature dựa trên TOÀN BỘ lịch sử của vehicle + agency
+                var featureRow = CreateFeatureRow(req, historicalData);
 
                 int offset = i * _numFeatures;
                 for (int j = 0; j < _numFeatures; j++)
@@ -136,16 +139,16 @@ namespace AnalyticService.Services
             return (startDate, endDate);
         }
 
-        private Monthly_Demand_Features FindHistory(IEnumerable<Monthly_Demand_Features> data, int vehicleId, int agencyId, int year, int month)
-        {
-            var targetDate = new DateTime(year, month, 1);
-            return data
-                .Where(d => d.VehicleId == vehicleId && d.AgencyId == agencyId)
-                .Where(d => new DateTime(d.Year, d.Month, 1) < targetDate)
-                .OrderByDescending(d => d.Year)
-                .ThenByDescending(d => d.Month)
-                .FirstOrDefault();
-        }
+        //private Monthly_Demand_Features FindHistory(IEnumerable<Monthly_Demand_Features> data, int vehicleId, int agencyId, int year, int month)
+        //{
+        //    var targetDate = new DateTime(year, month, 1);
+        //    return data
+        //        .Where(d => d.VehicleId == vehicleId && d.AgencyId == agencyId)
+        //        .Where(d => new DateTime(d.Year, d.Month, 1) < targetDate)
+        //        .OrderByDescending(d => d.Year)
+        //        .ThenByDescending(d => d.Month)
+        //        .FirstOrDefault();
+        //}
 
         private int EncodeCategory(string key, string value)
         {
@@ -158,52 +161,106 @@ namespace AnalyticService.Services
         }
 
         // === LOGIC TẠO FEATURE ĐÃ SỬA ===
-        private float[] CreateFeatureRow(PredictDemandDto req, Monthly_Demand_Features history)
+        private float[] CreateFeatureRow(PredictDemandDto req, IEnumerable<Monthly_Demand_Features> allHistory)
         {
-            // Tự động điền các trường bị thiếu từ lịch sử (hoặc giá trị mặc định)
-            // Model vẫn cần 17 features, nhưng UI chỉ gửi 4
+            var targetDate = new DateTime(req.Year, req.Month, 1);
 
+            // Lấy toàn bộ lịch sử của (vehicleId, agencyId) trước tháng cần dự đoán
+            var series = allHistory
+                .Where(d => d.VehicleId == req.VehicleId
+                         && d.AgencyId == req.AgencyId
+                         && new DateTime(d.Year, d.Month, 1) < targetDate)
+                .OrderByDescending(d => d.Year)
+                .ThenByDescending(d => d.Month)
+                .ToList();
+
+            // Lấy các tháng gần nhất
+            var last1 = series.ElementAtOrDefault(0);
+            var last2 = series.ElementAtOrDefault(1);
+            var last3 = series.ElementAtOrDefault(2);
+
+            float unitsLast1 = last1?.UnitsSold ?? 0f;
+            float unitsLast2 = last2?.UnitsSold ?? 0f;
+            float unitsLast3 = last3?.UnitsSold ?? 0f;
+
+            // Rolling 3, rolling 6
+            var last3List = series.Take(3).Select(d => (float)d.UnitsSold).ToList();
+            float rolling3 = last3List.Count > 0 ? last3List.Average() : 0f;
+
+            var last6List = series.Take(6).Select(d => (float)d.UnitsSold).ToList();
+            float rolling6 = last6List.Count > 0 ? last6List.Average() : 0f;
+
+            float trend3 = rolling3 - rolling6;
+            float momentum = unitsLast1 - rolling3;
+
+            // Tỷ lệ hoàn thành chỉ tiêu tháng trước: unitsSoldLast1 / agencyTargetLastMonth
+            float targetAchievedRate = 0f;
+            if (last1 != null && last1.AgencyTarget > 0)
+            {
+                targetAchievedRate = (float)last1.UnitsSold / (float)last1.AgencyTarget;
+            }
+
+            // Chọn bản ghi dùng làm “tham số tĩnh” (giá, cấu hình xe, region…)
+            var lastForStatics = last1 ?? series.LastOrDefault();
+
+            float avgPrice = (float)(lastForStatics?.AvgPrice ?? 1_000_000_000);
+            float testDrives = (float)(lastForStatics?.TestDrivesCount ?? 0);
+            float quotations = (float)(lastForStatics?.QuotationsAcceptedCount ?? 0);
+
+            // Giả định tương lai không khuyến mãi (hoặc em có thể cho user chọn trong UI)
+            float wasOnPromotion = 0f;
+            float promoAmount = 0f;
+
+            float vehicleRange = lastForStatics?.VehicleRangeKM ?? 0f;
+
+            int monthEncoded = EncodeCategory("month", req.Month.ToString());
+            int vehicleEncoded = EncodeCategory("vehicleId", req.VehicleId.ToString());
+            int agencyEncoded = EncodeCategory("agencyId", req.AgencyId.ToString());
+            int regionEncoded = EncodeCategory("agencyRegion", lastForStatics?.AgencyRegion ?? "Unknown");
+            int batteryEncoded = EncodeCategory("vehicleBatteryCapacity", lastForStatics?.VehicleBatteryCapacity ?? "Unknown");
+
+            // Map theo ĐÚNG tên features đã dùng trong train.py
             var rowMap = new Dictionary<string, float>
             {
-                // Dữ liệu từ request (4 trường)
-                ["month"] = EncodeCategory("month", req.Month.ToString()),
-                ["vehicleId"] = EncodeCategory("vehicleId", req.VehicleId.ToString()),
-                ["agencyId"] = EncodeCategory("agencyId", req.AgencyId.ToString()),
-                ["year"] = req.Year, // (Mặc dù 'year' không trong list, nhưng để đây)
+                ["month"] = monthEncoded,
+                ["vehicleId"] = vehicleEncoded,
+                ["agencyId"] = agencyEncoded,
 
-                // Dữ liệu TỰ SUY LUẬN (dựa trên lịch sử)
-                ["avgPrice"] = (float)(history?.AvgPrice ?? 1000000000), // Lấy giá của tháng trước
-                ["wasOnPromotion"] = 0f, // Giả định TƯƠNG LAI không có KM
-                ["promotionDiscountAmount"] = 0f,
-                ["agencyTarget"] = (float)(history?.AgencyTarget ?? 10), // Lấy target tháng trước
+                ["unitsSoldLast1"] = unitsLast1,
+                ["unitsSoldLast2"] = unitsLast2,
+                ["unitsSoldLast3"] = unitsLast3,
 
-                // Dữ liệu TỪ LỊCH SỬ (Lag/Rolling)
-                ["unitsSoldLastMonth"] = history?.UnitsSold ?? 0f,
-                ["unitsSoldSameMonthLastYear"] = history?.UnitsSoldSameMonthLastYear ?? 0f,
-                ["rollingAvgSales3Months"] = (float)(history?.RollingAvgSales3Months ?? 0.0),
-                ["rollingAvgSales6Months"] = (float)(history?.RollingAvgSales6Months ?? 0.0),
+                ["rolling3"] = rolling3,
+                ["rolling6"] = rolling6,
+                ["trend3"] = trend3,
+                ["momentum"] = momentum,
+                ["targetAchievedRate"] = targetAchievedRate,
 
-                // Dữ liệu TĨNH (Lấy từ lịch sử)
-                ["vehicleRangeKM"] = history?.VehicleRangeKM ?? 0f,
-                ["agencyRegion"] = EncodeCategory("agencyRegion", history?.AgencyRegion ?? "Unknown"),
-                ["vehicleBatteryCapacity"] = EncodeCategory("vehicleBatteryCapacity", history?.VehicleBatteryCapacity ?? "Unknown"),
+                ["avgPrice"] = avgPrice,
+                ["wasOnPromotion"] = wasOnPromotion,
+                ["promotionDiscountAmount"] = promoAmount,
+                ["testDrivesCount"] = testDrives,
+                ["quotationsAcceptedCount"] = quotations,
 
-                // Dữ liệu KHÔNG DÙNG ĐỂ DỰ ĐOÁN (Chống rò rỉ target)
-                ["testDrivesCount"] = 0f,
-                ["quotationsAcceptedCount"] = 0f,
-                ["agencyOrdersQuantity"] = 0f // (QUAN TRỌNG: Không dùng proxy nữa)
+                ["vehicleRangeKM"] = vehicleRange,
+                ["agencyRegion"] = regionEncoded,
+                ["vehicleBatteryCapacity"] = batteryEncoded
             };
 
-            // Sắp xếp mảng theo đúng thứ tự
             var featureRow = new float[_numFeatures];
+
+            // Đảm bảo đúng thứ tự feature như trong feature_list.json
             for (int i = 0; i < _numFeatures; i++)
             {
                 string featureName = _featureOrder[i];
+
                 if (!rowMap.TryGetValue(featureName, out featureRow[i]))
                 {
-                    _logger.LogError("Thieu feature '{FeatureName}' khi tao hang du doan!", featureName);
+                    _logger.LogWarning("Thiếu feature '{FeatureName}' khi tạo hàng dự đoán, gán 0.", featureName);
+                    featureRow[i] = 0f;
                 }
             }
+
             return featureRow;
         }
     }

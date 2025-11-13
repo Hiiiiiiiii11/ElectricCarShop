@@ -67,11 +67,16 @@ namespace AnalyticService.Services
             return false; // Không có trigger
         }
 
-        public async Task<IEnumerable<DemandFeatureResponse>> GetDemandFeaturesAsync(int startYear, int startMonth, int endYear, int endMonth)
+        public async Task<IEnumerable<DemandFeatureResponse>> GetDemandFeaturesAsync(
+     int startYear, int startMonth, int endYear, int endMonth,
+     int? vehicleId, int? agencyId)
         {
-            var features = await _analyticRepo.GetFeaturesByDateRange(startYear, startMonth, endYear, endMonth);
+            var features = await _analyticRepo.GetFeaturesByDateRange(
+                startYear, startMonth, endYear, endMonth,
+                vehicleId, agencyId
+            );
 
-            // Map từ Model (Database) sang DTO (Response)
+            // Map từ Model (Database) sang DTO
             return features.Select(f => new DemandFeatureResponse
             {
                 Year = f.Year,
@@ -94,9 +99,9 @@ namespace AnalyticService.Services
                 VehicleRangeKM = f.VehicleRangeKM,
                 AgencyRegion = f.AgencyRegion,
                 LastUpdatedAt = f.LastUpdatedAt
-                
             });
         }
+
 
         public async Task<IEnumerable<OrderReply>> GetAllOrdersAsync()
         {
