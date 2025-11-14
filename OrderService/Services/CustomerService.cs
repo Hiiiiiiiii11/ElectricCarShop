@@ -21,41 +21,92 @@ namespace OrderService.Services
             _emailVerificationGrpcClient = emailVerificationGrpcServiceClient;
         }
 
-        public async Task<CustomerResponse> CreateAsync(CustomerRequest request)
+        public async Task<Customers> FindOrCreateCustomerAsync(CustomerRequest request)
         {
-            // ===== BƯỚC KIỂM TRA MỚI =====
-            // 1. Kiểm tra xem email đã được xác thực chưa bằng gRPC
+            var normalizedEmail = request.Email.Trim().ToLower();
+
+            // 1) Verify email
             var isEmailVerified = await _emailVerificationGrpcClient.IsEmailVerifiedAsync(request.Email);
             if (!isEmailVerified)
-            {
-                // Nếu chưa, ném ra lỗi và không cho tạo
-                throw new InvalidOperationException($"Email '{request.Email}' has not been verified. Please verify the email before creating a customer.");
-            }
-            // =============================
+                throw new InvalidOperationException($"Email '{request.Email}' has not been verified.");
 
-            // 2. Nếu đã xác thực, tiếp tục tạo customer như cũ
+            // 2) Tìm customer theo Email + AgencyId
+            var existingCustomer = await _customerRepository.GetByEmailAndAgencyAsync(
+                normalizedEmail,
+                request.AgencyId.Value
+            );
+
+            if (existingCustomer != null)
+            {
+                // Kiểm tra phone khớp
+                if (existingCustomer.Phone != request.Phone)
+                    throw new InvalidOperationException(
+                        $"Email '{request.Email}' đã đăng ký tại đại lý này nhưng số điện thoại không khớp."
+                    );
+
+                // Có thể update profile
+                bool needUpdate = false;
+
+                if (existingCustomer.FullName != request.FullName)
+                {
+                    existingCustomer.FullName = request.FullName;
+                    needUpdate = true;
+                }
+                if (existingCustomer.Address != request.Address)
+                {
+                    existingCustomer.Address = request.Address;
+                    needUpdate = true;
+                }
+
+                if (needUpdate)
+                {
+                    _customerRepository.Update(existingCustomer);
+                    await _customerRepository.SaveChangesAsync();
+                }
+
+                return existingCustomer;
+            }
+
+            // 3) Tạo mới nếu chưa có trong Agency này
             var newCustomer = new Customers
             {
                 FullName = request.FullName,
-                Email = request.Email,
-                Phone = request.Phone,
+                Email = normalizedEmail,
+                Phone = request.Phone.Trim(),
                 Address = request.Address,
                 AgencyId = request.AgencyId,
                 Class = request.Class ?? "Normal",
-                //CreateAt = DateTime.UtcNow,
-                CreateAt = DateTime.UtcNow.AddMonths(-1),
+                CreateAt = DateTime.UtcNow.AddMonths(-1)
             };
 
             await _customerRepository.AddAsync(newCustomer);
             await _customerRepository.SaveChangesAsync();
 
-            return MapToResponse(newCustomer);
+            return newCustomer;
         }
+
+
+
+
+
+
         public async Task<CustomerResponse> UpdateAsync(int id, CustomerUpdateRequest request)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
             if (customer == null)
                 throw new KeyNotFoundException($"Customer with ID {id} not found.");
+
+            //if (!string.IsNullOrWhiteSpace(request.Email) && request.Email != customer.Email)
+            //{
+            //    if (await _customerRepository.EmailExistsAsync(request.Email, excludeId: id))
+            //        throw new InvalidOperationException($"Email '{request.Email}' already exists.");
+            //}
+
+            //if (!string.IsNullOrWhiteSpace(request.Phone) && request.Phone != customer.Phone)
+            //{
+            //    if (await _customerRepository.PhoneExistsAsync(request.Phone, excludeId: id))
+            //        throw new InvalidOperationException($"Phone '{request.Phone}' already exists.");
+            //}
 
             if (!string.IsNullOrWhiteSpace(request.FullName))
                 customer.FullName = request.FullName;

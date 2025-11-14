@@ -12,8 +12,8 @@ using OrderRepository.Data;
 namespace OrderRepository.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20251020144617_updatedba")]
-    partial class updatedba
+    [Migration("20251114144421_changeatribute")]
+    partial class changeatribute
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,11 +36,11 @@ namespace OrderRepository.Migrations
                     b.Property<int>("AgencyId")
                         .HasColumnType("int");
 
+                    b.Property<int>("CreateBy")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -83,6 +83,9 @@ namespace OrderRepository.Migrations
                     b.Property<DateTime>("ContractDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ContractImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ContractName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -121,9 +124,15 @@ namespace OrderRepository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CreateAt")
+                    b.Property<int?>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Class")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -142,6 +151,44 @@ namespace OrderRepository.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("OrderRepository.Model.Delivery", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeliveryStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ImgUrlAfter")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImgUrlBefore")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId", "DeliveryDate");
+
+                    b.ToTable("Deliveries", (string)null);
+                });
+
             modelBuilder.Entity("OrderRepository.Model.Feedback", b =>
                 {
                     b.Property<int>("Id")
@@ -149,6 +196,9 @@ namespace OrderRepository.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AgencyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -161,7 +211,6 @@ namespace OrderRepository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Reply")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -180,6 +229,145 @@ namespace OrderRepository.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Feedbacks");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentItems", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountDue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("FeeComponent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("InstallmentNo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InstallmentPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("InterestComponent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("PrincipalComponent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstallmentPlanId");
+
+                    b.ToTable("InstallmentItems");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentPayments", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("InstallmentItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InstallmentPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PaidDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstallmentItemId");
+
+                    b.HasIndex("InstallmentPlanId");
+
+                    b.ToTable("InstallmentPayments");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentPlans", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AgencyContractId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InterestMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PrincipalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RuleJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.ToTable("InstallmentPlans", t =>
+                        {
+                            t.HasCheckConstraint("CK_InstallmentPlans_ContractType", "([ContractId] IS NOT NULL AND [AgencyContractId] IS NULL) OR ([ContractId] IS NULL AND [AgencyContractId] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("OrderRepository.Model.OrderDetail", b =>
@@ -216,10 +404,10 @@ namespace OrderRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("CreateBy")
                         .HasColumnType("int");
 
-                    b.Property<int>("CustomerId1")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
@@ -232,14 +420,9 @@ namespace OrderRepository.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("CustomerId1");
 
                     b.ToTable("Orders");
                 });
@@ -252,17 +435,19 @@ namespace OrderRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AgencyOrderId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaymentMethod")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Prepay")
@@ -290,7 +475,10 @@ namespace OrderRepository.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("PaymentId")
+                    b.Property<int?>("InstallPaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -299,7 +487,7 @@ namespace OrderRepository.Migrations
 
                     b.Property<string>("TransactionCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
@@ -307,6 +495,9 @@ namespace OrderRepository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentId");
+
+                    b.HasIndex("TransactionCode")
+                        .IsUnique();
 
                     b.ToTable("Transactions");
                 });
@@ -333,6 +524,15 @@ namespace OrderRepository.Migrations
                     b.Navigation("Quotation");
                 });
 
+            modelBuilder.Entity("OrderRepository.Model.Delivery", b =>
+                {
+                    b.HasOne("OrderRepository.Model.Orders", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OrderRepository.Model.Feedback", b =>
                 {
                     b.HasOne("OrderRepository.Model.Customers", "Customer")
@@ -342,6 +542,44 @@ namespace OrderRepository.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentItems", b =>
+                {
+                    b.HasOne("OrderRepository.Model.InstallmentPlans", "InstallmentPlans")
+                        .WithMany("Items")
+                        .HasForeignKey("InstallmentPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InstallmentPlans");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentPayments", b =>
+                {
+                    b.HasOne("OrderRepository.Model.InstallmentItems", "InstallmentItem")
+                        .WithMany("Payments")
+                        .HasForeignKey("InstallmentItemId");
+
+                    b.HasOne("OrderRepository.Model.InstallmentPlans", "InstallmentPlan")
+                        .WithMany("Payments")
+                        .HasForeignKey("InstallmentPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InstallmentItem");
+
+                    b.Navigation("InstallmentPlan");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentPlans", b =>
+                {
+                    b.HasOne("OrderRepository.Model.Contracts", "Contract")
+                        .WithMany("Installments")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Contract");
                 });
 
             modelBuilder.Entity("OrderRepository.Model.OrderDetail", b =>
@@ -365,16 +603,10 @@ namespace OrderRepository.Migrations
 
             modelBuilder.Entity("OrderRepository.Model.Orders", b =>
                 {
-                    b.HasOne("OrderRepository.Model.Customers", null)
+                    b.HasOne("OrderRepository.Model.Customers", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("OrderRepository.Model.Customers", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId1")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -384,9 +616,7 @@ namespace OrderRepository.Migrations
                 {
                     b.HasOne("OrderRepository.Model.Orders", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
                     b.Navigation("Order");
                 });
@@ -395,9 +625,7 @@ namespace OrderRepository.Migrations
                 {
                     b.HasOne("OrderRepository.Model.Payments", "Payment")
                         .WithMany("Transactions")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PaymentId");
 
                     b.Navigation("Payment");
                 });
@@ -409,6 +637,11 @@ namespace OrderRepository.Migrations
                     b.Navigation("OrderDetails");
                 });
 
+            modelBuilder.Entity("OrderRepository.Model.Contracts", b =>
+                {
+                    b.Navigation("Installments");
+                });
+
             modelBuilder.Entity("OrderRepository.Model.Customers", b =>
                 {
                     b.Navigation("Feedbacks");
@@ -416,6 +649,18 @@ namespace OrderRepository.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Quotations");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentItems", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("OrderRepository.Model.InstallmentPlans", b =>
+                {
+                    b.Navigation("Items");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("OrderRepository.Model.Orders", b =>

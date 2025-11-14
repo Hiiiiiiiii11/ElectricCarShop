@@ -12,8 +12,8 @@ using OrderRepository.Data;
 namespace OrderRepository.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20251104083438_fixfeeback")]
-    partial class fixfeeback
+    [Migration("20251114150612_fixdbcustomer")]
+    partial class fixdbcustomer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,12 +121,16 @@ namespace OrderRepository.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CreateAt")
-                        .IsRequired()
+                    b.Property<int?>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Class")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()

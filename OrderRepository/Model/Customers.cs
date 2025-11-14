@@ -13,10 +13,10 @@ namespace OrderRepository.Model
         public string FullName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public string Address { get; set; }
+        public string? Address { get; set; }
         public DateTime CreateAt { get; set; }
         public int? AgencyId { get; set; }
-        public string Class { get; set; }
+        public string? Class { get; set; }
 
         public ICollection<Orders> Orders { get; set; } = new List<Orders>();
         public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();

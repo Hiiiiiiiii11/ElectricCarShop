@@ -12,8 +12,8 @@ using UserRepository.Data;
 namespace UserRepository.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20251003180110_3")]
-    partial class _3
+    [Migration("20251114144330_changecreateat")]
+    partial class changecreateat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace UserRepository.Migrations
                     b.Property<DateTime>("Created_At")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Created_By")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -100,7 +103,7 @@ namespace UserRepository.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
+                    b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -125,9 +128,7 @@ namespace UserRepository.Migrations
                 {
                     b.HasOne("UserRepository.Model.Roles", "Role")
                         .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
                 });

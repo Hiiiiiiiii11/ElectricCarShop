@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace AgencyRepository.Migrations
+namespace UserRepository.Migrations
 {
     /// <inheritdoc />
-    public partial class addAtribute : Migration
+    public partial class changecreateat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
