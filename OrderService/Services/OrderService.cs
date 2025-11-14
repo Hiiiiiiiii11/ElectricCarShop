@@ -36,7 +36,8 @@ namespace OrderService.Services
                 CustomerId = request.CustomerId,
                 Status = "Pending", // Gán một status mặc định
                 CreateBy = request.CreateBy ?? 0,
-                OrderDate = DateTime.UtcNow,
+                //OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.UtcNow.AddMonths(-1),
                 TotalAmount = 0 // Khởi tạo tổng tiền bằng 0
             };
 

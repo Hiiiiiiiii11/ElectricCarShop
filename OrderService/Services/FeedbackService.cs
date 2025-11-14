@@ -60,8 +60,10 @@ namespace OrderService.Service
                 Status = request.Status ?? "Pending",
                 Reply = string.Empty,
                 AgencyId = request.AgencyId ?? 0,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                //CreatedAt = DateTime.UtcNow,
+                //UpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow.AddMonths(-1),
+                UpdatedAt = DateTime.UtcNow.AddMonths(-1)
             };
 
             await _feedbackRepository.AddAsync(feedback);
@@ -85,7 +87,8 @@ namespace OrderService.Service
                 feedback.Type = request.Type;
            if(!string.IsNullOrEmpty(request.Reply))
                 feedback.Reply = request.Reply;
-            feedback.UpdatedAt = DateTime.UtcNow;
+            //feedback.UpdatedAt = DateTime.UtcNow;
+            feedback.UpdatedAt = DateTime.UtcNow.AddMonths(-1);
             if(request.AgencyId.HasValue)
                 feedback.AgencyId = request.AgencyId.Value;
 

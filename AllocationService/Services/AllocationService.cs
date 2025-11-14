@@ -45,7 +45,8 @@ namespace AllocationService.Services
                 AgencyContractId = request.AgencyContractId,
                 VehicleInstanceId = request.VehicleInstanceId,
                 AgencyOrderId = request.AgencyOrderId,
-                AllocationDate = DateTime.UtcNow
+                //AllocationDate = DateTime.UtcNow,
+                AllocationDate = DateTime.UtcNow.AddMonths(-1)
             };
 
             await _allocationRepository.AddAsync(allocation);

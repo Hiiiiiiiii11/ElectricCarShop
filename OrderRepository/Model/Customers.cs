@@ -14,7 +14,7 @@ namespace OrderRepository.Model
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
-        public string CreateAt { get; set; }
+        public DateTime CreateAt { get; set; }
         public int? AgencyId { get; set; }
         public string Class { get; set; }
 
