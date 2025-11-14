@@ -36,7 +36,7 @@ namespace OrderRepository.Model.OrderDTO
             public string Address { get; set; }
             public int? AgencyId { get; set; }
         public string? Class { get; set; }
-        public string CreateAt { get; set; }
+        public DateTime CreateAt { get; set; }
         }
         public class FeedbackRequest
         {

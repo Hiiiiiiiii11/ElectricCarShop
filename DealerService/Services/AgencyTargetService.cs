@@ -26,8 +26,10 @@ namespace AgencyService.Services
                 TargetYear = request.TargetYear,
                 TargetMonth = request.TargetMonth,
                 TargetUnits = request.TargetUnits,
-                CreatedAt= DateTime.UtcNow,
-                UpdatedAt= DateTime.UtcNow,
+                //CreatedAt = DateTime.UtcNow,
+                //UpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow.AddMonths(-1),
+                UpdatedAt= DateTime.UtcNow.AddMonths(-1),
 
             };
             await _AgencyTargetRepository.AddAsync(target);
@@ -107,8 +109,8 @@ namespace AgencyService.Services
             if (request.TargetUnits.HasValue)
                 target.TargetUnits = request.TargetUnits.Value;
 
-
-            target.UpdatedAt = DateTime.UtcNow;
+            //target.UpdatedAt = DateTime.UtcNow;
+            target.UpdatedAt = DateTime.UtcNow.AddMonths(-1);
 
             _AgencyTargetRepository.Update(target);
             await _AgencyTargetRepository.SaveChangesAsync();

@@ -73,7 +73,8 @@ namespace OrderAPIService.Services
                 QuotedPrice = request.QuotedPrice,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CreatedAt = DateTime.UtcNow,
+                //CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow.AddMonths(-1),
                 CreateBy = request.CreateBy ?? 0,
                 Status = "Pending"
             };

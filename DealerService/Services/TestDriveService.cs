@@ -89,8 +89,10 @@ namespace AgencyService.Services
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Scheduled" : request.Status,
-                CreateAt = DateTime.UtcNow,
-                UpdateAt = DateTime.UtcNow,
+                //CreateAt = DateTime.UtcNow,
+                //UpdateAt = DateTime.UtcNow,
+                CreateAt = DateTime.UtcNow.AddMonths(-1),
+                UpdateAt = DateTime.UtcNow.AddMonths(-1),
                 IsOneDayReminderSent = false,
                 IsThreeDayReminderSent = false
             };
@@ -153,8 +155,8 @@ namespace AgencyService.Services
                 testDrive.Notes = request.Notes;
             if (!string.IsNullOrWhiteSpace(request.Feedback))
                 testDrive.Feedback = request.Feedback;
-
-            testDrive.UpdateAt = DateTime.UtcNow;
+            //testDrive.UpdateAt = DateTime.UtcNow;
+            testDrive.UpdateAt = DateTime.UtcNow.AddMonths(-1);
 
             _testDriveRepository.Update(testDrive);
             await _testDriveRepository.SaveChangesAsync();

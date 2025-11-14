@@ -53,7 +53,8 @@ namespace OrderAPIService.Services
             {
                 OrderId = request.OrderId,
                 AgencyOrderId = request.AgencyOrderId,
-                PaymentDate = DateTime.UtcNow,
+                //PaymentDate = DateTime.UtcNow,
+                PaymentDate = DateTime.UtcNow.AddMonths(-1),
                 Prepay = request.Prepay,
                 Amount = request.Amount,
                 PaymentMethod = request.PaymentMethod,
@@ -66,6 +67,7 @@ namespace OrderAPIService.Services
             // 🧩 Logic tạo transaction
             decimal transactionAmount = 0;
             string transactionStatus = "Pending";
+            DateTime transactionDate = DateTime.UtcNow.AddMonths(-1);
 
             if (payment.Status == "Completed")
             {
@@ -94,7 +96,8 @@ namespace OrderAPIService.Services
                 {
                     PaymentId = payment.Id,
                     TransactionCode = GenerateTransactionCode(),
-                    TransactionDate = DateTime.UtcNow,
+                    //TransactionDate = DateTime.UtcNow,
+                    TransactionDate = transactionDate,
                     Amount = transactionAmount,
                     Status = transactionStatus
                 };
@@ -175,7 +178,8 @@ namespace OrderAPIService.Services
                     {
                         PaymentId = payment.Id,
                         TransactionCode = GenerateTransactionCode(),
-                        TransactionDate = DateTime.UtcNow,
+                        //TransactionDate = DateTime.UtcNow,
+                        TransactionDate = DateTime.UtcNow.AddMonths(-1),
                         Amount = remaining,
                         Status = "completed"
                     };
