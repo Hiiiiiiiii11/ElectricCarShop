@@ -2,10 +2,13 @@
 using AgencyRepository.Model.DTO;
 using AgencyRepository.Repositories;
 using GrpcService;
+using Microsoft.Extensions.Logging;
+using Share.Setting;
 using Share.ShareServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace AgencyService.Services
@@ -17,13 +20,18 @@ namespace AgencyService.Services
         private readonly ICustomerGrpcServiceClient _customerGrpcServiceClient;
         private readonly IAgencyRepository _agencyRepository;
         private readonly IOrderGrpcServiceClient _orderGrpcServiceClient;
+        private readonly EmailSetting _emailSetting;
+        private readonly ILogger<TestDriveService> _logger;
 
         public TestDriveService(
             ITestDriveRepository testDriveRepository,
             IVehicleInstanceGrpcServiceClient vehicleGrpcServiceClient,
             ICustomerGrpcServiceClient customerGrpcServiceClient,
             IAgencyRepository agencyRepository,
-            IOrderGrpcServiceClient orderGrpcServiceClient
+            IOrderGrpcServiceClient orderGrpcServiceClient,
+            EmailSetting emailSetting,
+            ILogger<TestDriveService> logger
+
             )
         {
             _testDriveRepository = testDriveRepository;
@@ -31,20 +39,24 @@ namespace AgencyService.Services
             _customerGrpcServiceClient = customerGrpcServiceClient;
             _agencyRepository = agencyRepository;
             _orderGrpcServiceClient = orderGrpcServiceClient;
+            _emailSetting = emailSetting;
+            _logger = logger;
         }
 
         // ===== CREATE =====
         public async Task<TestDriveResponse> CreateTestDriveAsync(CreateTestDriveRequest request)
         {
-            // === BƯỚC 2: KIỂM TRA BÁO GIÁ TỒN TẠI (gRPC) ===
-            var quotationCheck = await _orderGrpcServiceClient.CheckQuotationExistsForVehicleAsync(request.VehicleInstanceId);
+            // 1️⃣ KIỂM TRA BÁO GIÁ TỒN TẠI (gRPC)
+            var quotationCheck = await _orderGrpcServiceClient
+                .CheckQuotationExistsForVehicleAsync(request.VehicleInstanceId);
+
             if (quotationCheck.Exists)
             {
-                throw new InvalidOperationException($"Không thể đặt lịch. Xe (ID: {request.VehicleInstanceId}) đã nằm trong một Báo giá (Pending hoặc Accepted).");
+                throw new InvalidOperationException(
+                    $"Không thể đặt lịch. Xe (ID: {request.VehicleInstanceId}) đã nằm trong một Báo giá (Pending hoặc Accepted).");
             }
-            // === KẾT THÚC KIỂM TRA BÁO GIÁ ===
 
-            // --- BƯỚC 1: KIỂM TRA BOOKING TRÙNG LẶP (USER + VEHICLE) (Logic cũ) ---
+            // 2️⃣ KIỂM TRA BOOKING TRÙNG (USER + VEHICLE)
             var existingUserBookingForVehicle = await _testDriveRepository.FindAsync(td =>
                 td.CustomerId == request.CustomerId &&
                 td.VehicleInstanceId == request.VehicleInstanceId &&
@@ -53,10 +65,11 @@ namespace AgencyService.Services
 
             if (existingUserBookingForVehicle.Any())
             {
-                throw new InvalidOperationException($"Khách hàng (ID: {request.CustomerId}) đã có lịch hẹn (Scheduled/Completed) cho xe này (ID: {request.VehicleInstanceId}).");
+                throw new InvalidOperationException(
+                    $"Khách hàng (ID: {request.CustomerId}) đã có lịch hẹn (Scheduled/Completed) cho xe này (ID: {request.VehicleInstanceId}).");
             }
 
-            // --- BƯỚC 2: KIỂM TRA TRÙNG NGÀY (Logic cũ) ---
+            // 3️⃣ KIỂM TRA NGÀY HẸN
             if (!request.AppointmentDate.HasValue)
             {
                 throw new InvalidOperationException("Ngày hẹn (AppointmentDate) là bắt buộc.");
@@ -68,6 +81,7 @@ namespace AgencyService.Services
                 throw new InvalidOperationException("Ngày hẹn không thể trước ngày hiện tại.");
             }
 
+            // ⚠️ CHỈ CHẶN LỊCH ĐÃ ĐƯỢC CHỐT (Scheduled), Pending vẫn cho phép trùng ngày
             var existingVehicleBookingOnDate = await _testDriveRepository.FindAsync(td =>
                 td.VehicleInstanceId == request.VehicleInstanceId &&
                 td.Status == "Scheduled" &&
@@ -77,10 +91,11 @@ namespace AgencyService.Services
 
             if (existingVehicleBookingOnDate.Any())
             {
-                throw new InvalidOperationException($"Lịch trùng! Xe (ID: {request.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
+                throw new InvalidOperationException(
+                    $"Lịch trùng! Xe (ID: {request.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
             }
 
-            // --- BƯỚC 3: TẠO MỚI (Code cũ) ---
+            // 4️⃣ TẠO MỚI – DEFAULT STATUS = Pending
             var testDrive = new TestDrive
             {
                 AgencyId = request.AgencyId,
@@ -88,9 +103,7 @@ namespace AgencyService.Services
                 CustomerId = request.CustomerId,
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
-                Status = string.IsNullOrWhiteSpace(request.Status) ? "Scheduled" : request.Status,
-                //CreateAt = DateTime.UtcNow,
-                //UpdateAt = DateTime.UtcNow,
+                Status = string.IsNullOrWhiteSpace(request.Status) ? "Pending" : request.Status,
                 CreateAt = DateTime.UtcNow.AddMonths(-1),
                 UpdateAt = DateTime.UtcNow.AddMonths(-1),
                 IsOneDayReminderSent = false,
@@ -100,9 +113,32 @@ namespace AgencyService.Services
             await _testDriveRepository.AddAsync(testDrive);
             await _testDriveRepository.SaveChangesAsync();
 
-            // --- BƯỚC 4: LẤY DỮ LIỆU GRPC (Code cũ) ---
+            // 5️⃣ LẤY DỮ LIỆU QUA gRPC
             var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
+
+            // 6️⃣ GỬI EMAIL THÔNG BÁO ĐẶT LỊCH (PENDING)
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(customer.Email))
+                {
+                    var subject = "🚗 Đặt lịch lái thử thành công (đang chờ xác nhận)";
+                    var body = $@"
+                        <p>Xin chào {customer.FullName},</p>
+                        <p>Chúng tôi đã nhận được yêu cầu <b>đặt lịch lái thử</b> của bạn.</p>
+                        <p><b>Thời gian dự kiến:</b> {testDrive.AppointmentDate:dd/MM/yyyy HH:mm}</p>
+                        <p><b>Trạng thái hiện tại:</b> <span style='color:orange;'>Pending (Đang chờ xác nhận)</span></p>
+                        <p>Chúng tôi sẽ sớm liên hệ để xác nhận lịch hẹn của bạn.</p>
+                        <p>Trân trọng,<br/>EVN Auto</p>";
+
+                    await SendEmailAsync(customer.Email, subject, body);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[TestDrive] Lỗi khi gửi email đặt lịch Pending cho TestDriveId={testDrive.Id}");
+                // không throw, tránh làm fail API
+            }
 
             var response = MapToResponse(testDrive);
             response.Vehicle = vehicle;
@@ -118,15 +154,16 @@ namespace AgencyService.Services
             if (testDrive == null)
                 throw new KeyNotFoundException($"Test drive with ID {id} not found.");
 
-            // --- KIỂM TRA TRÙNG NGÀY (MỚI) ---
-            // Chỉ kiểm tra nếu người dùng *thay đổi* ngày hẹn sang một ngày khác
+            var oldStatus = testDrive.Status;   // 👈 lưu lại status cũ
+
+            // --- KIỂM TRA TRÙNG NGÀY NẾU ĐỔI NGÀY ---
             if (request.AppointmentDate.HasValue && request.AppointmentDate.Value.Date != testDrive.AppointmentDate?.Date)
             {
                 var requestedDate = request.AppointmentDate.Value.Date;
 
                 var existingBookingOnDate = await _testDriveRepository.FindAsync(td =>
-                    td.VehicleInstanceId == testDrive.VehicleInstanceId && // Cùng xe
-                    td.Id != id && // Loại trừ chính lịch hẹn đang update
+                    td.VehicleInstanceId == testDrive.VehicleInstanceId &&
+                    td.Id != id &&
                     td.Status == "Scheduled" &&
                     td.AppointmentDate.HasValue &&
                     td.AppointmentDate.Value.Date == requestedDate
@@ -134,28 +171,26 @@ namespace AgencyService.Services
 
                 if (existingBookingOnDate.Any())
                 {
-                    // Nếu tìm thấy bất kỳ lịch nào trong ngày đó, ném lỗi
-                    throw new InvalidOperationException($"Lịch trùng! Xe (ID: {testDrive.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
+                    throw new InvalidOperationException(
+                        $"Lịch trùng! Xe (ID: {testDrive.VehicleInstanceId}) đã có lịch hẹn lái thử vào ngày {requestedDate:yyyy-MM-dd}.");
                 }
-
-                // Nếu không trùng, gán ngày mới
-                testDrive.AppointmentDate = request.AppointmentDate.Value;
 
                 if (requestedDate < DateTime.UtcNow.Date)
-                {
                     throw new InvalidOperationException("Ngày hẹn không thể trước ngày hiện tại.");
-                }
-            }
-            // --- KẾT THÚC KIỂM TRA ---
 
-            // Cập nhật các trường còn lại
+                testDrive.AppointmentDate = request.AppointmentDate.Value;
+            }
+
+            // Cập nhật field khác
             if (!string.IsNullOrWhiteSpace(request.Status))
                 testDrive.Status = request.Status;
+
             if (!string.IsNullOrWhiteSpace(request.Notes))
                 testDrive.Notes = request.Notes;
+
             if (!string.IsNullOrWhiteSpace(request.Feedback))
                 testDrive.Feedback = request.Feedback;
-            //testDrive.UpdateAt = DateTime.UtcNow;
+
             testDrive.UpdateAt = DateTime.UtcNow.AddMonths(-1);
 
             _testDriveRepository.Update(testDrive);
@@ -164,6 +199,34 @@ namespace AgencyService.Services
             // Lấy dữ liệu gRPC
             var vehicle = await _vehicleGrpcServiceClient.GetVehicleInstanceByIdAsync(testDrive.VehicleInstanceId);
             var customer = await _customerGrpcServiceClient.GetCustomerByIdAsync(testDrive.CustomerId);
+            var agency = await _agencyRepository.GetByIdAsync(testDrive.AgencyId);
+
+            // ️⃣ GỬI EMAIL KHI CHỐT LỊCH: status CHUYỂN SANG "Scheduled"
+            if (!string.Equals(oldStatus, "Scheduled", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(testDrive.Status, "Scheduled", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(customer.Email))
+                    {
+                        var subject = "✅ Lịch lái thử của bạn đã được xác nhận";
+                        var body = $@"
+                            <p>Xin chào {customer.FullName},</p>
+                            <p>Lịch <b>lái thử xe</b> của bạn đã được <b>xác nhận</b>.</p>
+                            <p><b>Thời gian:</b> {testDrive.AppointmentDate:dd/MM/yyyy HH:mm}</p>
+                           <p><b>Địa điểm:</b><br/>{(agency != null ? $"{agency.AgencyName}<br/>{agency.Address}" : "Đại lý EVN Auto")}</p>
+                            <p>Rất mong được đón tiếp bạn!</p>
+                            <p>Trân trọng,<br/>EVN Auto</p>";
+
+                        await SendEmailAsync(customer.Email, subject, body);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"[TestDrive] Lỗi khi gửi email xác nhận Scheduled cho TestDriveId={testDrive.Id}");
+                    // không throw
+                }
+            }
 
             var response = MapToResponse(testDrive);
             response.Vehicle = vehicle;
@@ -171,6 +234,27 @@ namespace AgencyService.Services
 
             return response;
         }
+
+        private Task SendEmailAsync(string toEmail, string subject, string body)
+        {
+            var client = new SmtpClient(_emailSetting.SmtpServer, _emailSetting.SmtpPort)
+            {
+                Credentials = new System.Net.NetworkCredential(_emailSetting.SenderEmail, _emailSetting.SenderPassword),
+                EnableSsl = true
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSetting.SenderEmail, _emailSetting.SenderName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+            mailMessage.To.Add(toEmail);
+
+            return client.SendMailAsync(mailMessage);
+        }
+
 
         // ===== DELETE =====
         public async Task<bool> DeleteTestDriveAsync(int id)

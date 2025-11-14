@@ -15,5 +15,9 @@ namespace OrderRepository.Repositories
         Task<Customers?> GetByPhoneAsync(string phone);
 
         Task<Customers?> GetByEmailAsync(string email);
+
+        Task<bool> EmailExistsAsync(string email, int? excludeId = null);
+        Task<bool> PhoneExistsAsync(string phone, int? excludeId = null);
+        Task<Customers?> GetByEmailAndAgencyAsync(string email, int agencyId);
     }
 }

@@ -18,12 +18,10 @@ namespace OrderAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             try
             {
-                var createdCustomer = await _customerService.CreateAsync(request);
+                var createdCustomer = await _customerService.FindOrCreateCustomerAsync(request);
                 return Ok(createdCustomer);
             }
             catch (Exception ex)
