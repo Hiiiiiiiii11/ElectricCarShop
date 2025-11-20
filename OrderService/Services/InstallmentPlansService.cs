@@ -62,8 +62,8 @@ namespace OrderAPIService.Services
                     throw new KeyNotFoundException($"Agency contract with ID {request.AgencyContractId} not found.");
 
                 var plans = await _plansRepository.GetAllAsync();
-                if (plans.Any(p => p.AgencyContractId == request.AgencyContractId))
-                    throw new InvalidOperationException($"An installment plan already exists for AgencyContractId {request.AgencyContractId}.");
+                //if (plans.Any(p => p.AgencyContractId == request.AgencyContractId))
+                //    throw new InvalidOperationException($"An installment plan already exists for AgencyContractId {request.AgencyContractId}.");
             }
 
             // 4️⃣ Tạo mới

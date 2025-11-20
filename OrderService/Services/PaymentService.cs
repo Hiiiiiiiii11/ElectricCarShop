@@ -126,8 +126,8 @@ namespace OrderAPIService.Services
         public async Task<IEnumerable<Payments>> GetPaymentsByAgencyOrderIdAsync(int agencyOrderId)
         {
             var agencyorder = await _agencyGrpcServiceClient.GetAgencyOrderByIdAsync(agencyOrderId);
-            if (agencyorder == null)
-                throw new KeyNotFoundException($"Agency Order with ID {agencyOrderId} not found.");
+            //if (agencyorder == null)
+            //    throw new KeyNotFoundException($"Agency Order with ID {agencyOrderId} not found.");
             return await _paymentRepository.GetByAgencyOrderIdAsync(agencyOrderId);
         }
 
