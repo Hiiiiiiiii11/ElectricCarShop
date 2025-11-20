@@ -76,7 +76,7 @@ namespace OrderService.Services
                 Address = request.Address,
                 AgencyId = request.AgencyId,
                 Class = request.Class ?? "Normal",
-                CreateAt = DateTime.UtcNow.AddMonths(-1)
+                CreateAt = DateTime.UtcNow
             };
 
             await _customerRepository.AddAsync(newCustomer);

@@ -104,8 +104,8 @@ namespace AgencyService.Services
                 AppointmentDate = request.AppointmentDate,
                 Notes = request.Notes,
                 Status = string.IsNullOrWhiteSpace(request.Status) ? "Pending" : request.Status,
-                CreateAt = DateTime.UtcNow.AddMonths(-1),
-                UpdateAt = DateTime.UtcNow.AddMonths(-1),
+                CreateAt = DateTime.UtcNow,
+                UpdateAt = DateTime.UtcNow,
                 IsOneDayReminderSent = false,
                 IsThreeDayReminderSent = false
             };

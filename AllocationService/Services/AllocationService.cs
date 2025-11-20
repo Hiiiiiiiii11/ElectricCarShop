@@ -45,8 +45,8 @@ namespace AllocationService.Services
                 AgencyContractId = request.AgencyContractId,
                 VehicleInstanceId = request.VehicleInstanceId,
                 AgencyOrderId = request.AgencyOrderId,
-                //AllocationDate = DateTime.UtcNow,
-                AllocationDate = DateTime.UtcNow.AddMonths(-1)
+                AllocationDate = DateTime.UtcNow,
+
             };
 
             await _allocationRepository.AddAsync(allocation);
@@ -85,7 +85,7 @@ namespace AllocationService.Services
             allocation.AgencyOrderId = request.AgencyOrderId ?? allocation.AgencyOrderId;
 
             // Có thể cập nhật AllocationDate nếu bạn muốn mỗi lần update đều ghi lại thời gian
-            // allocation.AllocationDate = DateTime.UtcNow;
+            allocation.AllocationDate = DateTime.UtcNow;
 
             _allocationRepository.Update(allocation);
             await _allocationRepository.SaveChangesAsync();

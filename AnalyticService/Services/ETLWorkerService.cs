@@ -67,13 +67,13 @@ namespace AnalyticService.Services
                             // === BƯỚC 1: LẤP ĐẦY DỮ LIỆU LỊCH SỬ (NẾU CẦN) ===
                             if (needsBackfill)
                             {
-                                // Sửa: Chạy từ T1/2025 đến T9/2025 theo yêu cầu
+                                // Sửa: Chạy từ T1/2025 đến T10/2025 theo yêu cầu
                                 await RunBackfillProcess(scope, stoppingToken);
                             }
 
                             // === BƯỚC 2: CHẠY ETL CHO THÁNG TRƯỚC ===
                             // (Hôm nay T11/2025, chạy cho T10/2025)
-                            var processFullDate = DateTime.UtcNow.AddMonths(-1);
+                            var processFullDate = DateTime.UtcNow;
                             await RunEtlProcess(scope, stoppingToken, processFullDate);
 
                             await analyticRepo.SetEtlStatusAsync(false, "ETL process finished successfully.", DateTime.UtcNow);
@@ -103,10 +103,10 @@ namespace AnalyticService.Services
             var analyticRepo = scope.ServiceProvider.GetRequiredService<IAnalyticRepository>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<ETLWorkerService>>();
 
-            logger.LogWarning("ETL Backfill: Generating mock data from Jan 2025 to Sep 2025...");
+            logger.LogWarning("ETL Backfill: Generating mock data from Jan 2025 to Oct 2025...");
 
             var startDate = new DateTime(2025, 1, 1);
-            var endDate = new DateTime(2025, 9, 1);
+            var endDate = new DateTime(2025, 10, 1);
 
             // Dữ liệu giả (Hardcoded)
             // (Sử dụng ID thật từ dữ liệu JSON bạn đã cung cấp)
