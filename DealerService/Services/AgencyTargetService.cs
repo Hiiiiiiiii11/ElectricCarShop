@@ -19,6 +19,23 @@ namespace AgencyService.Services
 
         public async Task<AgencyTargetReportResponse> CreateTargetAsync(int AgencyId, CreateAgencyTargetRequest request)
         {
+            // 1. KIỂM TRA TRÙNG LẶP (MỚI)
+            // Tìm xem đã có target nào cho Agency, Vehicle, Năm, Tháng này chưa
+            var existingTarget = await _AgencyTargetRepository.FindAsync(t =>
+                t.AgencyId == AgencyId &&
+                t.VehicleId == request.VehicleId &&
+                t.TargetYear == request.TargetYear &&
+                t.TargetMonth == request.TargetMonth
+            );
+
+            if (existingTarget.Any())
+            {
+                throw new InvalidOperationException(
+                    $"Đã tồn tại chỉ tiêu cho Agency {AgencyId}, Xe {request.VehicleId} vào tháng {request.TargetMonth}/{request.TargetYear}."
+                );
+            }
+
+            // 2. TẠO MỚI (Nếu không trùng)
             var target = new AgencyTargets
             {
                 AgencyId = AgencyId,
@@ -26,10 +43,11 @@ namespace AgencyService.Services
                 TargetYear = request.TargetYear,
                 TargetMonth = request.TargetMonth,
                 TargetUnits = request.TargetUnits,
+                AchievedUnits = 0, // Mặc định ban đầu là 0
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-
             };
+
             await _AgencyTargetRepository.AddAsync(target);
             await _AgencyTargetRepository.SaveChangesAsync();
 

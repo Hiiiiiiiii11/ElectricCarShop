@@ -87,16 +87,16 @@ namespace AgencyService.Services
         public async Task<IEnumerable<AgencyContractResponse>> GetByAgencyIdAsync(int AgencyId)
         {
             var contracts =  await _AgencyContractRepository.GetByAgencyIdAsync(AgencyId);
-            if (contracts == null || !contracts.Any())
-                throw new KeyNotFoundException($"No contracts found for Agency with Id {AgencyId}.");
+            //if (contracts == null || !contracts.Any())
+            //    throw new KeyNotFoundException($"No contracts found for Agency with Id {AgencyId}.");
             return contracts.Select(MapToResponse);
         }
 
         public async Task<IEnumerable<AgencyContractResponse>> GetExpiredByAgencyIdAsync(int AgencyId)
         {
             var contract = await _AgencyContractRepository.GetExpiredByAgencyIdAsync(AgencyId);
-            if (contract == null || !contract.Any())
-                throw new KeyNotFoundException($"No expired contracts found for Agency with Id {AgencyId}.");
+            //if (contract == null || !contract.Any())
+            //    throw new KeyNotFoundException($"No expired contracts found for Agency with Id {AgencyId}.");
             return contract.Select(MapToResponse);
         }
 
