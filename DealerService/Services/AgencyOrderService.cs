@@ -38,8 +38,8 @@ namespace AgencyService.Services
                 AgencyContractId = request.AgencyContractId,
                 VehicleId = request.VehicleId,
                 Quantity = request.Quantity,
-                //OrderDate = DateTime.UtcNow,
-                OrderDate = DateTime.UtcNow.AddMonths(-1),
+                OrderDate = DateTime.UtcNow,
+                //OrderDate = DateTime.UtcNow.AddMonths(-1),
                 Status = "Pending",
             };
 

@@ -62,8 +62,8 @@ namespace OrderService.Service
                 AgencyId = request.AgencyId ?? 0,
                 //CreatedAt = DateTime.UtcNow,
                 //UpdatedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow.AddMonths(-1),
-                UpdatedAt = DateTime.UtcNow.AddMonths(-1)
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             await _feedbackRepository.AddAsync(feedback);
@@ -88,7 +88,7 @@ namespace OrderService.Service
            if(!string.IsNullOrEmpty(request.Reply))
                 feedback.Reply = request.Reply;
             //feedback.UpdatedAt = DateTime.UtcNow;
-            feedback.UpdatedAt = DateTime.UtcNow.AddMonths(-1);
+            feedback.UpdatedAt = DateTime.UtcNow;
             if(request.AgencyId.HasValue)
                 feedback.AgencyId = request.AgencyId.Value;
 

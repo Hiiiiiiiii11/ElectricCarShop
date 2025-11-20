@@ -74,7 +74,7 @@ namespace OrderAPIService.Services
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 //CreatedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow.AddMonths(-1),
+                CreatedAt = DateTime.UtcNow,
                 CreateBy = request.CreateBy ?? 0,
                 Status = "Pending"
             };
