@@ -52,7 +52,6 @@ namespace AllocationAPI.Controllers
 
         // ================= CREATE =================
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateTestDrive([FromBody] CreateTestDriveRequest request)
         {
             if (!ModelState.IsValid)
