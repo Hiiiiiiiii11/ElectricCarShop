@@ -12,8 +12,8 @@ using OrderRepository.Data;
 namespace OrderRepository.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20251114150612_fixdbcustomer")]
-    partial class fixdbcustomer
+    [Migration("20251121041115_InitialCreate1")]
+    partial class InitialCreate1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
