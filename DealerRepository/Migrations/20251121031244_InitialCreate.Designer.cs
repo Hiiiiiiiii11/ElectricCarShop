@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgencyRepository.Migrations
 {
     [DbContext(typeof(AgencyDbContext))]
-    [Migration("20251121030033_fixdb2111")]
-    partial class fixdb2111
+    [Migration("20251121031244_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
