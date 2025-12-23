@@ -14,8 +14,8 @@ namespace UserService.Services
         Task<RoleResponse> GetRoleByIdAsync(int id);
         Task<RoleResponse> UpdateRoleAsync(int id, UpdateRoleRequest request);
         Task<bool> DeleteRoleAsync(int id);
-        //Task<bool> RemoveUserRolesByUserId(int userId);
-        
+        Task<bool> RemoveUserRolesByUserId(int userId);
+
 
     }
 }
