@@ -18,6 +18,7 @@ namespace UserService.Services
         Task<IEnumerable<UserResponse>> GetUserCreateByUserId(int userId);
         Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
         //
+        //
 
     }
 }
